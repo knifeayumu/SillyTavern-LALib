@@ -687,6 +687,71 @@ rsc('json-pretty',
 );
 
 
+// GROUP: Regular Expressions
+const makeRegex = (value)=>{
+    return new RegExp(
+        value
+            .replace(/^\/(.+)\/([a-z]*)$/, '$1')
+        ,
+        value
+            .replace(/^\/(.+)\/([a-z]*)$/, '$2')
+        ,
+    );
+};
+
+rsc('re-test',
+    (args, value)=>{
+        try {
+            const re = makeRegex(args.find);
+            const text = getVar(args.var, args.globalvar, value) ?? '';
+            return JSON.stringify(re.test(text));
+        } catch (ex) {
+            toastr.error(ex.message);
+        }
+    },
+    [],
+    '<span class="monospace">[find=/pattern/flags] [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Tests if the provided variable or value matches a regular expression.',
+);
+
+rsc('re-replace',
+    async(args, value)=>{
+        try {
+            const re = makeRegex(args.find);
+            if (args.cmd) {
+                const replacements = [];
+                /**@type {(function():Promise<string>)[]} */
+                const cmds = [];
+                if (args.cmd instanceof SlashCommandClosure) {
+                    /**@type {SlashCommandClosure} */
+                    const closure = args.cmd;
+                    value.replace(re, (...matches)=>{
+                        const copy = closure.getCopy();
+                        matches.forEach((match,idx)=>{
+                            copy.scope.setMacro(`$${idx}`, match);
+                        });
+                        cmds.push(async()=>(await copy.execute())?.pipe);
+                    });
+                } else {
+                    value.replace(re, (...matches)=>{
+                        const cmd = args.cmd.replace(/\$(\d+)/g, (_, idx)=>matches[idx]);
+                        cmds.push(async()=>(await executeSlashCommands(cmd, false, args._scope))?.pipe);
+                    });
+                }
+                for (const cmd of cmds) {
+                    replacements.push(await cmd());
+                }
+                return value.replace(re, ()=>replacements.shift());
+            }
+            return value.replace(re, args.replace);
+        } catch (ex) {
+            toastr.error(ex.message);
+        }
+    },
+    [],
+    '<span class="monospace">[find=/pattern/flags] [optional replace=replaceText] [optional cmd=closure|command] [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.',
+);
+
+
 // GROUP: Accessing & Manipulating Structured Data
 rsc('getat',
     (args, value)=>{

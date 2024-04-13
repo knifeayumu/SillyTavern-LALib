@@ -7,6 +7,7 @@ Library of STScript commands.
 - List Operations (foreach, map, filter, find, slice, shuffle, dict)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty)
+- Regular Expressions (re-test, re-replace)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
 - Copy & Download (copy, download)
@@ -436,9 +437,88 @@ Pretty print JSON.
 
 ##### Examples
 
-```
+```stscript
 /json-pretty {"a":1, "b":[1,2,3]} |
 /send ```json{{newline}}{{pipe}}{{newline}}```
+```
+
+
+
+
+
+
+
+### Regular Expressions
+
+
+
+#### `/re-test`
+`[find=/pattern/flags] [optional var=varname] [optional globalvar=globalvarname] (optional value)`
+
+Tests if the provided variable or value matches a regular expression.
+
+##### Examples
+
+```
+/re-test find=/dog/i The quick brown fox jumps over the lazy dog. |
+/echo result will be true: {{pipe}}
+```
+
+```
+// pipes in the regex must to be escaped |
+/re-test find=/dog\|cat/i The quick brown fox jumps over the lazy dog. |
+/echo result will be true: {{pipe}}
+```
+
+```
+// if you want to find a literal pipe, you have to also escape the backslash escaping it |
+/re-test find=/dog\\\|cat/i The quick brown fox jumps over the lazy dog. |
+/echo result will be false: {{pipe}}
+```
+
+```
+// or you can put quote around the regex and forget about escaping... |
+/re-test find="/dog|cat/i" The quick brown fox jumps over the lazy dog. |
+/echo result will be true ("dog" or "cat"): {{pipe}} |
+/delay 500 |
+/re-test find="/dog\|cat/i" The quick brown fox jumps over the lazy dog. |
+/echo result will be false (only matching "dog\|cat"): {{pipe}}
+```
+
+
+
+
+
+#### `/re-replace`
+`[find=/pattern/flags] [optional replace=replaceText] [optional cmd=closure|command] [optional var=varname] [optional globalvar=globalvarname] (optional value)`
+
+Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
+
+##### Examples
+
+```
+// simple find and replace |
+/re-replace find=/dog/i replace=cat The quick brown fox jumps over the lazy dog. |
+/echo result will be "[...] the lazy cat.": {{pipe}}
+```
+
+```
+// Use $1, $2, ... to reference capturing groups. |
+/re-replace find="/\b(\w+)\b dog/i" replace="cat $1" The quick brown fox jumps over the lazy dog.
+/echo result will be "[...] over the cat lazy.": {{pipe}}
+```
+
+```
+// You can also use the return value of another command or closure as the replacement text. |
+// In closures use {{$1}}, {{$2}}, ... to reference capturing groups. |
+/re-replace
+    find=/(fox\|dog)/ig
+    cmd={:
+        /input replace {{$1}} with:
+    :}
+    The quick brown fox jumps over the lazy dog.
+|
+/echo who jumps over who now? {{pipe}}
 ```
 
 
