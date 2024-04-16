@@ -880,7 +880,7 @@ rsc('catch',
         }
     },
     [],
-    '<span class="monospace">[pipe={{pipe}}] (command)</span> – try catch. You must always set <code>pipe={{pipe}}</code> and /catch must always be called right after /try. Use <code>{{exception}}</code> or <code>{{error}}</code> to get the exception\'s message.',
+    '<span class="monospace">(command)</span> – try catch. /catch must always be called right after /try. Use <code>{{exception}}</code> or <code>{{error}}</code> to get the exception\'s message.',
 );
 
 
@@ -1042,7 +1042,7 @@ rsc('case',
         return args._scope.pipe;
     },
     [],
-    '<span class="monospace">[pipe={{pipe}}] [value=comparisonValue] (/command)</span> – Execute command and break out of the switch if the value given in /switch matches the value given here.',
+    '<span class="monospace">[value=comparisonValue] (/command)</span> – Execute command and break out of the switch if the value given in /switch matches the value given here.',
 );
 
 
@@ -1087,7 +1087,7 @@ rsc('elseif',
         return args._scope.pipe;
     },
     [],
-    '<span class="monospace">[pipe={{pipe}}] (/command)</span> – Use with /ife, /then, and /else. The provided command must return true or false.',
+    '<span class="monospace">(/command)</span> – Use with /ife, /then, and /else. The provided command must return true or false.',
 );
 
 rsc('else',
@@ -1112,7 +1112,7 @@ rsc('else',
         return args._scope.pipe;
     },
     [],
-    '<span class="monospace">[pipe={{pipe}}] (/command)</span> – Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.',
+    '<span class="monospace">(/command)</span> – Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.',
 );
 
 rsc('then',
@@ -1137,7 +1137,7 @@ rsc('then',
         return args._scope.pipe;
     },
     [],
-    '<span class="monospace">[pipe={{pipe}}] (/command)</span> – Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.',
+    '<span class="monospace">(/command)</span> – Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.',
 );
 
 
@@ -1413,7 +1413,7 @@ rsc('swipes-swipe',
         return chat[id].mes;
     },
     [],
-    '<span class="monospace"></span> – Trigger a new swipe on the current message.',
+    '<span class="monospace"></span> – Trigger a new swipe on the last message.',
 );
 
 rsc('message-edit',
