@@ -434,6 +434,15 @@ rsc('dict',
     '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (list of lists)</span> – Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each items first item as key and each items second item as value.',
 );
 
+rsc('keys',
+    async(args, value)=>{
+        let list = getListVar(args.var, args.globalvar, args.list);
+        return JSON.stringify(Object.keys(list));
+    },
+    [],
+    '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (dictionary)</span> – Return the list of keys of a dictionary / object.',
+);
+
 
 // GROUP: Split & Join
 rsc('split',
