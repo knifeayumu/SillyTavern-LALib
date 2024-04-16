@@ -4,7 +4,7 @@ Library of STScript commands.
 
 
 - Boolean Operations (test, and, or, not)
-- List Operations (foreach, map, filter, find, slice, shuffle, dict)
+- List Operations (foreach, map, filter, find, slice, shuffle, dict, keys)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty)
 - Regular Expressions (re-test, re-replace)
@@ -185,9 +185,9 @@ Executes command for each item of a list or dictionary.
 
 
 #### `/map`
-`[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})`
+`[optional asList=true] [optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})`
 
-Executes command for each item of a list or dictionary and returns the list or dictionary of the command results.
+Executes command for each item of a list or dictionary and returns the list or dictionary of the command results. Use <code>asList=true</code> to return the results of a dictionary / object as a list.
 
 ##### Examples
 
@@ -201,6 +201,13 @@ Executes command for each item of a list or dictionary and returns the list or d
 
 ```stscript
 /map list={"a":"foo","b":"bar"}
+    /return This is item {{index}} with value {{item}}
+|
+/echo
+```
+
+```stscript
+/map asList=True list={"a":"foo","b":"bar"}
     /return This is item {{index}} with value {{item}}
 |
 /echo
@@ -316,6 +323,22 @@ Takes a list of lists (each item must be a list of at least two items) and creat
     ["c", 3]
 ] |
 /dict var=x |
+/echo
+```
+
+
+
+
+
+#### `/keys`
+`[optional var=varname] [optional globalvar=globalvarname] (dictionary)`
+
+Return the list of keys of a dictionary / object.
+
+##### Examples
+
+```
+/keys list={"a":"foo","b":"bar","c":"foobar","d":"barfoo"} |
 /echo
 ```
 
@@ -1251,9 +1274,9 @@ Returns the number of milliseconds midnight at the beginning of January 1, 1970,
 
 
 #### `/fireandforget`
-`(closure|command)`
+`(command)`
 
-Execute a closure or command without waiting for it to finish.
+Execute a command without waiting for it to finish.
 
 ##### Examples
 

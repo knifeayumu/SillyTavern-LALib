@@ -324,13 +324,17 @@ rsc('map',
             result = list;
         }
 
+        if (isTrueBoolean(args.asList) && !isList) {
+            result = Object.keys(result).map(it=>result[it]);
+        }
+
         if (typeof result == 'object') {
             result = JSON.stringify(result);
         }
         return result;
     },
     [],
-    '<span class="monospace">[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary and returns the list or dictionary of the command results.',
+    '<span class="monospace">[optional asList=true] [optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary and returns the list or dictionary of the command results. Use <code>asList=true</code> to return the results of a dictionary / object as a list.',
 );
 
 rsc('filter',
@@ -457,6 +461,15 @@ rsc('dict',
     },
     [],
     '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (list of lists)</span> – Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each items first item as key and each items second item as value.',
+);
+
+rsc('keys',
+    async(args, value)=>{
+        let list = getListVar(args.var, args.globalvar, args.list);
+        return JSON.stringify(Object.keys(list));
+    },
+    [],
+    '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (dictionary)</span> – Return the list of keys of a dictionary / object.',
 );
 
 
