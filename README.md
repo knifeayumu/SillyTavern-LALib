@@ -184,9 +184,9 @@ Executes command for each item of a list or dictionary.
 
 
 #### `/map`
-`[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})`
+`[optional asList=true] [optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})`
 
-Executes command for each item of a list or dictionary and returns the list or dictionary of the command results.
+Executes command for each item of a list or dictionary and returns the list or dictionary of the command results. Use <code>asList=true</code> to return the results of a dictionary / object as a list.
 
 ##### Examples
 
@@ -200,6 +200,13 @@ Executes command for each item of a list or dictionary and returns the list or d
 
 ```stscript
 /map list={"a":"foo","b":"bar"}
+    /return This is item {{index}} with value {{item}}
+|
+/echo
+```
+
+```stscript
+/map asList=True list={"a":"foo","b":"bar"}
     /return This is item {{index}} with value {{item}}
 |
 /echo
