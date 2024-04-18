@@ -465,7 +465,7 @@ rsc('dict',
 
 rsc('keys',
     async(args, value)=>{
-        let list = getListVar(args.var, args.globalvar, args.list);
+        let list = getListVar(args.var, args.globalvar, value);
         return JSON.stringify(Object.keys(list));
     },
     [],
