@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, getRequestHeaders, reloadMarkdownProcessor, sendSystemMessage } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, sendSystemMessage } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -1328,41 +1328,60 @@ rsc('swipes-index',
 
 rsc('swipes-add',
     (args, value)=>{
-        const id = chat.length - 1;
-        const mes = chat[id];
-        const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
+        const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
+        const mes = chat[idx];
+        const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
 
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
 
-        if (mes.swipe_id === undefined) {
+        if (mes.swipe_id === null || mes.swipe_id === undefined) {
             mes.swipe_id = 0;
         }
-        if (mes.swipes === undefined) {
+        if (!mes.swipes) {
             mes.swipes = [mes.mes];
         }
-        if (mes.swipes_info === undefined) {
+        if (!mes.swipe_info) {
             mes.swipe_info = [{
                 send_date: mes.send_date,
                 gen_started: mes.gen_started,
                 gen_finished: mes.gen_finished,
-                extra: JSON.parse(JSON.stringify(mes.extra)),
+                extra: structuredClone(mes.extra),
             }];
         }
-        mes.swipe_id = mes.swipes.length - 1;
         mes.swipes.push(value);
-        mes.swipe_info.push({ send_date:getMessageTimeStamp(), extra:{} });
-        currentMessage.querySelector('.swipe_right').click();
+        mes.swipe_info.push({
+            send_date: getMessageTimeStamp(),
+            gen_started: null,
+            gen_finished: null,
+            extra: {
+                bias: extractMessageBias(value),
+                gen_id: Date.now(),
+                api: 'manual',
+                model: 'slash command',
+            },
+        });
+        mes.swipe_id = mes.swipes.length - 1;
+        mes.mes = value;
+        mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
+            mes.mes,
+            mes.name,
+            mes.is_system,
+            mes.is_user,
+            Number(mesDom.getAttribute('mesid')),
+        );
+        mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
+        saveChatConditional();
     },
     [],
-    '<span class="monospace">(message)</span> – Add a new swipe to the last message.',
+    '<span class="monospace">[optional message=messageId] (text)</span> – Add a new swipe to the last message or the message with messageId.',
 );
 
 rsc('swipes-del',
     async(args, value)=>{
-        const id = chat.length - 1;
-        const mes = chat[id];
-        const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
+        const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
+        const mes = chat[idx];
+        const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
 
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
@@ -1371,35 +1390,62 @@ rsc('swipes-del',
             return;
         }
         const swipeId = Number(value == '' ? mes.swipe_id : value);
-        mes.swipe_id = mes.swipes.length - 2;
-        mes.swipes.push('deleting swipe...');
-        mes.swipe_info.push({ send_date:getMessageTimeStamp(), extra:{} });
+        if (swipeId + 1 < mes.swipes.length) {
+            mes.swipe_id = swipeId;
+        } else {
+            mes.swipe_id = swipeId - 1;
+        }
         mes.swipes.splice(swipeId, 1);
-        mes.swipe_info.splice(swipeId, 1);
-        currentMessage.querySelector('.swipe_right').click();
-        mes.swipes.pop();
-        mes.swipe_info.pop();
-        mes.swipe_id = swipeId % mes.swipes.length;
-        currentMessage.querySelector('.swipe_left').click();
+        mes.mes = mes.swipes[mes.swipe_id];
+        mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
+        mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
+        mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
+        mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
+        mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
+            mes.mes,
+            mes.name,
+            mes.is_system,
+            mes.is_user,
+            Number(mesDom.getAttribute('mesid')),
+        );
+        mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
+        saveChatConditional();
     },
     [],
-    '<span class="monospace">(optional index)</span> – Delete the current swipe or the swipe at index (0-based).',
+    '<span class="monospace">[optional message=messageId] (optional index)</span> – Delete the current swipe or the swipe at index (0-based).',
 );
 
 rsc('swipes-go',
     (args, value)=>{
-        const id = chat.length - 1;
-        const mes = chat[id];
-        const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
+        const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
+        const mes = chat[idx];
+        const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
+
+        // close current message editor
+        document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
+
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
             return;
         }
         const swipeId = Number(value);
-        mes.swipe_id = (swipeId + 1) % mes.swipes.length;
-        currentMessage.querySelector('.swipe_left').click();
+        mes.swipe_id = swipeId;
+        mes.mes = mes.swipes[mes.swipe_id];
+        mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
+        mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
+        mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
+        mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
+        mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
+            mes.mes,
+            mes.name,
+            mes.is_system,
+            mes.is_user,
+            Number(mesDom.getAttribute('mesid')),
+        );
+        mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
+        saveChatConditional();
     },
     [],
-    '<span class="monospace">(index)</span> – Go to the swipe. 0-based index.',
+    '<span class="monospace">[optional message=messageId] (index)</span> – Go to the swipe. 0-based index.',
 );
 
 rsc('swipes-swipe',
