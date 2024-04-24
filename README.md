@@ -336,7 +336,7 @@ Return the list of keys of a dictionary / object.
 
 ##### Examples
 
-```
+```stscript
 /keys list={"a":"foo","b":"bar","c":"foobar","d":"barfoo"} |
 /echo
 ```
@@ -1064,9 +1064,9 @@ Get the current swipe index from the last message or the message with the given 
 
 
 #### `/swipes-add`
-`(message)`
+`[optional message=messageId] (text)`
 
-Add a new swipe to the last message.
+Add a new swipe to the last message or the message with messageId.
 
 ##### Examples
 
@@ -1081,7 +1081,7 @@ Add a new swipe to the last message.
 
 
 #### `/swipes-del`
-`(optional index)`
+`[optional message=messageId] (optional index)`
 
 Delete the current swipe or the swipe at index (0-based).
 
@@ -1110,7 +1110,7 @@ Delete the current swipe or the swipe at index (0-based).
 
 
 #### `/swipes-go`
-`(index)`
+`[optional message=messageId] (index)`
 
 Go to the swipe. 0-based index.
 
