@@ -6,7 +6,7 @@ Library of STScript commands.
 - Boolean Operations (test, and, or, not)
 - List Operations (foreach, map, filter, find, slice, shuffle, dict, keys)
 - Split & Join (split, join)
-- Text Operations (trim, diff, json-pretty)
+- Text Operations (trim, diff, json-pretty, substitute)
 - Regular Expressions (re-test, re-replace)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
@@ -463,6 +463,27 @@ Pretty print JSON.
 ```stscript
 /json-pretty {"a":1, "b":[1,2,3]} |
 /send ```json{{newline}}{{pipe}}{{newline}}```
+```
+
+
+
+
+
+#### `/substitute`
+`(text)`
+
+Substitute macros in text.
+
+##### Examples
+
+```
+/setvar key=x char |
+/setvar key=y user |
+/substitute {{{{getvar::x}}}} |
+/echo x turns into the char name: {{pipe}} |
+/delay 500 |
+/substitute {{{{getvar::y}}}} |
+/echo and y turns into the persona name: {{pipe}} |
 ```
 
 

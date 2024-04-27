@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, sendSystemMessage } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, name1, name2, reloadMarkdownProcessor, saveChatConditional, sendSystemMessage, substituteParams } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -697,6 +697,14 @@ rsc('json-pretty',
     },
     [],
     '<span class="monospace">(JSON)</span> – Pretty print JSON.',
+);
+
+rsc('substitute',
+    (args, value) => {
+        return substituteParams(value, name1, name2);
+    },
+    [],
+    '<span class="monospace">(text)</span> – Substitute macros in text.',
 );
 
 
