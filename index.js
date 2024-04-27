@@ -697,6 +697,18 @@ rsc('sentencecount',
     '<span class="monospace">[optional language=lang] (text)</span> – Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
 );
 
+rsc('segment',
+    (args, value) => {
+        const segments = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity: args.granularity }).segment(value))
+            .filter(it=>args.granularity != 'word' || it.isWordLike)
+            .map(it=>it.segment)
+        ;
+        return JSON.stringify(segments);
+    },
+    [],
+    '<span class="monospace">[granularity=grapheme|word|sentence] [optional language=lang] (text)</span> – Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.',
+);
+
 
 // GROUP: Accessing & Manipulating Structured Data
 rsc('getat',

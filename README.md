@@ -6,7 +6,7 @@ Library of STScript commands.
 - Boolean Operations (test, and, or, not)
 - List Operations (foreach, map, filter, find, slice, shuffle, dict, keys)
 - Split & Join (split, join)
-- Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount)
+- Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
 - Copy & Download (copy, download)
@@ -496,7 +496,7 @@ Count the number of words in text. Language defaults to "en". Supply a two chara
 
 ##### Examples
 
-```
+```stscript
 /wordcount The quick brown fox jumps over the lazy dog. |
 /echo The result will be nine: {{pipe}}
 ```
@@ -512,9 +512,30 @@ Count the number of sentences in text. Language defaults to "en". Supply a two c
 
 ##### Examples
 
-```
+```stscript
 /sentencecount The quick brown fox jumps over the lazy dog. Does the quick brown fox jump over the lazy dog? |
 /echo The result will be two: {{pipe}}
+```
+
+
+
+
+
+#### `/segment`
+`[granularity=grapheme|word|sentence] [optional language=lang] (text)`
+
+Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
+
+##### Examples
+
+```stscript
+/segment granularity=sentence  The fox. The dog. |
+/echo The two sentences are: {{pipe}}
+```
+
+```stscript
+/segment granularity=word  The fox. The dog. |
+/echo The four word are: {{pipe}}
 ```
 
 
