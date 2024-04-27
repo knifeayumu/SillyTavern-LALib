@@ -678,6 +678,25 @@ rsc('substitute',
     '<span class="monospace">(text)</span> – Substitute macros in text.',
 );
 
+rsc('wordcount',
+    (args, value) => {
+        const words = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity:'word' }).segment(value))
+            .filter(it=>it.isWordLike);
+        return words.length.toString();
+    },
+    [],
+    '<span class="monospace">[optional language=lang] (text)</span> – Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+);
+
+rsc('sentencecount',
+    (args, value) => {
+        const words = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity:'sentence' }).segment(value));
+        return words.length.toString();
+    },
+    [],
+    '<span class="monospace">[optional language=lang] (text)</span> – Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+);
+
 
 // GROUP: Accessing & Manipulating Structured Data
 rsc('getat',

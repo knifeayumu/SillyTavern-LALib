@@ -6,7 +6,7 @@ Library of STScript commands.
 - Boolean Operations (test, and, or, not)
 - List Operations (foreach, map, filter, find, slice, shuffle, dict, keys)
 - Split & Join (split, join)
-- Text Operations (trim, diff, json-pretty, substitute)
+- Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
 - Copy & Download (copy, download)
@@ -475,7 +475,7 @@ Substitute macros in text.
 
 ##### Examples
 
-```
+```stscript
 /setvar key=x char |
 /setvar key=y user |
 /substitute {{{{getvar::x}}}} |
@@ -483,6 +483,38 @@ Substitute macros in text.
 /delay 500 |
 /substitute {{{{getvar::y}}}} |
 /echo and y turns into the persona name: {{pipe}} |
+```
+
+
+
+
+
+#### `/wordcount`
+`[optional language=lang] (text)`
+
+Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
+
+##### Examples
+
+```
+/wordcount The quick brown fox jumps over the lazy dog. |
+/echo The result will be nine: {{pipe}}
+```
+
+
+
+
+
+#### `/sentencecount`
+`[optional language=lang] (text)`
+
+Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
+
+##### Examples
+
+```
+/sentencecount The quick brown fox jumps over the lazy dog. Does the quick brown fox jump over the lazy dog? |
+/echo The result will be two: {{pipe}}
 ```
 
 
