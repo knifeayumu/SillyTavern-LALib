@@ -923,6 +923,36 @@ rsc('catch',
 );
 
 
+// GROUP: Null Handling
+rsc('ifempty',
+    (args, value)=>{
+        const list = getListVar(null, null, args.value);
+        if (list) {
+            if (Array.isArray(list)) {
+                if (list.length == 0) return value;
+            } else if (typeof list == 'object') {
+                if (Object.keys(list).length == 0) return value;
+            }
+        } else {
+            const val = getVar(null, null, args.value);
+            if ((val?.length ?? 0) == 0) return value;
+        }
+        return args.value;
+    },
+    [],
+    '<span class="monospace">[value=valueToCheck] (fallbackValue)</span> – Returns the fallback value if value is empty (empty string, empty list, empty dictionary).',
+);
+
+rsc('ifnullish',
+    (args, value)=>{
+        if ((args.value?.length ?? 0) == 0) return value;
+        return args.value;
+    },
+    [],
+    '<span class="monospace">[value=valueToCheck] (fallbackValue)</span> – Returns the fallback value if value is nullish (empty string).',
+);
+
+
 // GROUP: Copy & Download
 rsc('copy',
     (args, value)=>{
@@ -992,6 +1022,8 @@ rsc('dom',
                 }
                 target.value = args.value;
                 target.dispatchEvent(new Event('change', { bubbles:true }));
+                target.dispatchEvent(new Event('input', { bubbles:true }));
+                target.dispatchEvent(new Event('mouseup', { bubbles:true }));
                 return;
             }
             case 'property': {
@@ -1409,7 +1441,7 @@ rsc('swipes-add',
             mes.is_user,
             Number(mesDom.getAttribute('mesid')),
         );
-        mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
+        [...mesDom.querySelectorAll('.swipe_right .swipes-counter')].forEach(it=>it.textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`);
         saveChatConditional();
     },
     [],

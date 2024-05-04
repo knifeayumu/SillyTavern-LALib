@@ -10,6 +10,7 @@ Library of STScript commands.
 - Regular Expressions (re-test, re-replace)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
+- Null Handling (ifempty, ifnullish)
 - Copy & Download (copy, download)
 - DOM Interaction (dom)
 - Group Chats (memberpos)
@@ -778,6 +779,62 @@ try catch. You must always set <code>pipe={{pipe}}</code> and /catch must always
 
 ```stscript
 see /try
+```
+
+
+
+
+
+
+
+### Null Handling
+
+
+
+#### `/ifempty`
+`[value=valueToCheck] (fallbackValue)`
+
+Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
+
+##### Examples
+
+```stscript
+/ifempty value=[] [1,2,3] |
+/echo will be [1,2,3]: {{pipe}}
+```
+
+```stscript
+/setvar key=x |
+/setvar key=y bar |
+/ifempty value={{getvar::x}} foo |
+/echo will be foo: {{pipe}} |
+/ifempty value={{getvar::y}} foo |
+/echo will be bar: {{pipe}} |
+```
+
+
+
+
+
+#### `/ifnullish`
+`[value=valueToCheck] (fallbackValue)`
+
+Returns the fallback value if value is nullish (empty string).
+
+##### Examples
+
+```stscript
+/ifnullish value=[] [1,2,3] |
+/echo will be []: {{pipe}}
+```
+
+```stscript
+/setvar key=x |
+/setvar key=y bar |
+/ifnullish value={{getvar::x}} foo |
+/echo will be foo: {{pipe}} |
+/ifnullish value={{getvar::y}} foo |
+/echo will be bar: {{pipe}} |
 ```
 
 
