@@ -3,7 +3,11 @@ import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
 import { executeSlashCommands, registerSlashCommand } from '../../../slash-commands.js';
+import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
+import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
 import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure.js';
+import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
+import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
 import { debounce, delay, isTrueBoolean } from '../../../utils.js';
 import { world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
@@ -163,18 +167,6 @@ function getVar(local, global, literal) {
 }
 
 
-class Command {
-    /**@type {String} */ command;
-    /**@type {String} */ args;
-    /**@type {String} */ helpText;
-    constructor(command, helpText) {
-        this.command = command;
-        this.args = helpText.split(' – ')[0];
-        this.helpText = helpText.split(/(?=– )/)[1];
-    }
-}
-/**@type {Command[]} */
-const commandList = [];
 
 /**
  * registerSlashCommand
@@ -187,88 +179,172 @@ const commandList = [];
  */
 const rsc = (command, callback, aliasList, helpText, a = true, b = true)=>{
     registerSlashCommand(command, callback, aliasList, helpText, a, b);
-    commandList.push(new Command(command, helpText));
 };
 
 
 
 
 // GROUP: Help
-rsc('lalib?',
-    async()=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
+    callback: async () => {
         const converter = reloadMarkdownProcessor();
         const readme = await (await fetch('/scripts/extensions/third-party/SillyTavern-LALib/README.md')).text();
         sendSystemMessage('generic', converter.makeHtml(readme));
     },
-    [],
-    '<span class="monospace"></span> – Lists LALib commands',
-);
+    helpString: 'Lists LALib commands',
+}));
+
 
 
 // GROUP: Boolean Operations
-rsc('test',
-    (args)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
+    callback: (args) => {
         const { a, b, rule } = parseBooleanOperands(args);
         return JSON.stringify(evalBoolean(rule, a, b));
     },
-    [],
-    '<span class="monospace">left=val rule=rule right=val</span> – Returns true or false, depending on whether left and right adhere to rule. Available rules: gt => a > b, gte => a >= b, lt => a < b, lte => a <= b, eq => a == b, neq => a != b, not => !a, in (strings) => a includes b, nin (strings) => a not includes b',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'left',
+            description: 'the left operand value',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'rule',
+            description: 'the boolean operation rule',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            enumList: [
+                new SlashCommandEnumValue('gt',  'a > b'),
+                new SlashCommandEnumValue('gte', 'a >= b'),
+                new SlashCommandEnumValue('lt',  'a < b'),
+                new SlashCommandEnumValue('lte', 'a <= b'),
+                new SlashCommandEnumValue('eq',  'a == b'),
+                new SlashCommandEnumValue('neq', 'a !== b'),
+                new SlashCommandEnumValue('not', '!a'),
+                new SlashCommandEnumValue('in',  'a includes b'),
+                new SlashCommandEnumValue('nin', 'a not includes b'),
+            ],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'right',
+            description: 'the right operand value',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Compares the value of the left operand <code>a</code> with the value of the right operand <code>b</code>,
+            and returns the result of the comparison (true or false).
+        </div>
+        <div>
+            Numeric values and string literals for left and right operands supported.
+        </div>
+        <div>
+            <strong>Available rules:</strong>
+            <ul>
+                <li>gt => a > b</li>
+                <li>gte => a >= b</li>
+                <li>lt => a < b</li>
+                <li>lte => a <= b</li>
+                <li>eq => a == b</li>
+                <li>neq => a != b</li>
+                <li>not => !a</li>
+                <li>in (strings) => a includes b</li>
+                <li>nin (strings) => a not includes b</li>
+            </ul>
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/setvar key=i 0 | /test left=i rule=let right=10 | /echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'true or false',
+}));
 
-rsc('and',
-    (args)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'and',
+    callback: (args) => {
         let left = args.left;
-        try { left = JSON.parse(args.left); } catch { /* empty */ }
+        try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
         let right = args.right;
-        try { right = JSON.parse(args.right); } catch { /* empty */ }
+        try { right = isTrueBoolean(args.right); } catch { /*empty*/ }
         return JSON.stringify((left && right) == true);
     },
-    [],
-    '<span class="monospace">left=val right=val</span> – Returns true if both left and right are true, otherwise false.',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'left',
+            description: 'the left value to evaluate',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'right',
+            description: 'the right value to evaluate',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns true if both left and right are true, otherwise false.',
+    returns: 'true or false',
+}));
 
-rsc('or',
-    (args)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'or',
+    callback: (args) => {
         let left = args.left;
-        try { left = JSON.parse(args.left); } catch { /* empty */ }
+        try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
         let right = args.right;
-        try { right = JSON.parse(args.right); } catch { /* empty */ }
+        try { right = isTrueBoolean(args.right); } catch { /*empty*/ }
         return JSON.stringify((left || right) == true);
     },
-    [],
-    '<span class="monospace">left=val right=val</span> – Returns true if at least one of left and right are true, false if both are false.',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'left',
+            description: 'the left value to evaluate',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'right',
+            description: 'the right value to evaluate',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns true if at least one of left and right are true, false if both are false.',
+    returns: 'true or false',
+}));
 
-rsc('not',
-    (args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
+    callback: (args, value) => {
         return JSON.stringify(isTrueBoolean(value) != true);
     },
-    [],
-    '<span class="monospace">(value)</span> – Returns true if value is false, otherwise true.',
-    true,
-    true,
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to negate',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns true if value is false, otherwise true.',
+    returns: 'true or false',
+}));
+
 
 
 // GROUP: List Operations
-rsc('foreach',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
+    callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
         const isList = Array.isArray(list);
         if (isList) {
-            list = list.map((it,idx)=>[idx,it]);
+            list = list.map((it, idx) => [idx, it]);
         } else if (typeof list == 'object') {
             list = Object.entries(list);
         }
         if (Array.isArray(list)) {
-            for (let [index,item] of list) {
+            for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
@@ -282,32 +358,51 @@ rsc('foreach',
             }
             return result;
         }
-
         if (typeof result == 'object') {
             result = JSON.stringify(result);
         }
         return result;
     },
-    [],
-    '<span class="monospace">[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary.',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'list',
+            description: 'the list to iterate over',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to use as the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to use as the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.',
+    returns: 'result of executing the command on the last item',
+}));
 
-rsc('map',
-    async(args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
+    callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
         const isList = Array.isArray(list);
         if (isList) {
-            list = list.map((it,idx)=>[idx,it]);
+            list = list.map((it, idx) => [idx, it]);
             result = [];
         } else if (typeof list == 'object') {
             list = Object.entries(list);
             result = {};
         }
         if (Array.isArray(list)) {
-            for (let [index,item] of list) {
+            for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
@@ -318,49 +413,88 @@ rsc('map',
                 } else {
                     result[index] = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
                 }
-                try { result[index] = JSON.parse(result[index]); } catch { /* empty */ }
+                try { result[index] = JSON.parse(result[index]); } catch { /*empty*/ }
             }
         } else {
             result = list;
         }
-
         if (isTrueBoolean(args.asList) && !isList) {
-            result = Object.keys(result).map(it=>result[it]);
+            result = Object.keys(result).map(it => result[it]);
         }
-
         if (typeof result == 'object') {
             result = JSON.stringify(result);
         }
         return result;
     },
-    [],
-    '<span class="monospace">[optional asList=true] [optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary and returns the list or dictionary of the command results. Use <code>asList=true</code> to return the results of a dictionary / object as a list.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'asList',
+            description: 'whether to return the results of a dictionary/object as a list',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'list',
+            description: 'the list to map over',
+            typeList: [ARGUMENT_TYPE.LIST],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to use as the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to use as the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    returns: 'list or dictionary of the command results',
+    helpString: `
+        <div>
+            Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/map list=[1,2,3] {: /mul {{item}} {{item}} :}</code></pre>
+                    Calculates the square of each number.
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
-rsc('filter',
-    async(args, value)=>{
-        let list = getListVar(args.var, args.globalvar, args.list);
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
+    callback: async (namedArgs, unnamedArgs) => {
+        let list = getListVar(namedArgs.var, namedArgs.globalvar, namedArgs.list);
         let result;
         const isList = Array.isArray(list);
         if (isList) {
-            list = list.map((it,idx)=>[idx,it]);
+            list = list.map((it, idx) => [idx, it]);
             result = [];
         } else if (typeof list == 'object') {
             list = Object.entries(list);
             result = {};
         }
         if (Array.isArray(list)) {
-            for (let [index,item] of list) {
+            for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
                 let outcome;
-                if (value instanceof SlashCommandClosure) {
-                    value.scope.setMacro('item', item);
-                    value.scope.setMacro('index', index);
-                    outcome = (await value.execute())?.pipe;
+                if (unnamedArgs instanceof SlashCommandClosure) {
+                    unnamedArgs.scope.setMacro('item', item);
+                    unnamedArgs.scope.setMacro('index', index);
+                    outcome = (await unnamedArgs.execute())?.pipe;
                 } else {
-                    outcome = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
+                    outcome = (await executeSlashCommands(unnamedArgs.toString().replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, namedArgs._scope))?.pipe;
                 }
                 if (isTrueBoolean(outcome)) {
                     if (isList) {
@@ -373,31 +507,65 @@ rsc('filter',
         } else {
             result = list;
         }
-
         if (typeof result == 'object') {
             result = JSON.stringify(result);
         }
         return result;
     },
-    [],
-    '<span class="monospace">[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'list',
+            description: 'the list or dictionary to filter',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable containing the list or dictionary',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable containing the list or dictionary',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/filter list=[1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}</code></pre>
+                    returns [3, 4, 5]
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'the filtered list or dictionary',
+}));
 
-rsc('find',
-    async(args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
+    callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
         const isList = Array.isArray(list);
         if (isList) {
-            list = list.map((it,idx)=>[idx,it]);
+            list = list.map((it, idx) => [idx, it]);
             result = [];
-        } else if (typeof list == 'object') {
+        } else if (typeof list === 'object') {
             list = Object.entries(list);
             result = {};
         }
         if (Array.isArray(list)) {
-            for (let [index,item] of list) {
-                if (typeof item == 'object') {
+            for (let [index, item] of list) {
+                if (typeof item === 'object') {
                     item = JSON.stringify(item);
                 }
                 let outcome;
@@ -409,7 +577,7 @@ rsc('find',
                     outcome = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
                 }
                 if (isTrueBoolean(outcome)) {
-                    if (typeof result == 'object') {
+                    if (typeof result === 'object') {
                         return JSON.stringify(item);
                     }
                     return item;
@@ -419,12 +587,47 @@ rsc('find',
         }
         return undefined;
     },
-    [],
-    '<span class="monospace">[optional list=[1,2,3]] [optional var=varname] [optional globalvar=globalvarname] (/command {{item}} {{index}})</span> – Executes command for each item of a list or dictionary and returns the first item where the command returned true.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'list',
+            description: 'the list or dictionary to search',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable containing the list or dictionary',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable containing the list or dictionary',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute for each item, using {{item}} and {{index}} as placeholders',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/find list=[1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo</code></pre>
+                    returns 3
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'the first item where the command returned true',
+}));
 
-rsc('slice',
-    (args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
+    callback: (args, value) => {
         const list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
         let end = args.end ?? (args.length ? Number(args.start) + Number(args.length) : undefined);
         const result = list.slice(args.start, end);
@@ -433,12 +636,59 @@ rsc('slice',
         }
         return result;
     },
-    [],
-    '<span class="monospace">start=int [optional end=int] [optional length=int] [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Retrieves a slice of a list or string.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'start',
+            description: 'the starting index of the slice, negative numbers start from the back',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'end',
+            description: 'the ending index of the slice (non-inclusive)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'length',
+            description: 'the length of the slice',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to slice',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to slice',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to slice',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.LIST],
+        }),
+    ],
+    returns: 'the sliced list or string',
+    helpString: `
+        <div>
+            Retrieves a slice of a list or string.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/slice start=2 length=3 [1,2,3,4,5,6] | /echo</code></pre>
+                    returns [3,4,5]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/slice start=-8 The quick brown fox jumps over the lazy dog | /echo</code></pre>
+                    returns lazy dog
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
-rsc('shuffle',
-    (args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shuffle',
+    callback: (args, value) => {
         const list = getListVar(null, null, value);
         for (let i = list.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -446,12 +696,20 @@ rsc('shuffle',
         }
         return JSON.stringify(list);
     },
-    [],
-    '<span class="monospace">(list to shuffle)</span> – Returns a shuffled list.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to shuffle',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns a shuffled list.',
+    returns: 'the shuffled list',
+}));
 
-rsc('dict',
-    (args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dict',
+    callback: (args, value) => {
         const result = {};
         const list = getListVar(args.var, args.globalvar, value);
         for (const [key, val] of list) {
@@ -459,23 +717,79 @@ rsc('dict',
         }
         return JSON.stringify(result);
     },
-    [],
-    '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (list of lists)</span> – Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each items first item as key and each items second item as value.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to use as input',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to use as input',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'a list of lists, where each inner list has at least two elements',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+    ],
+    returns: 'dictionary created from the input list of lists',
+    helpString: `
+        <div>
+            Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
+            items first item as key and each items second item as value.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/let x [
+    ["a", 1],
+    ["b", 2],
+    ["c", 3]
+] |
+/dict {{var::x}} |
+/echo
+</code></pre>
+                    returns {a:1, b:2, c:3}
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
-rsc('keys',
-    async(args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'keys',
+    callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, value);
         return JSON.stringify(Object.keys(list));
     },
-    [],
-    '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (dictionary)</span> – Return the list of keys of a dictionary / object.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to get keys from',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to get keys from',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the dictionary/object to get keys from',
+            typeList: [ARGUMENT_TYPE.DICTIONARY],
+        }),
+    ],
+    returns: 'list of keys in the dictionary/object',
+    helpString: 'Return the list of keys of a dictionary / object.',
+}));
+
 
 
 // GROUP: Split & Join
-rsc('split',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
+    callback: (args, value)=>{
         value = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
         let find = args.find ?? ',';
         if (find.match(/^\/.+\/[a-z]*$/)) {
@@ -483,14 +797,51 @@ rsc('split',
         }
         return JSON.stringify(value.split(find).map(it=>isTrueBoolean(args.trim ?? 'true') ? it.trim() : it));
     },
-    [],
-    '<span class="monospace">[optional find=","] [optional trim=true|false] [optional var=varname] [optional globalvar=globalvarname] (value)</span> – Splits value into list at every occurrence of find. Supports regex <code>find=/\\s/</code>',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'find',
+            description: 'the text to split at',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: ',',
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'trim',
+            description: 'whether to trim the resulting values',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'true',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to split',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to split',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to split',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    returns: 'list of the split values',
+    helpString: `
+        <div>
+            Splits value into list at every occurrence of find. Supports regex <code>find="/\\s/"</code>
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code>/split find="/\\s/" The quick brown fox jumps over the lazy dog | /echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
-rsc('join',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
+    callback: (args, value) => {
         let list = getListVar(args.var, args.globalvar, value);
         if (Array.isArray(list)) {
             const glue = (args.glue ?? ', ')
@@ -499,11 +850,48 @@ rsc('join',
             return list.join(glue);
         }
     },
-    [],
-    '<span class="monospace">[optional glue=", "] [optional var=varname] [optional globalvar=globalvarname] (optional list)</span> – Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'glue',
+            description: 'the string to join the list items with',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: ', ',
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable containing the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable containing the list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to join',
+            typeList: [ARGUMENT_TYPE.LIST],
+        }),
+    ],
+    returns: 'a single string containing the joined list items',
+    helpString: `
+        <div>
+            Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/join ["apple", "banana", "cherry"]</code></pre>
+                    returns "apple, banana, cherry"
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/join glue=" | " ["apple", "banana", "cherry"]</code></pre>
+                    returns "apple | banana | cherry"
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
 
 
 // GROUP: Text Operations
@@ -1524,7 +1912,7 @@ rsc('swipes-swipe',
         const id = chat.length - 1;
         const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
         await executeSlashCommands('/swipes-count | /sub {{pipe}} 1 | /swipes-go');
-        currentMessage.querySelector('.swipe_right').click();
+        currentMessage.querySelector('.swipe_right:not(.stus--btn)').click();
         await new Promise(resolve=>eventSource.once(event_types.GENERATION_ENDED, resolve));
         await delay(200);
         return chat[id].mes;
