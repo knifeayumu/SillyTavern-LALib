@@ -911,8 +911,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'trim',
 }));
 
 
-rsc('diff',
-    async (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
+    callback: async (args, value) => {
         /**@type {HTMLScriptElement} */
         let script = document.querySelector('script[src*="SillyTavern-LALib/lib/wiked-diff.js"]');
         if (!script) {
@@ -1083,9 +1083,49 @@ rsc('diff',
         await callPopup(dom, 'text', null, { wide:true, large:true, okButton:'Close' });
         return result;
     },
-    [],
-    '<span class="monospace">[optional all=true] [optional buttons=true] [optional stripcode=true] [optional notes=text] [old=oldText] [new=newText]</span> – Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'all',
+            description: 'show new, old, and diff side by side',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'true',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'buttons',
+            description: 'add buttons to pick which text to return',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'true',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'stripcode',
+            description: 'remove all codeblocks before diffing',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'true',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'notes',
+            description: 'show additional notes or comments above the comparison',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'old',
+            description: 'the old text to compare',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'new',
+            description: 'the new text to compare',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.',
+}));
+
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'json-pretty',
     callback: (args, value) => {
