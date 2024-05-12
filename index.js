@@ -895,13 +895,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
 
 
 // GROUP: Text Operations
-rsc('trim',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'trim',
+    callback: (args, value) => {
         return value?.trim();
     },
-    [],
-    '<span class="monospace">(text to trim)</span> – Removes whitespace at the start and end of the text.',
-);
+    returns: 'the trimmed text',
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'text to trim',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Removes whitespace at the start and end of the text.',
+}));
+
 
 rsc('diff',
     async (args, value)=>{
@@ -1079,52 +1087,121 @@ rsc('diff',
     '<span class="monospace">[optional all=true] [optional buttons=true] [optional stripcode=true] [optional notes=text] [old=oldText] [new=newText]</span> – Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.',
 );
 
-rsc('json-pretty',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'json-pretty',
+    callback: (args, value) => {
         return JSON.stringify(JSON.parse(value), null, 4);
     },
-    [],
-    '<span class="monospace">(JSON)</span> – Pretty print JSON.',
-);
+    returns: 'formatted JSON',
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'JSON to pretty print',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Pretty print JSON.',
+}));
 
-rsc('substitute',
-    (args, value) => {
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'substitute',
+    callback: (args, value) => {
         return substituteParams(value, name1, name2);
     },
-    [],
-    '<span class="monospace">(text)</span> – Substitute macros in text.',
-);
+    returns: 'text with macros replaced',
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'text to substitute macros in',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Substitute macros in text.',
+}));
 
-rsc('wordcount',
-    (args, value) => {
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wordcount',
+    callback: (args, value) => {
         const words = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity:'word' }).segment(value))
             .filter(it=>it.isWordLike);
         return words.length.toString();
     },
-    [],
-    '<span class="monospace">[optional language=lang] (text)</span> – Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'language',
+            description: 'Two character language code according to IETF BCP 47',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'en',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the text to count words in',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'the number of words',
+    helpString: 'Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+}));
 
-rsc('sentencecount',
-    (args, value) => {
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sentencecount',
+    callback: (args, value) => {
         const words = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity:'sentence' }).segment(value));
         return words.length.toString();
     },
-    [],
-    '<span class="monospace">[optional language=lang] (text)</span> – Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'language',
+            description: 'Two character language code according to IETF BCP 47',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'en',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the text to count sentences in',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'the number of sentences',
+    helpString: 'Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+}));
 
-rsc('segment',
-    (args, value) => {
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'segment',
+    callback: (args, value) => {
+        args.granularity = args.granularity ?? 'word';
         const segments = Array.from(new Intl.Segmenter(args.language ?? 'en', { granularity: args.granularity }).segment(value))
             .filter(it=>args.granularity != 'word' || it.isWordLike)
             .map(it=>it.segment)
         ;
         return JSON.stringify(segments);
     },
-    [],
-    '<span class="monospace">[granularity=grapheme|word|sentence] [optional language=lang] (text)</span> – Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'granularity',
+            description: 'The unit to segment the text into: grapheme, word or sentence',
+            typeList: [ARGUMENT_TYPE.STRING],
+            enumList: ['grapheme', 'word', 'sentence'],
+            defaultValue: 'word',
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'language',
+            description: 'Two character language code according to IETF BCP 47',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'en',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the text to segment',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'list of the segments (graphemes, words, or sentences)',
+    helpString: 'Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.',
+}));
+
 
 
 // GROUP: Regular Expressions
@@ -1139,8 +1216,8 @@ const makeRegex = (value)=>{
     );
 };
 
-rsc('re-test',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
+    callback: (args, value) => {
         try {
             const re = makeRegex(args.find);
             const text = getVar(args.var, args.globalvar, value) ?? '';
@@ -1149,52 +1226,129 @@ rsc('re-test',
             toastr.error(ex.message);
         }
     },
-    [],
-    '<span class="monospace">[find=/pattern/flags] [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Tests if the provided variable or value matches a regular expression.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'find',
+            description: 'the regular expression to test against',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'var',
+            description: 'name of the chat variable to test',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'globalvar',
+            description: 'name of the global variable to test',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to test',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    returns: 'true or false',
+    helpString: 'Tests if the provided variable or value matches a regular expression.',
+}));
 
-rsc('re-replace',
-    async(args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
+    callback: async (namedArgs, unnamedArgs) => {
         try {
-            const re = makeRegex(args.find);
-            if (args.cmd) {
+            const re = makeRegex(namedArgs.find);
+            if (namedArgs.cmd) {
                 const replacements = [];
-                /**@type {(function():Promise<string>)[]} */
+                /**@type {(function():Promise<string>)[]}*/
                 const cmds = [];
-                if (args.cmd instanceof SlashCommandClosure) {
+                if (namedArgs.cmd instanceof SlashCommandClosure) {
                     /**@type {SlashCommandClosure} */
-                    const closure = args.cmd;
-                    value.replace(re, (...matches)=>{
+                    const closure = namedArgs.cmd;
+                    unnamedArgs.toString().replace(re, (...matches) => {
                         const copy = closure.getCopy();
-                        matches.forEach((match,idx)=>{
+                        matches.forEach((match, idx) => {
                             copy.scope.setMacro(`$${idx}`, match);
                         });
-                        cmds.push(async()=>(await copy.execute())?.pipe);
+                        cmds.push(async () => (await copy.execute())?.pipe);
                     });
                 } else {
-                    value.replace(re, (...matches)=>{
-                        const cmd = args.cmd.replace(/\$(\d+)/g, (_, idx)=>matches[idx]);
-                        cmds.push(async()=>(await executeSlashCommands(cmd, false, args._scope))?.pipe);
+                    unnamedArgs.toString().replace(re, (...matches) => {
+                        const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
+                        cmds.push(async () => (await executeSlashCommands(cmd, false, namedArgs._scope))?.pipe);
                     });
                 }
                 for (const cmd of cmds) {
                     replacements.push(await cmd());
                 }
-                return value.replace(re, ()=>replacements.shift());
+                return unnamedArgs.toString().replace(re, () => replacements.shift());
             }
-            return value.replace(re, args.replace);
+            return unnamedArgs.toString().replace(re, namedArgs.replace);
         } catch (ex) {
             toastr.error(ex.message);
         }
     },
-    [],
-    '<span class="monospace">[find=/pattern/flags] [optional replace=replaceText] [optional cmd=closure|command] [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.',
-);
+    returns: 'the new text',
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'find',
+            description: 'the regular expression (/pattern/flags)',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'replace',
+            description: 'the replacement text',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'cmd',
+            description: 'a closure or slash command to execute for each match',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'var',
+            description: 'name of the chat variable to perform the replacement on',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'globalvar',
+            description: 'name of the global variable to perform the replacement on',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to perform the replacement on',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: `
+        <div>
+            Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/re-replace find=/\\s+/ replace=" " The quick   brown  fox  jumps over the lazy dog | /echo</code></pre>
+                    replaces multiple whitespace with a single space
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/re-replace find=/([a-z]+) ([a-z]+)/ cmd="/echo $2 $1" the quick brown fox | /echo</code></pre>
+                    swaps words using a slash command on each match
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
 
 
 // GROUP: Accessing & Manipulating Structured Data
-rsc('getat',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
+    callback: (args, value) => {
         let index = getListVar(null, null, args.index) ?? [args.index];
         if (!Array.isArray(index)) {
             index = [index];
@@ -1204,20 +1358,45 @@ rsc('getat',
         while (index.length > 0 && result !== undefined) {
             const ci = index.shift();
             result = Array.isArray(result) ? result.slice(ci)[0] : result[ci];
-            try { result = JSON.parse(result); } catch { /* empty */ }
+            try { result = JSON.parse(result); } catch { /*empty*/ }
         }
         if (typeof result == 'object') {
             return JSON.stringify(result);
         }
         return result;
     },
-    [],
-    '<span class="monospace">index=int|fieldname|list [optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Retrieves an item from a list or a property from a dictionary.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'index',
+            description: 'the index, field name, or list of indices/field names to retrieve',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'var',
+            description: 'name of the chat variable to retrieve from',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'globalvar',
+            description: 'name of the global variable to retrieve from',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to retrieve from (if not using a variable)',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: 'Retrieves an item from a list or a property from a dictionary.',
+    returns: 'the retrieved item or property value',
+}));
 
-rsc('setat',
-    async(args, value)=>{
-        try { value = JSON.parse(value); } catch { /* empty */ }
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
+    callback: async (args, value) => {
+        try { value = JSON.parse(value); } catch { /*empty*/ }
         let index = getListVar(null, null, args.index) ?? [args.index];
         const list = getListVar(args.var, args.globalvar, args.value) ?? (Number.isNaN(Number(index[0])) ? {} : []);
         if (!Array.isArray(index)) {
@@ -1241,7 +1420,7 @@ rsc('setat',
             try {
                 current = JSON.parse(current);
                 prev[ci] = current;
-            } catch { /* empty */ }
+            } catch { /*empty*/ }
         }
         if (list !== undefined) {
             let result = (typeof list == 'object') ? JSON.stringify(list) : list;
@@ -1254,14 +1433,63 @@ rsc('setat',
             return result;
         }
     },
-    [],
-    '<span class="monospace">index=int|fieldname|list [optional var=varname] [optional globalvar=globalvarname] [optional value=list|dictionary] (value)</span> – Sets an item in a list or a property in a dictionary. Example: <code>/setat value=[1,2,3] index=1 X</code> returns <code>[1,"X",3]</code>, <code>/setat var=myVariable index=[1,2,"somePropery"] foobar</code> sets the value of <code>myVariable[1][2].someProperty</code> to "foobar" (the variable will be updated and the resulting value of myVariable will be returned). Can be used to create structures that do not already exist.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'index',
+            description: 'the index or key to set the value at',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'var',
+            description: 'name of the chat variable to update',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'globalvar',
+            description: 'name of the global variable to update',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'value',
+            description: 'the value to update',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to set',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Sets an item in a list or a property in a dictionary.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/setat value=[1,2,3] index=1 X</code></pre>
+                    returns <code>[1,"X",3]</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/setat var=myVariable index=[1,2,"someProperty"] foobar</code></pre>
+                    sets the value of <code>myVariable[1][2].someProperty</code> to "foobar" (the variable will be updated and the resulting value of myVariable will be returned)
+                </li>
+            </ul>
+            Can be used to create structures that do not already exist.
+        </div>
+    `,
+    returns: 'the updated list or dictionary',
+}));
+
 
 
 // GROUP: Exception Handling
-rsc('try',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
+    callback: async (args, value) => {
         try {
             let result;
             if (value instanceof SlashCommandClosure) {
@@ -1280,12 +1508,32 @@ rsc('try',
             });
         }
     },
-    [],
-    '<span class="monospace">(command)</span> – try catch.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to try',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/try {: /divide 10 0 :} |
+/catch {: /echo An error occurred: {{exception}} :}</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'an object with properties `isException` and `result` or `exception`',
+}));
 
-rsc('catch',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
+    callback: async (args, value) => {
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -1306,14 +1554,35 @@ rsc('catch',
             return data?.result;
         }
     },
-    [],
-    '<span class="monospace">(command)</span> – try catch. /catch must always be called right after /try. Use <code>{{exception}}</code> or <code>{{error}}</code> to get the exception\'s message.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute if an exception occurred',
+            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/try {: /divide 10 0 :} |
+/catch {: /echo An error occurred: {{exception}} :}</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'the result of the catch command, or the original result if no exception occurred',
+}));
+
 
 
 // GROUP: Null Handling
-rsc('ifempty',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifempty',
+    callback: (args, value) => {
         const list = getListVar(null, null, args.value);
         if (list) {
             if (Array.isArray(list)) {
@@ -1327,23 +1596,54 @@ rsc('ifempty',
         }
         return args.value;
     },
-    [],
-    '<span class="monospace">[value=valueToCheck] (fallbackValue)</span> – Returns the fallback value if value is empty (empty string, empty list, empty dictionary).',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'value',
+            description: 'the value to check',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the fallback value',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns the fallback value if value is empty (empty string, empty list, empty dictionary).',
+    returns: 'the value or the fallback value',
+}));
 
-rsc('ifnullish',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifnullish',
+    callback: (args, value) => {
         if ((args.value?.length ?? 0) == 0) return value;
         return args.value;
     },
-    [],
-    '<span class="monospace">[value=valueToCheck] (fallbackValue)</span> – Returns the fallback value if value is nullish (empty string).',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'value',
+            description: 'the value to check',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the fallback value',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns the fallback value if value is nullish (empty string).',
+    returns: 'the value or the fallback value',
+}));
+
 
 
 // GROUP: Copy & Download
-rsc('copy',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'copy',
+    callback: (args, value) => {
         const ta = document.createElement('textarea'); {
             ta.value = value;
             ta.style.position = 'fixed';
@@ -1359,14 +1659,18 @@ rsc('copy',
             ta.remove();
         }
     },
-    [],
-    '<span class="monospace">(value)</span> – Copies value into clipboard.',
-    true,
-    true,
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to copy',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Copies value into clipboard.',
+}));
 
-rsc('download',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'download',
+    callback: (args, value) => {
         const blob = new Blob([value], { type:'text' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); {
@@ -1377,16 +1681,35 @@ rsc('download',
             a.click();
         }
     },
-    [],
-    '<span class="monospace">[optional name=filename] [optional ext=extension] (value)</span> – Downloads value as a text file.',
-    true,
-    true,
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'name',
+            description: 'the filename for the downloaded file',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: `SillyTavern-${new Date().toISOString()}`,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'ext',
+            description: 'the file extension for the downloaded file',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'txt',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to download as a text file',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Downloads value as a text file.',
+}));
+
 
 
 // GROUP: DOM Interaction
-rsc('dom',
-    (args, query)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
+    callback: (args, query) => {
         /**@type {HTMLElement} */
         let target;
         try {
@@ -1433,14 +1756,57 @@ rsc('dom',
             }
         }
     },
-    [],
-    '<span class="monospace">[action=click|value|property] [optional value=newValue] [optional property=propertyName] [optional attribute=attributeName] (CSS selector)</span> – Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors. Example: <code>/dom action=click #expandMessageActions</code> or <code>/dom action=value value=0 #avatar_style</code>',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'action',
+            description: 'the action to perform',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            enumList: ['click', 'value', 'property', 'attribute', 'call'],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'value',
+            description: 'new value to set (for action=value)',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'property',
+            description: 'property name to get/call (for action=property or action=call)',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'attribute',
+            description: 'attribute name to get (for action=attribute)',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'CSS selector to target an element',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'the result of the action, if any',
+    helpString: `
+        <div>
+            Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li><pre><code class="language-stscript">/dom action=click #expandMessageActions</code></pre></li>
+                <li><pre><code class="language-stscript">/dom action=value value=0 #avatar_style</code></pre></li>
+            </ul>
+        </div>
+    `,
+}));
+
 
 
 // GROUP: Group Chats
-rsc('memberpos',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
+    callback: async(args, value) => {
         if (!selected_group) {
             toastr.warning('Cannot run /memberpos command outside of a group chat.');
             return '';
@@ -1464,50 +1830,96 @@ rsc('memberpos',
         }
         return currentIndex;
     },
-    [],
-    '<span class="monospace">(name) (position)</span> – Move group member to position (index starts with 0).</code>',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'name of the group member',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'new position index for the member',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Move group member to position (index starts with 0).',
+}));
+
 
 
 // GROUP: Conditionals - switch
-rsc('switch',
-    (args, value)=>{
-        const val = getVar(args.var, args.globalvar, value);
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
+    callback: (namedArgs, unnamedArgs) => {
+        const val = getVar(namedArgs.var, namedArgs.globalvar, unnamedArgs.toString());
         return JSON.stringify({
             switch: val,
         });
     },
-    [],
-    '<span class="monospace">[optional var=varname] [optional globalvar=globalvarname] (optional value)</span> – Use with /case.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'var',
+            description: 'name of the chat variable to use as the switch value',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'globalvar',
+            description: 'name of the global variable to use as the switch value',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to use as the switch value',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: 'Use with /case to conditionally execute commands based on a value.',
+    returns: 'an object containing the switch value',
+}));
 
-rsc('case',
-    async (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
+    callback: async (namedArgs, unnamedArgs) => {
         let data;
         try {
-            data = JSON.parse(args._scope.pipe);
+            data = JSON.parse(namedArgs._scope.pipe);
         } catch (ex) {
-            console.warn('[LALIB]', '[CASE]', 'failed to parse pipe', args._scope.pipe, ex);
+            console.warn('[LALIB]', '[CASE]', 'failed to parse pipe', namedArgs._scope.pipe, ex);
         }
         if (data?.switch !== undefined) {
-            if (data.switch == args.value) {
-                if (value instanceof SlashCommandClosure) {
-                    value.scope.setMacro('value', data.switch);
-                    return (await value.execute())?.pipe;
+            if (data.switch == namedArgs.value) {
+                if (unnamedArgs instanceof SlashCommandClosure) {
+                    unnamedArgs.scope.setMacro('value', data.switch);
+                    return (await unnamedArgs.execute())?.pipe;
                 }
-                return (await executeSlashCommands(value.replace(/{{value}}/ig, data.switch), true, args._scope))?.pipe;
+                return (await executeSlashCommands(unnamedArgs.toString().replace(/{{value}}/ig, data.switch), true, namedArgs._scope))?.pipe;
             }
         }
-        return args._scope.pipe;
+        return namedArgs._scope.pipe;
     },
-    [],
-    '<span class="monospace">[value=comparisonValue] (/command)</span> – Execute command and break out of the switch if the value given in /switch matches the value given here.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'value',
+            description: 'the value to compare against the switch value',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute if the value matches the switch value',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Execute a command if the provided value matches the switch value from /switch.',
+    returns: 'the result of the executed command, or the unchanged pipe if no match',
+}));
+
 
 
 // GROUP: Conditionals - if
-rsc('ife',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
+    callback: async (args, value) => {
         let result;
         if (value instanceof SlashCommandClosure) {
             result = await value.execute();
@@ -1518,12 +1930,19 @@ rsc('ife',
             if: isTrueBoolean(result?.pipe),
         });
     },
-    [],
-    '<span class="monospace">(/command)</span> – Use with /then, /elseif, and /else. The provided command must return true or false.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to evaluate',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: '<div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>',
+    returns: 'an object with a boolean "if" property',
+}));
 
-rsc('elseif',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
+    callback: async (args, value) => {
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -1545,12 +1964,19 @@ rsc('elseif',
         }
         return args._scope.pipe;
     },
-    [],
-    '<span class="monospace">(/command)</span> – Use with /ife, /then, and /else. The provided command must return true or false.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to evaluate',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: '<div>Use with /ife, /then, and /else. The provided command must return true or false.</div>',
+    returns: 'an object with a boolean "if" property',
+}));
 
-rsc('else',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
+    callback: async (args, value) => {
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -1570,12 +1996,19 @@ rsc('else',
         }
         return args._scope.pipe;
     },
-    [],
-    '<span class="monospace">(/command)</span> – Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: '<div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>',
+    returns: 'the result of the executed command',
+}));
 
-rsc('then',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
+    callback: async (args, value) => {
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -1595,9 +2028,17 @@ rsc('then',
         }
         return args._scope.pipe;
     },
-    [],
-    '<span class="monospace">(/command)</span> – Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the command to execute',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: '<div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>',
+    returns: 'the result of the executed command',
+}));
+
 
 
 const getBookNamesWithSource = ()=>{
@@ -1641,20 +2082,29 @@ const getBookNames = ()=>{
     return names;
 };
 // GROUP: World Info
-rsc('wi-list-books',
-    async(args, value)=>{
-        if (isTrueBoolean(args.source)) {
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-books',
+    callback: async (namedArgs) => {
+        if (isTrueBoolean(namedArgs.source)) {
             return JSON.stringify(getBookNamesWithSource());
         }
         return JSON.stringify(getBookNames());
     },
-    [],
-    '<span class="monospace">[optional source=true]</span> – Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'source',
+            description: 'whether to include the activation source for each book',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+    ],
+    helpString: 'Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.',
+    returns: 'a list of book names, or a dictionary of lists with activation sources as keys',
+}));
 
-rsc('wi-list-entries',
-    async(args, value)=>{
-        const loadBook = async(name)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entries',
+    callback: async (namedArgs, unnamedArgs) => {
+        const loadBook = async (name) => {
             const result = await fetch('/api/worldinfo/get', {
                 method: 'POST',
                 headers: getRequestHeaders(),
@@ -1662,7 +2112,7 @@ rsc('wi-list-entries',
             });
             if (result.ok) {
                 const data = await result.json();
-                data.entries = Object.keys(data.entries).map(it=>{
+                data.entries = Object.keys(data.entries).map(it => {
                     data.entries[it].book = name;
                     return data.entries[it];
                 });
@@ -1674,8 +2124,8 @@ rsc('wi-list-entries',
         };
         let names;
         let isNameGiven = false;
-        if (value && value?.trim()?.length && value != '""' && value != 'null') {
-            names = [value.trim()];
+        if (unnamedArgs.length && unnamedArgs[0]?.trim()?.length && unnamedArgs[0] != '""' && unnamedArgs[0] != 'null') {
+            names = [unnamedArgs[0].trim()];
             isNameGiven = true;
         } else {
             names = getBookNames();
@@ -1684,23 +2134,39 @@ rsc('wi-list-entries',
         for (const book of names) {
             books[book] = await loadBook(book);
         }
-        if (isTrueBoolean(args.flat) || isNameGiven) {
-            return JSON.stringify(Object.keys(books).map(it=>books[it].entries).flat());
+        if (isTrueBoolean(namedArgs.flat) || isNameGiven) {
+            return JSON.stringify(Object.keys(books).map(it => books[it].entries).flat());
         }
         return JSON.stringify(books);
     },
-    [],
-    '<span class="monospace">[optional flat=true] (optional book name)</span> – Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'flat',
+            description: 'whether to list all entries in a flat list',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the name of the book to list entries from',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: 'Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.',
+    returns: 'a dictionary of book entries, or a flat list of entries',
+}));
+
 
 
 // GROUP: Costumes / Sprites
-rsc('costumes',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'costumes',
+    callback: async (namedArgs, unnamedArgs) => {
         const response = await fetch('/api/plugins/costumes/', {
             method: 'POST',
             headers: getRequestHeaders(),
-            body: JSON.stringify({ folder:value, recurse:args.recurse ?? true }),
+            body: JSON.stringify({ folder: unnamedArgs[0], recurse: namedArgs.recurse ?? true }),
         });
         if (!response.ok) {
             toastr.error(`Failed to retrieve costumes: ${response.status} - ${response.statusText}`);
@@ -1708,16 +2174,32 @@ rsc('costumes',
         }
         return await response.text();
     },
-    [],
-    '<span class="monospace">[optional recurse=false] (folder)</span> – Get a list of costume / sprite folders, recursive by default.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'recurse',
+            description: 'whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'true',
+            enumList: ['true', 'false'],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the folder to list costumes from',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: 'Get a list of costume / sprite folders, recursive by default.',
+    returns: 'a list of costume/sprite folders',
+}));
+
 
 
 // GROUP: Quick Replies
-rsc('qr-edit',
-    async(args, value)=>{
-        let set = args.set;
-        let label = args.label ?? value;
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-edit',
+    callback: async (namedArgs, unnamedArgs) => {
+        let set = namedArgs.set;
+        let label = namedArgs.label ?? unnamedArgs.toString();
         if (set === undefined) {
             const sets = [...quickReplyApi.listGlobalSets(), ...quickReplyApi.listChatSets()];
             for (const setName of sets) {
@@ -1729,71 +2211,141 @@ rsc('qr-edit',
         }
         quickReplyApi.getQrByLabel(set, label)?.showEditor();
     },
-    [],
-    '<span class="monospace">[optional set=qrSetName] [optional label=qrLabel] (optional qrLabel)</span> – Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'set',
+            description: 'the name of the quick reply set',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'label',
+            description: 'the label of the quick reply',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the label of the quick reply',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: 'Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.',
+}));
 
-rsc('qr-add',
-    async(args, value)=>{
-        let set = args.set ?? quickReplyApi.listGlobalSets()[0] ?? quickReplyApi.listChatSets()[0];
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-add',
+    callback: async (namedArgs, unnamedArgs) => {
+        let set = namedArgs.set ?? quickReplyApi.listGlobalSets()[0] ?? quickReplyApi.listChatSets()[0];
         if (set === undefined) {
             toastr.error('No Quick Reply Set given and no active Quick Reply Sets to add the new Quick Reply to.');
             return;
         }
-        let label = args.label ?? value;
+        let label = namedArgs.label ?? unnamedArgs.toString();
         quickReplyApi.createQuickReply(set, label)?.showEditor();
     },
-    [],
-    '<span class="monospace">[optional set=qrSetName] [optional label=qrLabel] (optional qrLabel)</span> – Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'set',
+            description: 'the name of the quick reply set',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'label',
+            description: 'the label of the quick reply',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the label of the quick reply',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: 'Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.',
+}));
+
 
 
 // GROUP: Chat Messages
-rsc('swipes-get',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-get',
+    aliases: ['getswipe'],
+    callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         return chat[idx]?.swipes?.[Number(value)] ?? '';
     },
-    ['getswipe'],
-    '<span class="monospace">[optional message=messageId] (index)</span> – Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to get swipes from',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the index of the swipe to get',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.',
+    returns: 'swipe text',
+}));
 
-rsc('swipes-list',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-list',
+    callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         return JSON.stringify(chat[idx]?.swipes ?? []);
     },
-    [],
-    '<span class="monospace">[optional message=messageId]</span> – Get a list of all swipes from the last message or the message with the given message ID.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to get swipes from',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: 'Get a list of all swipes from the last message or the message with the given message ID.',
+    returns: 'a list of swipes',
+}));
 
-rsc('swipes-count',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-count',
+    callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         return chat[idx]?.swipes?.length ?? 0;
     },
-    [],
-    '<span class="monospace">[optional message=messageId]</span> – Get the number of all swipes from the last message or the message with the given message ID.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to get swipes from',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: 'Get the number of all swipes from the last message or the message with the given message ID.',
+    returns: 'the number of swipes',
+}));
 
-rsc('swipes-index',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-index',
+    callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         return chat[idx]?.swipe_id ?? 0;
     },
-    [],
-    '<span class="monospace">[optional message=messageId]</span> – Get the current swipe index from the last message or the message with the given message ID.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to get the swipe index from',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: 'Get the current swipe index from the last message or the message with the given message ID.',
+    returns: 'the current swipe index',
+}));
 
-rsc('swipes-add',
-    (args, value)=>{
-        const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-add',
+    callback: (namedArgs, unnamedArgs) => {
+        const idx = namedArgs.message && !isNaN(Number(namedArgs.message)) ? Number(namedArgs.message) : chat.length - 1;
         const mes = chat[idx];
         const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
-
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
-
         if (mes.swipe_id === null || mes.swipe_id === undefined) {
             mes.swipe_id = 0;
         }
@@ -1808,20 +2360,20 @@ rsc('swipes-add',
                 extra: structuredClone(mes.extra),
             }];
         }
-        mes.swipes.push(value);
+        mes.swipes.push(unnamedArgs.toString());
         mes.swipe_info.push({
             send_date: getMessageTimeStamp(),
             gen_started: null,
             gen_finished: null,
             extra: {
-                bias: extractMessageBias(value),
+                bias: extractMessageBias(unnamedArgs.toString()),
                 gen_id: Date.now(),
                 api: 'manual',
                 model: 'slash command',
             },
         });
         mes.swipe_id = mes.swipes.length - 1;
-        mes.mes = value;
+        mes.mes = unnamedArgs.toString();
         mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
             mes.mes,
             mes.name,
@@ -1832,19 +2384,31 @@ rsc('swipes-add',
         [...mesDom.querySelectorAll('.swipe_right .swipes-counter')].forEach(it=>it.textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`);
         saveChatConditional();
     },
-    [],
-    '<span class="monospace">[optional message=messageId] (text)</span> – Add a new swipe to the last message or the message with messageId.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the ID of the message to add the swipe to',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the text to add as a new swipe',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Add a new swipe to the last message or the message with the provided messageId.',
+}));
 
-rsc('swipes-del',
-    async(args, value)=>{
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
+    callback: async (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         const mes = chat[idx];
         const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
-
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
-
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
             return;
         }
@@ -1870,19 +2434,29 @@ rsc('swipes-del',
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
     },
-    [],
-    '<span class="monospace">[optional message=messageId] (optional index)</span> – Delete the current swipe or the swipe at index (0-based).',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the id of the message to delete the swipe from',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the index of the swipe to delete (0-based)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: 'Delete the current swipe or the swipe at the specified index (0-based).',
+}));
 
-rsc('swipes-go',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
+    callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         const mes = chat[idx];
         const mesDom = document.querySelector(`#chat .mes[mesid="${idx}"]`);
-
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
-
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
             return;
         }
@@ -1903,27 +2477,39 @@ rsc('swipes-go',
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
     },
-    [],
-    '<span class="monospace">[optional message=messageId] (index)</span> – Go to the swipe. 0-based index.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to go to the swipe for',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the index of the swipe to go to',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Go to the swipe. 0-based index.',
+}));
 
-rsc('swipes-swipe',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe',
+    callback: async (args, value) => {
         const id = chat.length - 1;
         const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
         await executeSlashCommands('/swipes-count | /sub {{pipe}} 1 | /swipes-go');
         currentMessage.querySelector('.swipe_right:not(.stus--btn)').click();
-        await new Promise(resolve=>eventSource.once(event_types.GENERATION_ENDED, resolve));
+        await new Promise(resolve => eventSource.once(event_types.GENERATION_ENDED, resolve));
         await delay(200);
         return chat[id].mes;
     },
-    [],
-    '<span class="monospace"></span> – Trigger a new swipe on the last message.',
-);
+    helpString: 'Trigger a new swipe on the last message.',
+}));
 
-rsc('message-edit',
-    (args, value)=>{
-        /**@type {HTMLTextAreaElement} */
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit',
+    callback: (args, value) => {
+        /**@type {HTMLTextAreaElement}*/
         const input = document.querySelector('#send_textarea');
         const restoreFocus = document.activeElement == input;
         value = value.replace(/{{space}}/g, ' ');
@@ -1936,24 +2522,46 @@ rsc('message-edit',
         document.querySelector(`#chat [mesid="${args.message ?? chat.length - 1}"] .mes_edit_done`).click();
         if (restoreFocus) input.focus();
     },
-    [],
-    '<span class="monospace">[optional message=messageId] [optional append=true] (new text)</span> – Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'message',
+            description: 'the message ID to edit',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'append',
+            description: 'whether to append the new text to the end of the message',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the new text for the message',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
+}));
+
 
 
 // GROUP: Time & Date
-rsc('timestamp',
-    (args, value) => {
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'timestamp',
+    callback: (args, value) => {
         return JSON.stringify(new Date().getTime());
     },
-    [],
-    '<span class="monospace"></span> – Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.',
-);
+    helpString: 'Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.',
+    returns: 'timestamp',
+}));
+
 
 
 // GROUP: Async
-rsc('fireandforget',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforget',
+    callback: (args, value) => {
         if (value instanceof SlashCommandClosure) {
             /**@type {SlashCommandClosure} */
             const closure = value;
@@ -1963,32 +2571,45 @@ rsc('fireandforget',
             executeSlashCommands(value, true, args._scope);
         }
     },
-    [],
-    '<span class="monospace">(closure|command)</span> – Execute a closure or command without waiting for it to finish.',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the closure or command to execute',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Execute a closure or command without waiting for it to finish.',
+}));
+
 
 
 // GROUP: Undocumented
-rsc('fetch',
-    async(args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
+    callback: async (args, value) => {
         if (!window.stfetch) {
             toastr.error('Userscript missing: SillyTavern - Fetch');
             throw new Error('Userscript missing: SillyTavern - Fetch');
         }
         try {
-            const response = await window.stfetch({ url:value });
+            const response = await window.stfetch({ url: value });
             return response.responseText;
         }
         catch (ex) {
             console.warn('[LALIB]', '[FETCH]', ex);
         }
     },
-    [],
-    '<span class="monospace">(url)</span> – UNDOCUMENTED',
-);
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the url to fetch',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'UNDOCUMENTED',
+}));
 
-rsc('$',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
+    callback: (args, value) => {
         const dom = document.createRange().createContextualFragment(value);
         let el;
         if (args.query) {
@@ -2001,7 +2622,7 @@ rsc('$',
         }
         if (args.call) {
             el[args.call]();
-            return [...dom.children].map(it=>it.outerHTML).join('\n');
+            return [...dom.children].map(it => it.outerHTML).join('\n');
         } else {
             const result = el?.[args.take ?? 'outerHTML'];
             if (typeof result == 'object') {
@@ -2010,12 +2631,36 @@ rsc('$',
             return result;
         }
     },
-    [],
-    '<span class="monospace">[optional query=cssSelector] [optional take=property] [optional call=property] (html)</span> – UNDOCUMENTED',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'query',
+            description: 'css selector to query the provided html',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'take',
+            description: 'property to take from the resulting element',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'outerHTML',
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'call',
+            description: 'method to call on the resulting element',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the html to operate on',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'UNDOCUMENTED',
+}));
 
-rsc('$$',
-    (args, value)=>{
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
+    callback: (args, value) => {
         const dom = document.createRange().createContextualFragment(value);
         let els;
         if (args.query) {
@@ -2024,16 +2669,41 @@ rsc('$$',
             els = Array.from(dom.children);
         }
         if (args.call) {
-            els.forEach(el=>el[args.call]());
-            return [...dom.children].map(it=>it.outerHTML).join('\n');
+            els.forEach(el => el[args.call]());
+            return [...dom.children].map(it => it.outerHTML).join('\n');
         } else {
-            const result = els.map(el=>el?.[args.take ?? 'outerHTML']);
+            const result = els.map(el => el?.[args.take ?? 'outerHTML']);
             if (typeof result == 'object') {
                 return JSON.stringify(result);
             }
             return result;
         }
     },
-    [],
-    '<span class="monospace">[optional query=cssSelector] [optional take=property] [optional call=property] (html)</span> – UNDOCUMENTED',
-);
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'query',
+            description: 'css selector to query the provided html',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'take',
+            description: 'property to take from the resulting elements',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: 'outerHTML',
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'call',
+            description: 'method to call on the resulting elements',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the html to operate on',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'UNDOCUMENTED',
+}));
+
