@@ -2,7 +2,7 @@ import { callPopup, characters, chat, chat_metadata, eventSource, event_types, e
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
-import { executeSlashCommands, registerSlashCommand } from '../../../slash-commands.js';
+import { executeSlashCommands } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
 import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure.js';
