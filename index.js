@@ -168,21 +168,6 @@ function getVar(local, global, literal) {
 
 
 
-/**
- * registerSlashCommand
- * @param {String} command
- * @param {Function} callback
- * @param {String[]} aliasList
- * @param {String} helpText
- * @param {Boolean} a
- * @param {Boolean} b
- */
-const rsc = (command, callback, aliasList, helpText, a = true, b = true)=>{
-    registerSlashCommand(command, callback, aliasList, helpText, a, b);
-};
-
-
-
 
 // GROUP: Help
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
