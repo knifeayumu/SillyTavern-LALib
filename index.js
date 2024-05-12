@@ -1345,7 +1345,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
         SlashCommandNamedArgument.fromProps({
             name: 'cmd',
             description: 'a closure or slash command to execute for each match',
-            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.STRING],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'var',
