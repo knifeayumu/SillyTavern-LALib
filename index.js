@@ -557,7 +557,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 if (value instanceof SlashCommandClosure) {
                     value.scope.setMacro('item', item);
                     value.scope.setMacro('index', index);
-                    result = (await value.execute())?.pipe;
+                    outcome = (await value.execute())?.pipe;
                 } else {
                     outcome = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
                 }
