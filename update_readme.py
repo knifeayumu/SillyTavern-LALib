@@ -11,10 +11,15 @@ class Command:
 		self.args:str = ''
 		self.hint:str = ''
 		self.examples:list[str] = []
+	def __str__(self):
+		return self.cmd
+	def __repr__(self):
+		return self.cmd
 
 re_group = r'^// GROUP: (.+?)\n?$'
-re_start = r'^rsc\(\'([^\']+)\',\s*?\n?$'
-re_hint = r'^\s*\'(?:<span class="monospace">(.*?)</span>)? – (.+)\',\n?$'
+re_start = r'^SlashCommandParser\.addCommandObject\(SlashCommand\.fromProps\(\{\s*name:\s*\'([^\']+)\',\n$'
+re_hint = r'^\s*helpString:\s*(?P<quote>["\'`])(?P<hint>.*?)(?P=quote),\n$'
+re_mhint = r'^\s*helpString:\s*`\s*\n$'
 
 
 with open(os.path.join(os.path.dirname(__file__), 'index.js'), 'r', encoding='utf-8') as f:
@@ -23,6 +28,7 @@ with open(os.path.join(os.path.dirname(__file__), 'index.js'), 'r', encoding='ut
 cmd_list:dict[str,Command] = {}
 cmd:Command = None
 group:str = 'Ungrouped'
+is_help = False
 for line in lines:
 	if re.match(re_group, line):
 		group = re.sub(re_group, r'\1', line)
@@ -32,9 +38,22 @@ for line in lines:
 		cmd = Command(re.sub(re_start, r'\1', line))
 		cmd_list[group].append(cmd)
 	elif cmd is not None and re.match(re_hint, line):
-		cmd.args = re.sub(re_hint, r'\1', line)
-		cmd.hint = re.sub(re_hint, r'\2', line)
+		cmd.args = ''
+		m = re.match(re_hint, line)
+		cmd.hint = m['hint']
 		cmd = None
+	elif cmd is not None and re.match(re_mhint, line):
+		cmd.args = ''
+		cmd.hint = ''
+		is_help = True
+	elif cmd and is_help and line.endswith('`,\n'):
+		cmd.hint += line[0:-3]
+		cmd.hint = re.sub(r'\s*<div>\n\s*<strong>Example.+?</div>', '', cmd.hint, flags=re.DOTALL)
+		cmd.hint = re.sub(r'(^|\n)\s+', r'\1', cmd.hint, flags=re.DOTALL)
+		is_help = False
+		cmd = None
+	elif cmd and is_help:
+		cmd.hint += line
 
 shutil.copy(os.path.join(os.path.dirname(__file__), 'README.md'), os.path.join(os.path.dirname(__file__), 'README.bak.md'))
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'r', encoding='utf-8') as f:
@@ -46,6 +65,7 @@ ex:str = ''
 req:str = ''
 req_start = False
 req_end = False
+prev_was_cmd = False
 for line in readme:
 	if line.startswith('## Requirements'):
 		req_start = True
@@ -59,6 +79,9 @@ for line in readme:
 	elif group and line.startswith('#### '):
 		name = line.split('`')[1][1:]
 		cmd = [x for x in cmd_list[group] if x.cmd == name][0]
+		prev_was_cmd = True
+	elif group and cmd and prev_was_cmd and line[0] == '`' and line[1] != '`':
+		cmd.args = line
 	elif group and cmd and (line == '```\n' or line == '```stscript\n'):
 		if in_example:
 			cmd.examples.append(ex)
@@ -66,6 +89,7 @@ for line in readme:
 		ex = ''
 	elif group and cmd and in_example:
 		ex += line
+
 
 with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='utf-8') as f:
 	# intro
@@ -94,7 +118,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='u
 			f.write('\n'*4)
 			f.write(f'#### `/{cmd.cmd}`\n')
 			if cmd.args:
-				f.write(f'`{cmd.args}`\n\n')
+				f.write(f'{cmd.args}\n\n')
 			f.write(f'{cmd.hint}\n\n')
 			f.write('##### Examples\n\n')
 			if len(cmd.examples) > 0:
