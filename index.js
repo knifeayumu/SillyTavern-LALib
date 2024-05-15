@@ -174,7 +174,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
     callback: async () => {
         const converter = reloadMarkdownProcessor();
         const readme = await (await fetch('/scripts/extensions/third-party/SillyTavern-LALib/README.md')).text();
-        sendSystemMessage('generic', converter.makeHtml(readme));
+        const html = converter.makeHtml(readme).replace(/<br\s*\/?>/g, '<br style="display:block;">');
+        console.log('LALIB', html);
+        sendSystemMessage('generic', html);
     },
     helpString: 'Lists LALib commands',
 }));
