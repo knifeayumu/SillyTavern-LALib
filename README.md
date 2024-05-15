@@ -49,6 +49,7 @@ Library of STScript commands.
 
 
 #### `/lalib?`
+
 Lists LALib commands
 
 ##### Examples
@@ -74,6 +75,7 @@ Lists LALib commands
  the boolean operation rule
 - `[right:variable_name|number|string]`  
  the right operand value
+
 <div>
 Compares the value of the left operand <code>a</code> with the value of the right operand <code>b</code>,
 and returns the result of the comparison (true or false).
@@ -122,6 +124,7 @@ Numeric values and string literals for left and right operands supported.
  the left value to evaluate
 - `[right:boolean]`  
  the right value to evaluate
+
 Returns true if both left and right are true, otherwise false.
 
 ##### Examples
@@ -145,6 +148,7 @@ Returns true if both left and right are true, otherwise false.
  the left value to evaluate
 - `[right:boolean]`  
  the right value to evaluate
+
 Returns true if at least one of left and right are true, false if both are false.
 
 ##### Examples
@@ -164,6 +168,7 @@ Returns true if at least one of left and right are true, false if both are false
 
 
 #### `/not`
+
 Returns true if value is false, otherwise true.
 
 ##### Examples
@@ -195,6 +200,7 @@ Returns true if value is false, otherwise true.
  *optional* name of the chat variable to use as the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the list
+
 Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
 
 ##### Examples
@@ -227,6 +233,7 @@ Executes the provided command for each item of a list or dictionary, replacing {
  *optional* name of the chat variable to use as the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the list
+
 <div>
 Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
 </div>
@@ -267,6 +274,7 @@ Executes a command for each item of a list or dictionary and returns the list or
  *optional* name of the chat variable containing the list or dictionary
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable containing the list or dictionary
+
 <div>
 Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
 </div>
@@ -305,6 +313,7 @@ Executes command for each item of a list or dictionary and returns the list or d
  *optional* return the matching item's index instead of the item
 - `[last=true|false]? = false`  
  *optional* return the last instead of the first matching item
+
 <div>
 Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
 </div>
@@ -343,6 +352,7 @@ Executes the provided command for each item of a list or dictionary and returns 
  *optional* name of the chat variable to slice
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to slice
+
 <div>
 Retrieves a slice of a list or string.
 </div>
@@ -366,6 +376,7 @@ Retrieves a slice of a list or string.
 
 
 #### `/shuffle`
+
 Returns a shuffled list.
 
 ##### Examples
@@ -380,6 +391,7 @@ Returns a shuffled list.
 
 
 #### `/reverse`
+
 Returns a reversed list.
 
 ##### Examples
@@ -398,6 +410,7 @@ Returns a reversed list.
  *optional* name of the chat variable to use as input
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as input
+
 <div>
 Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
 items first item as key and each items second item as value.
@@ -425,6 +438,7 @@ items first item as key and each items second item as value.
  *optional* name of the chat variable to get keys from
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to get keys from
+
 Return the list of keys of a dictionary / object.
 
 ##### Examples
@@ -453,6 +467,7 @@ Return the list of keys of a dictionary / object.
  *optional* name of the chat variable to split
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to split
+
 <div>
 Splits value into list at every occurrence of find. Supports regex <code>find="/\\s/"</code>
 </div>
@@ -481,6 +496,7 @@ Splits value into list at every occurrence of find. Supports regex <code>find="/
  *optional* name of the chat variable containing the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable containing the list
+
 <div>
 Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
 </div>
@@ -510,6 +526,7 @@ Joins the items of a list with glue into a single string. Use <code>glue={{space
 
 
 #### `/trim`
+
 Removes whitespace at the start and end of the text.
 
 ##### Examples
@@ -538,6 +555,7 @@ Removes whitespace at the start and end of the text.
  the old text to compare
 - `[new:string]`  
  the new text to compare
+
 Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.
 
 ##### Examples
@@ -570,6 +588,7 @@ Compares old text vs new text and displays the difference between the two. Use <
 
 
 #### `/json-pretty`
+
 Pretty print JSON.
 
 ##### Examples
@@ -584,6 +603,7 @@ Pretty print JSON.
 
 
 #### `/substitute`
+
 Substitute macros in text.
 
 ##### Examples
@@ -605,6 +625,7 @@ Substitute macros in text.
 #### `/wordcount`
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+
 Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
 ##### Examples
@@ -621,6 +642,7 @@ Count the number of words in text. Language defaults to "en". Supply a two chara
 #### `/sentencecount`
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+
 Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
 ##### Examples
@@ -639,6 +661,7 @@ Count the number of sentences in text. Language defaults to "en". Supply a two c
  *optional* The unit to segment the text into: grapheme, word or sentence
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+
 Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
 
 ##### Examples
@@ -670,6 +693,7 @@ Return the graphemes (characters, basically), words or sentences found in the te
  *optional* name of the chat variable to test
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to test
+
 Tests if the provided variable or value matches a regular expression.
 
 ##### Examples
@@ -715,6 +739,7 @@ Tests if the provided variable or value matches a regular expression.
  *optional* name of the chat variable to perform the replacement on
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to perform the replacement on
+
 <div>
 Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
 </div>
@@ -764,6 +789,7 @@ Searches the provided variable or value with the regular expression and replaces
  *optional* name of the chat variable to retrieve from
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to retrieve from
+
 Retrieves an item from a list or a property from a dictionary.
 
 ##### Examples
@@ -831,6 +857,7 @@ Retrieves an item from a list or a property from a dictionary.
  *optional* name of the global variable to update
 - `[value:list|dictionary]?`  
  *optional* the value to update
+
 <div>
 Sets an item in a list or a property in a dictionary.
 </div>
@@ -887,6 +914,7 @@ Sets an item in a list or a property in a dictionary.
 
 
 #### `/try`
+
 <div>
 Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
 </div>
@@ -913,6 +941,7 @@ Attempts to execute the provided command and catches any exceptions thrown. Use 
 
 
 #### `/catch`
+
 <div>
 Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
 </div>
@@ -937,6 +966,7 @@ see /try
 #### `/ifempty`
 - `[value:string]`  
  the value to check
+
 Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
 
 ##### Examples
@@ -962,6 +992,7 @@ Returns the fallback value if value is empty (empty string, empty list, empty di
 #### `/ifnullish`
 - `[value:string]`  
  the value to check
+
 Returns the fallback value if value is nullish (empty string).
 
 ##### Examples
@@ -991,6 +1022,7 @@ Returns the fallback value if value is nullish (empty string).
 
 
 #### `/copy`
+
 Copies value into clipboard.
 
 ##### Examples
@@ -1012,6 +1044,7 @@ Copies value into clipboard.
  *optional* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *optional* the file extension for the downloaded file
+
 Downloads value as a text file.
 
 ##### Examples
@@ -1043,6 +1076,7 @@ Downloads value as a text file.
  *optional* property name to get/call (for action=property or action=call)
 - `[attribute:string]?`  
  *optional* attribute name to get (for action=attribute)
+
 <div>
 Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
 </div>
@@ -1081,6 +1115,7 @@ Click on an element, change its value, retrieve a property, or retrieve an attri
 
 
 #### `/memberpos`
+
 Move group member to position (index starts with 0).
 
 ##### Examples
@@ -1105,6 +1140,7 @@ Move group member to position (index starts with 0).
  *optional* name of the chat variable to use as the switch value
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the switch value
+
 Use with /case to conditionally execute commands based on a value.
 
 ##### Examples
@@ -1125,6 +1161,7 @@ Use with /case to conditionally execute commands based on a value.
 #### `/case`
 - `[value:string|number]`  
  the value to compare against the switch value
+
 Execute a command if the provided value matches the switch value from /switch.
 
 ##### Examples
@@ -1144,6 +1181,7 @@ see /switch
 
 
 #### `/ife`
+
 <div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>
 
 ##### Examples
@@ -1164,6 +1202,7 @@ see /switch
 
 
 #### `/elseif`
+
 <div>Use with /ife, /then, and /else. The provided command must return true or false.</div>
 
 ##### Examples
@@ -1177,6 +1216,7 @@ see /ife
 
 
 #### `/else`
+
 <div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>
 
 ##### Examples
@@ -1190,6 +1230,7 @@ see /ife
 
 
 #### `/then`
+
 <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
 
 ##### Examples
@@ -1211,6 +1252,7 @@ see /ife
 #### `/wi-list-books`
 - `[source=true|false]? = false`  
  *optional* whether to include the activation source for each book
+
 Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.
 
 ##### Examples
@@ -1233,6 +1275,7 @@ Get a list of currently active World Info books. Use <code>source=true</code> to
 #### `/wi-list-entries`
 - `[flat=true|false]? = false`  
  *optional* whether to list all entries in a flat list
+
 Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.
 
 ##### Examples
@@ -1261,6 +1304,7 @@ Get a list of World Info entries from currently active books or from the book wi
 #### `/costumes`
 - `[recurse=true|false]? = true`  
  *optional* whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)
+
 Get a list of costume / sprite folders, recursive by default.
 
 ##### Examples
@@ -1292,6 +1336,7 @@ Get a list of costume / sprite folders, recursive by default.
  *optional* the name of the quick reply set
 - `[label:string]?`  
  *optional* the label of the quick reply
+
 Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
 ##### Examples
@@ -1313,6 +1358,7 @@ Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one
  *optional* the name of the quick reply set
 - `[label:string]?`  
  *optional* the label of the quick reply
+
 Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
 ##### Examples
@@ -1338,6 +1384,7 @@ Create a new Quick Reply and open its editor. If no QR set is provided, tries to
 #### `/swipes-get`
 - `[message:number]?`  
  *optional* the message ID to get swipes from
+
 Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
 
 ##### Examples
@@ -1360,6 +1407,7 @@ Get the n-th swipe (zero-based index) from the last message or the message with 
 #### `/swipes-list`
 - `[message:number]?`  
  *optional* the message ID to get swipes from
+
 Get a list of all swipes from the last message or the message with the given message ID.
 
 ##### Examples
@@ -1382,6 +1430,7 @@ Get a list of all swipes from the last message or the message with the given mes
 #### `/swipes-count`
 - `[message:number]?`  
  *optional* the message ID to get swipes from
+
 Get the number of all swipes from the last message or the message with the given message ID.
 
 ##### Examples
@@ -1404,6 +1453,7 @@ Get the number of all swipes from the last message or the message with the given
 #### `/swipes-index`
 - `[message:number]?`  
  *optional* the message ID to get the swipe index from
+
 Get the current swipe index from the last message or the message with the given message ID.
 
 ##### Examples
@@ -1426,6 +1476,7 @@ Get the current swipe index from the last message or the message with the given 
 #### `/swipes-add`
 - `[message:number]?`  
  *optional* the ID of the message to add the swipe to
+
 Add a new swipe to the last message or the message with the provided messageId.
 
 ##### Examples
@@ -1443,6 +1494,7 @@ Add a new swipe to the last message or the message with the provided messageId.
 #### `/swipes-del`
 - `[message:number]?`  
  *optional* the id of the message to delete the swipe from
+
 Delete the current swipe or the swipe at the specified index (0-based).
 
 ##### Examples
@@ -1472,6 +1524,7 @@ Delete the current swipe or the swipe at the specified index (0-based).
 #### `/swipes-go`
 - `[message:number]?`  
  *optional* the message ID to go to the swipe for
+
 Go to the swipe. 0-based index.
 
 ##### Examples
@@ -1491,6 +1544,7 @@ Go to the swipe. 0-based index.
 
 
 #### `/swipes-swipe`
+
 Trigger a new swipe on the last message.
 
 ##### Examples
@@ -1509,6 +1563,7 @@ Trigger a new swipe on the last message.
  *optional* the message ID to edit
 - `[append=true|false]? = false`  
  *optional* whether to append the new text to the end of the message
+
 Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.
 
 ##### Examples
@@ -1536,6 +1591,7 @@ Edit the current message or the message at the provided message ID. Use <code>ap
 
 
 #### `/timestamp`
+
 Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.
 
 ##### Examples
@@ -1556,6 +1612,7 @@ Returns the number of milliseconds midnight at the beginning of January 1, 1970,
 
 
 #### `/fireandforget`
+
 Execute a closure or command without waiting for it to finish.
 
 ##### Examples
@@ -1581,6 +1638,7 @@ Execute a closure or command without waiting for it to finish.
 
 
 #### `/fetch`
+
 UNDOCUMENTED
 
 ##### Examples
@@ -1601,6 +1659,7 @@ UNDOCUMENTED
  *optional* property to take from the resulting element
 - `[call:string]?`  
  *optional* method to call on the resulting element
+
 UNDOCUMENTED
 
 ##### Examples
@@ -1622,6 +1681,7 @@ UNDOCUMENTED
  *optional* property to take from the resulting elements
 - `[call:string]?`  
  *optional* method to call on the resulting elements
+
 UNDOCUMENTED
 
 ##### Examples
