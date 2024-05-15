@@ -710,6 +710,23 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shuffle',
     returns: 'the shuffled list',
 }));
 
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reverse',
+    callback: (args, value) => {
+        const list = getListVar(null, null, value);
+        list.reverse();
+        return JSON.stringify(list);
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to reverse',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Returns a reversed list.',
+    returns: 'the reversed list',
+}));
+
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dict',
     callback: (args, value) => {
