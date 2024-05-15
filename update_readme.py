@@ -195,6 +195,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='u
 				f.write('\n')
 			# if cmd.args:
 			# 	f.write(f'{cmd.args}\n\n')
+			f.write('\n')
 			f.write(f'{cmd.hint}\n\n')
 			f.write('##### Examples\n\n')
 			if len(cmd.examples) > 0:
