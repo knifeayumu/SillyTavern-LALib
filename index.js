@@ -549,6 +549,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             result = {};
         }
         if (Array.isArray(list)) {
+            if (isTrueBoolean(args.last)) {
+                list.reverse();
+            }
             for (let [index, item] of list) {
                 if (typeof item === 'object') {
                     item = JSON.stringify(item);
@@ -562,6 +565,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     outcome = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
                 }
                 if (isTrueBoolean(outcome)) {
+                    if (isTrueBoolean(args.index)) {
+                        return index;
+                    }
                     if (typeof result === 'object') {
                         return JSON.stringify(item);
                     }
@@ -584,6 +590,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         SlashCommandNamedArgument.fromProps({ name: 'globalvar',
             description: 'name of the global variable containing the list or dictionary',
             typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'index',
+            description: 'return the matching item\'s index instead of the item',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'last',
+            description: 'return the last instead of the first matching item',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
         }),
     ],
     unnamedArgumentList: [
