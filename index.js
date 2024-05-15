@@ -1804,7 +1804,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
                     toastr.warning(`Property does not exist: ${target.tagName}`);
                     return;
                 }
-                return target[args.property];
+                const propVal = target[args.property];
+                if (typeof propVal != 'string') {
+                    return JSON.stringify(propVal);
+                }
+                return propVal;
             }
             case 'attribute': {
                 return target.getAttribute(args.attribute);
