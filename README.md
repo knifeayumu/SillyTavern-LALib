@@ -168,6 +168,8 @@ Returns true if at least one of left and right are true, false if both are false
 
 
 #### `/not`
+- `[:boolean]`  
+ the value to negate
 
 Returns true if value is false, otherwise true.
 
@@ -200,6 +202,8 @@ Returns true if value is false, otherwise true.
  *optional* name of the chat variable to use as the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the list
+- `[:subcommand|closure]`  
+ the command to execute for each item, with {{item}} and {{index}} placeholders
 
 Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
 
@@ -233,6 +237,8 @@ Executes the provided command for each item of a list or dictionary, replacing {
  *optional* name of the chat variable to use as the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the list
+- `[:subcommand|closure]`  
+ the command to execute for each item, with {{item}} and {{index}} placeholders
 
 <div>
 Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
@@ -274,6 +280,8 @@ Executes a command for each item of a list or dictionary and returns the list or
  *optional* name of the chat variable containing the list or dictionary
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable containing the list or dictionary
+- `[:subcommand|closure]`  
+ the command to execute for each item, with {{item}} and {{index}} placeholders
 
 <div>
 Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
@@ -313,6 +321,8 @@ Executes command for each item of a list or dictionary and returns the list or d
  *optional* return the matching item's index instead of the item
 - `[last=true|false]? = false`  
  *optional* return the last instead of the first matching item
+- `[:subcommand|closure]`  
+ the command to execute for each item, using {{item}} and {{index}} as placeholders
 
 <div>
 Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
@@ -352,6 +362,8 @@ Executes the provided command for each item of a list or dictionary and returns 
  *optional* name of the chat variable to slice
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to slice
+- `[:string|list]?`  
+ *optional* the value to slice
 
 <div>
 Retrieves a slice of a list or string.
@@ -376,6 +388,8 @@ Retrieves a slice of a list or string.
 
 
 #### `/shuffle`
+- `[:list]`  
+ the list to shuffle
 
 Returns a shuffled list.
 
@@ -391,6 +405,8 @@ Returns a shuffled list.
 
 
 #### `/reverse`
+- `[:list]`  
+ the list to reverse
 
 Returns a reversed list.
 
@@ -410,6 +426,8 @@ Returns a reversed list.
  *optional* name of the chat variable to use as input
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as input
+- `[:list]`  
+ a list of lists, where each inner list has at least two elements
 
 <div>
 Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
@@ -438,6 +456,8 @@ items first item as key and each items second item as value.
  *optional* name of the chat variable to get keys from
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to get keys from
+- `[:dictionary]?`  
+ *optional* the dictionary/object to get keys from
 
 Return the list of keys of a dictionary / object.
 
@@ -467,6 +487,8 @@ Return the list of keys of a dictionary / object.
  *optional* name of the chat variable to split
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to split
+- `[:string]?`  
+ *optional* the value to split
 
 <div>
 Splits value into list at every occurrence of find. Supports regex <code>find="/\\s/"</code>
@@ -496,6 +518,8 @@ Splits value into list at every occurrence of find. Supports regex <code>find="/
  *optional* name of the chat variable containing the list
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable containing the list
+- `[:list]?`  
+ *optional* the list to join
 
 <div>
 Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
@@ -526,6 +550,8 @@ Joins the items of a list with glue into a single string. Use <code>glue={{space
 
 
 #### `/trim`
+- `[:string]`  
+ text to trim
 
 Removes whitespace at the start and end of the text.
 
@@ -588,6 +614,8 @@ Compares old text vs new text and displays the difference between the two. Use <
 
 
 #### `/json-pretty`
+- `[:string]`  
+ JSON to pretty print
 
 Pretty print JSON.
 
@@ -603,6 +631,8 @@ Pretty print JSON.
 
 
 #### `/substitute`
+- `[:string]`  
+ text to substitute macros in
 
 Substitute macros in text.
 
@@ -625,6 +655,8 @@ Substitute macros in text.
 #### `/wordcount`
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+- `[:string]`  
+ the text to count words in
 
 Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -642,6 +674,8 @@ Count the number of words in text. Language defaults to "en". Supply a two chara
 #### `/sentencecount`
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+- `[:string]`  
+ the text to count sentences in
 
 Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -661,6 +695,8 @@ Count the number of sentences in text. Language defaults to "en". Supply a two c
  *optional* The unit to segment the text into: grapheme, word or sentence
 - `[language:string]? = en`  
  *optional* Two character language code according to IETF BCP 47
+- `[:string]`  
+ the text to segment
 
 Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -693,6 +729,8 @@ Return the graphemes (characters, basically), words or sentences found in the te
  *optional* name of the chat variable to test
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to test
+- `[:string]?`  
+ *optional* the value to test
 
 Tests if the provided variable or value matches a regular expression.
 
@@ -739,6 +777,8 @@ Tests if the provided variable or value matches a regular expression.
  *optional* name of the chat variable to perform the replacement on
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to perform the replacement on
+- `[:string]?`  
+ *optional* the value to perform the replacement on
 
 <div>
 Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
@@ -789,6 +829,8 @@ Searches the provided variable or value with the regular expression and replaces
  *optional* name of the chat variable to retrieve from
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to retrieve from
+- `[:string]?`  
+ *optional* the value to retrieve from (if not using a variable)
 
 Retrieves an item from a list or a property from a dictionary.
 
@@ -857,6 +899,8 @@ Retrieves an item from a list or a property from a dictionary.
  *optional* name of the global variable to update
 - `[value:list|dictionary]?`  
  *optional* the value to update
+- `[:string]`  
+ the value to set
 
 <div>
 Sets an item in a list or a property in a dictionary.
@@ -914,6 +958,8 @@ Sets an item in a list or a property in a dictionary.
 
 
 #### `/try`
+- `[:subcommand|closure]`  
+ the command to try
 
 <div>
 Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
@@ -941,6 +987,8 @@ Attempts to execute the provided command and catches any exceptions thrown. Use 
 
 
 #### `/catch`
+- `[:subcommand|closure]`  
+ the command to execute if an exception occurred
 
 <div>
 Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
@@ -966,6 +1014,8 @@ see /try
 #### `/ifempty`
 - `[value:string]`  
  the value to check
+- `[:string]`  
+ the fallback value
 
 Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
 
@@ -992,6 +1042,8 @@ Returns the fallback value if value is empty (empty string, empty list, empty di
 #### `/ifnullish`
 - `[value:string]`  
  the value to check
+- `[:string]`  
+ the fallback value
 
 Returns the fallback value if value is nullish (empty string).
 
@@ -1022,6 +1074,8 @@ Returns the fallback value if value is nullish (empty string).
 
 
 #### `/copy`
+- `[:string]`  
+ the value to copy
 
 Copies value into clipboard.
 
@@ -1044,6 +1098,8 @@ Copies value into clipboard.
  *optional* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *optional* the file extension for the downloaded file
+- `[:string]`  
+ the value to download as a text file
 
 Downloads value as a text file.
 
@@ -1076,6 +1132,8 @@ Downloads value as a text file.
  *optional* property name to get/call (for action=property or action=call)
 - `[attribute:string]?`  
  *optional* attribute name to get (for action=attribute)
+- `[:string]`  
+ CSS selector to target an element
 
 <div>
 Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
@@ -1115,6 +1173,10 @@ Click on an element, change its value, retrieve a property, or retrieve an attri
 
 
 #### `/memberpos`
+- `[:string]`  
+ name of the group member
+- `[:number]`  
+ new position index for the member
 
 Move group member to position (index starts with 0).
 
@@ -1140,6 +1202,8 @@ Move group member to position (index starts with 0).
  *optional* name of the chat variable to use as the switch value
 - `[globalvar:variable_name]?`  
  *optional* name of the global variable to use as the switch value
+- `[:string|number]?`  
+ *optional* the value to use as the switch value
 
 Use with /case to conditionally execute commands based on a value.
 
@@ -1161,6 +1225,8 @@ Use with /case to conditionally execute commands based on a value.
 #### `/case`
 - `[value:string|number]`  
  the value to compare against the switch value
+- `[:closure|subcommand]`  
+ the command to execute if the value matches the switch value
 
 Execute a command if the provided value matches the switch value from /switch.
 
@@ -1181,6 +1247,8 @@ see /switch
 
 
 #### `/ife`
+- `[:closure|subcommand]`  
+ the command to evaluate
 
 <div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>
 
@@ -1202,6 +1270,8 @@ see /switch
 
 
 #### `/elseif`
+- `[:closure|subcommand]`  
+ the command to evaluate
 
 <div>Use with /ife, /then, and /else. The provided command must return true or false.</div>
 
@@ -1216,6 +1286,8 @@ see /ife
 
 
 #### `/else`
+- `[:closure|subcommand]`  
+ the command to execute
 
 <div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>
 
@@ -1230,6 +1302,8 @@ see /ife
 
 
 #### `/then`
+- `[:closure|subcommand]`  
+ the command to execute
 
 <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
 
@@ -1275,6 +1349,8 @@ Get a list of currently active World Info books. Use <code>source=true</code> to
 #### `/wi-list-entries`
 - `[flat=true|false]? = false`  
  *optional* whether to list all entries in a flat list
+- `[:string]?`  
+ *optional* the name of the book to list entries from
 
 Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.
 
@@ -1304,6 +1380,8 @@ Get a list of World Info entries from currently active books or from the book wi
 #### `/costumes`
 - `[recurse=true|false]? = true`  
  *optional* whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)
+- `[:string]?`  
+ *optional* the folder to list costumes from
 
 Get a list of costume / sprite folders, recursive by default.
 
@@ -1336,6 +1414,8 @@ Get a list of costume / sprite folders, recursive by default.
  *optional* the name of the quick reply set
 - `[label:string]?`  
  *optional* the label of the quick reply
+- `[:string]?`  
+ *optional* the label of the quick reply
 
 Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
@@ -1357,6 +1437,8 @@ Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one
 - `[set:string]?`  
  *optional* the name of the quick reply set
 - `[label:string]?`  
+ *optional* the label of the quick reply
+- `[:string]?`  
  *optional* the label of the quick reply
 
 Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.
@@ -1384,6 +1466,8 @@ Create a new Quick Reply and open its editor. If no QR set is provided, tries to
 #### `/swipes-get`
 - `[message:number]?`  
  *optional* the message ID to get swipes from
+- `[:number]`  
+ the index of the swipe to get
 
 Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
 
@@ -1476,6 +1560,8 @@ Get the current swipe index from the last message or the message with the given 
 #### `/swipes-add`
 - `[message:number]?`  
  *optional* the ID of the message to add the swipe to
+- `[:string]`  
+ the text to add as a new swipe
 
 Add a new swipe to the last message or the message with the provided messageId.
 
@@ -1494,6 +1580,8 @@ Add a new swipe to the last message or the message with the provided messageId.
 #### `/swipes-del`
 - `[message:number]?`  
  *optional* the id of the message to delete the swipe from
+- `[:number]?`  
+ *optional* the index of the swipe to delete (0-based)
 
 Delete the current swipe or the swipe at the specified index (0-based).
 
@@ -1524,6 +1612,8 @@ Delete the current swipe or the swipe at the specified index (0-based).
 #### `/swipes-go`
 - `[message:number]?`  
  *optional* the message ID to go to the swipe for
+- `[:number]`  
+ the index of the swipe to go to
 
 Go to the swipe. 0-based index.
 
@@ -1563,6 +1653,8 @@ Trigger a new swipe on the last message.
  *optional* the message ID to edit
 - `[append=true|false]? = false`  
  *optional* whether to append the new text to the end of the message
+- `[:string]`  
+ the new text for the message
 
 Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.
 
@@ -1612,6 +1704,8 @@ Returns the number of milliseconds midnight at the beginning of January 1, 1970,
 
 
 #### `/fireandforget`
+- `[:closure|subcommand]`  
+ the closure or command to execute
 
 Execute a closure or command without waiting for it to finish.
 
@@ -1638,6 +1732,8 @@ Execute a closure or command without waiting for it to finish.
 
 
 #### `/fetch`
+- `[:string]`  
+ the url to fetch
 
 UNDOCUMENTED
 
@@ -1659,6 +1755,8 @@ UNDOCUMENTED
  *optional* property to take from the resulting element
 - `[call:string]?`  
  *optional* method to call on the resulting element
+- `[:string]`  
+ the html to operate on
 
 UNDOCUMENTED
 
@@ -1681,6 +1779,8 @@ UNDOCUMENTED
  *optional* property to take from the resulting elements
 - `[call:string]?`  
  *optional* method to call on the resulting elements
+- `[:string]`  
+ the html to operate on
 
 UNDOCUMENTED
 

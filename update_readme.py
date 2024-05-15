@@ -193,6 +193,29 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='u
 						opt = '*optional* '
 					f.write(f'  \n {opt}{arg["description"]}')
 				f.write('\n')
+			for arg in cmd.unnamed:
+				f.write(f'- `[')
+				if 'enumList' in arg and arg['enumList']:
+					enums = '|'.join([x[0] if type(x) == list else x for x in arg['enumList']])
+					f.write(f'={enums}')
+				else:
+					types = '|'.join([x.split('.')[-1].lower() for x in arg["typeList"]])
+					f.write(f':{types}')
+				f.write(']')
+				if 'isRequired' in arg and arg['isRequired']:
+					f.write('')
+				else:
+					f.write('?')
+				if 'defaultValue' in arg and arg['defaultValue']:
+					f.write(f' = {arg["defaultValue"]}')
+				f.write('`')
+				if 'description' in arg and arg['description']:
+					if 'isRequired' in arg and arg['isRequired']:
+						opt = ''
+					else:
+						opt = '*optional* '
+					f.write(f'  \n {opt}{arg["description"]}')
+				f.write('\n')
 			# if cmd.args:
 			# 	f.write(f'{cmd.args}\n\n')
 			f.write('\n')
