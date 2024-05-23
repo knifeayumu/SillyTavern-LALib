@@ -194,14 +194,14 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='u
 					f.write(f'  \n {opt}{arg["description"]}')
 				f.write('\n')
 			for arg in cmd.unnamed:
-				f.write(f'- `[')
+				f.write(f'- `(')
 				if 'enumList' in arg and arg['enumList']:
 					enums = '|'.join([x[0] if type(x) == list else x for x in arg['enumList']])
 					f.write(f'={enums}')
 				else:
 					types = '|'.join([x.split('.')[-1].lower() for x in arg["typeList"]])
-					f.write(f':{types}')
-				f.write(']')
+					f.write(f'{types}')
+				f.write(')')
 				if 'isRequired' in arg and arg['isRequired']:
 					f.write('')
 				else:
