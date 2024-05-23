@@ -2,10 +2,11 @@ import { callPopup, characters, chat, chat_metadata, eventSource, event_types, e
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
-import { executeSlashCommands } from '../../../slash-commands.js';
+import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
 import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure.js';
+import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandClosureResult.js';
 import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
 import { debounce, delay, isTrueBoolean } from '../../../utils.js';
@@ -321,6 +322,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
 
 // GROUP: List Operations
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
@@ -330,18 +336,44 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         } else if (typeof list == 'object') {
             list = Object.entries(list);
         }
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         if (Array.isArray(list)) {
+            /**@type {SlashCommandClosureResult}*/
+            let commandResult;
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
-                if (value instanceof SlashCommandClosure) {
-                    value.scope.setMacro('item', item);
-                    value.scope.setMacro('index', index);
-                    result = (await value.execute())?.pipe;
+                if (command instanceof SlashCommandClosure) {
+                    command.scope.setMacro('item', item);
+                    command.scope.setMacro('index', index);
+                    commandResult = (await command.execute());
+                    if (commandResult.isAborted) break;
                 } else {
-                    result = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
+                    commandResult = (await executeSlashCommandsWithOptions(
+                        command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    ));
+                    if (commandResult.isAborted) {
+                        args._abortController.abort(commandResult.abortReason, true);
+                        break;
+                    }
                 }
+                result = commandResult.pipe;
             }
             return result;
         }
@@ -371,12 +403,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: 'Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.',
     returns: 'result of executing the command on the last item',
 }));
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
@@ -388,18 +426,44 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             list = Object.entries(list);
             result = {};
         }
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         if (Array.isArray(list)) {
+            /**@type {SlashCommandClosureResult}*/
+            let commandResult;
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
-                if (value instanceof SlashCommandClosure) {
-                    value.scope.setMacro('item', item);
-                    value.scope.setMacro('index', index);
-                    result[index] = (await value.execute())?.pipe;
+                if (command instanceof SlashCommandClosure) {
+                    command.scope.setMacro('item', item);
+                    command.scope.setMacro('index', index);
+                    commandResult = (await command.execute());
+                    if (commandResult.isAborted) break;
                 } else {
-                    result[index] = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
+                    commandResult = (await executeSlashCommandsWithOptions(
+                        command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    ));
+                    if (commandResult.isAborted) {
+                        args._abortController.abort(commandResult.abortReason, true);
+                        break;
+                    }
                 }
+                result[index] = commandResult.pipe;
                 try { result[index] = JSON.parse(result[index]); } catch { /*empty*/ }
             }
         } else {
@@ -440,6 +504,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     returns: 'list or dictionary of the command results',
     helpString: `
         <div>
@@ -459,8 +524,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
-    callback: async (namedArgs, unnamedArgs) => {
-        let list = getListVar(namedArgs.var, namedArgs.globalvar, namedArgs.list);
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
+    callback: async (args, value) => {
+        let list = getListVar(args.var, args.globalvar, args.list);
         let result;
         const isList = Array.isArray(list);
         if (isList) {
@@ -470,19 +540,45 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             list = Object.entries(list);
             result = {};
         }
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         if (Array.isArray(list)) {
+            /**@type {SlashCommandClosureResult}*/
+            let commandResult;
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
                 let outcome;
-                if (unnamedArgs instanceof SlashCommandClosure) {
-                    unnamedArgs.scope.setMacro('item', item);
-                    unnamedArgs.scope.setMacro('index', index);
-                    outcome = (await unnamedArgs.execute())?.pipe;
+                if (command instanceof SlashCommandClosure) {
+                    command.scope.setMacro('item', item);
+                    command.scope.setMacro('index', index);
+                    commandResult = (await command.execute());
+                    if (commandResult.isAborted) break;
                 } else {
-                    outcome = (await executeSlashCommands(unnamedArgs.toString().replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, namedArgs._scope))?.pipe;
+                    commandResult = (await executeSlashCommandsWithOptions(
+                        command.toString().replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    ));
+                    if (commandResult.isAborted) {
+                        args._abortController.abort(commandResult.abortReason, true);
+                        break;
+                    }
                 }
+                outcome = commandResult.pipe;
                 if (isTrueBoolean(outcome)) {
                     if (isList) {
                         result.push(item);
@@ -520,6 +616,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: `
         <div>
             Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
@@ -539,6 +636,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
         let list = getListVar(args.var, args.globalvar, args.list);
         let result;
@@ -550,7 +652,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             list = Object.entries(list);
             result = {};
         }
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         if (Array.isArray(list)) {
+            /**@type {SlashCommandClosureResult}*/
+            let commandResult;
             if (isTrueBoolean(args.last)) {
                 list.reverse();
             }
@@ -559,18 +672,33 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     item = JSON.stringify(item);
                 }
                 let outcome;
-                if (value instanceof SlashCommandClosure) {
-                    value.scope.setMacro('item', item);
-                    value.scope.setMacro('index', index);
-                    outcome = (await value.execute())?.pipe;
+                if (command instanceof SlashCommandClosure) {
+                    command.scope.setMacro('item', item);
+                    command.scope.setMacro('index', index);
+                    commandResult = (await command.execute());
+                    if (commandResult.isAborted) break;
                 } else {
-                    outcome = (await executeSlashCommands(value.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index), true, args._scope))?.pipe;
+                    commandResult = (await executeSlashCommandsWithOptions(
+                        command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    ));
+                    if (commandResult.isAborted) {
+                        args._abortController.abort(commandResult.abortReason, true);
+                        break;
+                    }
                 }
+                outcome = commandResult.pipe;
                 if (isTrueBoolean(outcome)) {
                     if (isTrueBoolean(args.index)) {
                         return index;
                     }
-                    if (typeof result === 'object') {
+                    if (typeof item === 'object') {
                         return JSON.stringify(item);
                     }
                     return item;
@@ -613,6 +741,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: `
         <div>
             Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
@@ -1334,11 +1463,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                             copy.scope.setMacro(`$${idx}`, match);
                         });
                         cmds.push(async () => (await copy.execute())?.pipe);
+                        return '';
                     });
                 } else {
                     unnamedArgs.toString().replace(re, (...matches) => {
                         const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
-                        cmds.push(async () => (await executeSlashCommands(cmd, false, namedArgs._scope))?.pipe);
+                        cmds.push(async () => (await executeSlashCommandsWithOptions(
+                            cmd,
+                            {
+                                handleExecutionErrors: false,
+                                handleParserErrors: false,
+                                parserFlags: namedArgs._parserFlags,
+                                scope: namedArgs._scope,
+                                abortController: namedArgs._abortController,
+                            },
+                        ))?.pipe);
+                        return '';
                     });
                 }
                 for (const cmd of cmds) {
@@ -1551,13 +1691,36 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
 
 // GROUP: Exception Handling
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         try {
             let result;
-            if (value instanceof SlashCommandClosure) {
-                result = await value.execute();
+            if (command instanceof SlashCommandClosure) {
+                result = await command.execute();
             } else {
-                result = await executeSlashCommands(value, true, args._scope);
+                result = await executeSlashCommandsWithOptions(
+                    command,
+                    {
+                        handleExecutionErrors: false,
+                        handleParserErrors: false,
+                        parserFlags: args._parserFlags,
+                        scope: args._scope,
+                        abortController: args._abortController,
+                    },
+                );
             }
             return JSON.stringify({
                 isException: false,
@@ -1577,6 +1740,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: `
         <div>
             Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
@@ -1595,7 +1759,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -1604,12 +1782,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
         }
         if (data?.isException) {
             let result;
-            if (value instanceof SlashCommandClosure) {
-                value.scope.setMacro('exception', data.exception);
-                value.scope.setMacro('error', data.exception);
-                result = await value.execute();
+            if (command instanceof SlashCommandClosure) {
+                command.scope.setMacro('exception', data.exception);
+                command.scope.setMacro('error', data.exception);
+                result = await command.execute();
             } else {
-                result = await executeSlashCommands(value.replace(/{{(exception|error)}}/ig, data.exception), true, args._scope);
+                result = await executeSlashCommandsWithOptions(
+                    command.replace(/{{(exception|error)}}/ig, data.exception),
+                    {
+                        handleExecutionErrors: false,
+                        handleParserErrors: false,
+                        parserFlags: args._parserFlags,
+                        scope: args._scope,
+                        abortController: args._abortController,
+                    },
+                );
             }
             return result.pipe;
         } else {
@@ -1623,6 +1810,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: `
         <div>
             Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
@@ -1919,6 +2107,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
         const val = getVar(namedArgs.var, namedArgs.globalvar, unnamedArgs.toString());
         return JSON.stringify({
             switch: val,
+            break: false,
         });
     },
     namedArgumentList: [
@@ -1944,23 +2133,50 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
-    callback: async (namedArgs, unnamedArgs) => {
-        let data;
-        try {
-            data = JSON.parse(namedArgs._scope.pipe);
-        } catch (ex) {
-            console.warn('[LALIB]', '[CASE]', 'failed to parse pipe', namedArgs._scope.pipe, ex);
-        }
-        if (data?.switch !== undefined) {
-            if (data.switch == namedArgs.value) {
-                if (unnamedArgs instanceof SlashCommandClosure) {
-                    unnamedArgs.scope.setMacro('value', data.switch);
-                    return (await unnamedArgs.execute())?.pipe;
-                }
-                return (await executeSlashCommands(unnamedArgs.toString().replace(/{{value}}/ig, data.switch), true, namedArgs._scope))?.pipe;
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
+    callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
             }
         }
-        return namedArgs._scope.pipe;
+        let data;
+        try {
+            data = JSON.parse(args._scope.pipe);
+        } catch (ex) {
+            console.warn('[LALIB]', '[CASE]', 'failed to parse pipe', args._scope.pipe, ex);
+        }
+        if (data?.break) return args._scope.pipe;
+        if (data?.switch !== undefined) {
+            if (data.switch == args.value || args.value === undefined) {
+                data.break = true;
+                args._scope.pipe = JSON.stringify(data);
+                if (command instanceof SlashCommandClosure) {
+                    command.scope.setMacro('value', data.switch);
+                    return (await command.execute())?.pipe;
+                }
+                const commandResult = await executeSlashCommandsWithOptions(
+                    command.toString().replace(/{{value}}/ig, data.switch),
+                    {
+                        handleExecutionErrors: false,
+                        handleParserErrors: false,
+                        parserFlags: args._parserFlags,
+                        scope: args._scope,
+                        abortController: args._abortController,
+                    },
+                );
+                return commandResult.pipe;
+            }
+        }
+        return args._scope.pipe;
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
@@ -1977,6 +2193,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: 'Execute a command if the provided value matches the switch value from /switch.',
     returns: 'the result of the executed command, or the unchanged pipe if no match',
 }));
@@ -1985,12 +2202,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
 
 // GROUP: Conditionals - if
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         let result;
-        if (value instanceof SlashCommandClosure) {
-            result = await value.execute();
+        if (command instanceof SlashCommandClosure) {
+            result = await command.execute();
         } else {
-            result = await executeSlashCommands(value, true, args._scope);
+            result = await executeSlashCommandsWithOptions(
+                command,
+                {
+                    handleExecutionErrors: false,
+                    handleParserErrors: false,
+                    parserFlags: args._parserFlags,
+                    scope: args._scope,
+                    abortController: args._abortController,
+                },
+            );
         }
         return JSON.stringify({
             if: isTrueBoolean(result?.pipe),
@@ -2003,12 +2243,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: '<div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>',
     returns: 'an object with a boolean "if" property',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -2018,10 +2273,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
         if (data?.if !== undefined) {
             if (!data.if) {
                 let result;
-                if (value instanceof SlashCommandClosure) {
-                    result = await value.execute();
+                if (command instanceof SlashCommandClosure) {
+                    result = await command.execute();
                 } else {
-                    result = await executeSlashCommands(value, true, args._scope);
+                    result = await executeSlashCommandsWithOptions(
+                        command,
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    );
                 }
                 return JSON.stringify({
                     if: isTrueBoolean(result?.pipe),
@@ -2037,12 +2301,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: '<div>Use with /ife, /then, and /else. The provided command must return true or false.</div>',
     returns: 'an object with a boolean "if" property',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -2052,10 +2331,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
         if (data?.if !== undefined) {
             if (!data.if) {
                 let result;
-                if (value instanceof SlashCommandClosure) {
-                    result = await value.execute();
+                if (command instanceof SlashCommandClosure) {
+                    result = await command.execute();
                 } else {
-                    result = await executeSlashCommands(value, true, args._scope);
+                    result = await executeSlashCommandsWithOptions(
+                        command,
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    );
                 }
                 return result.pipe;
             }
@@ -2069,12 +2357,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: '<div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>',
     returns: 'the result of the executed command',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: async (args, value) => {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
         let data;
         try {
             data = JSON.parse(args._scope.pipe);
@@ -2084,10 +2387,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
         if (data?.if !== undefined) {
             if (data.if) {
                 let result;
-                if (value instanceof SlashCommandClosure) {
-                    result = await value.execute();
+                if (command instanceof SlashCommandClosure) {
+                    result = await command.execute();
                 } else {
-                    result = await executeSlashCommands(value, true, args._scope);
+                    result = await executeSlashCommandsWithOptions(
+                        command,
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
+                        },
+                    );
                 }
                 return result.pipe;
             }
@@ -2101,6 +2413,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: '<div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>',
     returns: 'the result of the executed command',
 }));
@@ -2627,14 +2940,36 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'timestamp',
 
 // GROUP: Async
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforget',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {(string|SlashCommandClosure)[]} value
+     */
     callback: (args, value) => {
-        if (value instanceof SlashCommandClosure) {
+        /**@type {string|SlashCommandClosure} */
+        let command;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                command = value[0];
+            } else {
+                command = value.join(' ');
+            }
+        }
+        if (command instanceof SlashCommandClosure) {
             /**@type {SlashCommandClosure} */
-            const closure = value;
+            const closure = command;
             closure.scope.parent = args._scope;
             closure.execute();
         } else {
-            executeSlashCommands(value, true, args._scope);
+            executeSlashCommandsWithOptions(
+                command,
+                {
+                    handleExecutionErrors: true,
+                    handleParserErrors: false,
+                    parserFlags: args._parserFlags,
+                    scope: args._scope,
+                },
+            );
         }
     },
     unnamedArgumentList: [
@@ -2644,6 +2979,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
             isRequired: true,
         }),
     ],
+    splitUnnamedArgument: true,
     helpString: 'Execute a closure or command without waiting for it to finish.',
 }));
 
@@ -2772,4 +3108,3 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
     ],
     helpString: 'UNDOCUMENTED',
 }));
-
