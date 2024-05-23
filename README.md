@@ -19,7 +19,7 @@ Library of STScript commands.
 - World Info (wi-list-books, wi-list-entries)
 - Costumes / Sprites (costumes)
 - Quick Replies (qr-edit, qr-add)
-- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit)
+- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, role-swap)
 - Time & Date (timestamp)
 - Async (fireandforget)
 
@@ -1671,6 +1671,57 @@ Edit the current message or the message at the provided message ID. Use <code>ap
 /delay 1000 |
 /message-edit append=true bar
 ```
+
+
+
+
+
+#### `/role-swap`
+- `(number|range)?`  
+ *optional* message id or range to swap
+
+<div>
+Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
+</div>
+
+
+##### Examples
+
+```stscript
+// All messages: |
+/role-swap
+```
+
+```stscript
+// Last message: |
+/role-swap {{lastMessageId}}
+```
+
+```stscript
+// Last message: |
+/role-swap -1
+```
+
+```stscript
+// Second to last message: |
+/role-swap -2
+```
+
+```stscript
+// First 10 messages: |
+/role-swap 0-10
+```
+
+```stscript
+// Last 10 messages: |
+/role-swap -10-
+```
+
+```stscript
+// All messages except last 10: |
+/role-swap 0--10
+```
+
 
 
 

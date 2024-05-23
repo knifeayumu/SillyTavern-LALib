@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, name1, name2, reloadMarkdownProcessor, saveChatConditional, sendSystemMessage, substituteParams } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, name1, name2, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage, substituteParams } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -165,6 +165,25 @@ function getVar(local, global, literal) {
         value = literal;
     }
     return value;
+}
+
+function getRange(text, value) {
+    const re = /^(-?\d+)(?:(-)(-?\d+)?)?$/;
+    if (!re.test(text)) {
+        throw new Error(`Invalid range: "${text}"`);
+    }
+    let [_, start, isRange, end] = re.exec(text);
+    start = Number(start);
+    if (!isRange) {
+        if (start == -1) {
+            return value.slice(start);
+        }
+        return value.slice(start, start + 1);
+    }
+    if (end === undefined) {
+        return value.slice(start);
+    }
+    return value.slice(start, Number(end) + 1);
 }
 
 
@@ -2923,6 +2942,60 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
         }),
     ],
     helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
+    callback: (args, value)=>{
+        const chatRange = value.length == 0 ? chat : getRange(value, chat);
+        for (const mes of chatRange) {
+            mes.is_user = !mes.is_user;
+            document.querySelector(`#chat .mes[mesid="${chat.indexOf(mes)}"]`).setAttribute('is_user', mes.is_user);
+        }
+        saveChatDebounced();
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'message id or range to swap',
+            typeList: [ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.RANGE],
+        }),
+    ],
+    helpString: `
+        <div>
+        Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    All messages:
+                    <pre><code class="language-stscript">/role-swap</code></pre>
+                </li>
+                <li>
+                    Last message:
+                    <pre><code class="language-stscript">/role-swap {{lastMessageId}}</code></pre>
+                </li>
+                <li>
+                    Last message:
+                    <pre><code class="language-stscript">/role-swap -1</code></pre>
+                </li>
+                <li>
+                    Second to last message:
+                    <pre><code class="language-stscript">/role-swap -2</code></pre>
+                </li>
+                <li>
+                    First 10 messages:
+                    <pre><code class="language-stscript">/role-swap 0-10</code></pre>
+                </li>
+                <li>
+                    Last 10 messages:
+                    <pre><code class="language-stscript">/role-swap -10-</code></pre>
+                </li>
+                <li>
+                    All messages except last 10:
+                    <pre><code class="language-stscript">/role-swap 0--10</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 
