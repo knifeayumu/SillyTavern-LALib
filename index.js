@@ -844,15 +844,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
     `,
 }));
 
-
+const shuffleList = (value)=>{
+    const list = getListVar(null, null, value);
+    for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+};
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shuffle',
     callback: (args, value) => {
-        const list = getListVar(null, null, value);
-        for (let i = list.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [list[i], list[j]] = [list[j], list[i]];
-        }
-        return JSON.stringify(list);
+        return JSON.stringify(shuffleList(value));
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
@@ -863,6 +865,45 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shuffle',
     ],
     helpString: 'Returns a shuffled list.',
     returns: 'the shuffled list',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pick',
+    callback: (args, value) => {
+        const list = shuffleList(value);
+        const items = Number(args.items ?? '1');
+        const asList = args.list ?? false;
+        const picks = list.slice(0, items);
+        if (items > 1 || asList) {
+            return JSON.stringify(picks);
+        }
+        const pick = picks[0];
+        if (typeof pick != 'string') {
+            return JSON.stringify(pick);
+        }
+        return pick;
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'items',
+            description: 'how many items to pick (if greater than one, will return a list)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            defaultValue: '1',
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'list',
+            description: 'whether to return a list, even if only one item is picked',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            enumList: ['true', 'false'],
+            defaultValue: 'false',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to pick from',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Picks one random item or <code>items</code> number of random items from a list (no duplicates).',
+    returns: 'the picked item or list of picked items',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reverse',
