@@ -2258,6 +2258,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
         }
         return JSON.stringify({
             if: isTrueBoolean(result?.pipe),
+            isHandled: false,
         });
     },
     unnamedArgumentList: [
@@ -2352,8 +2353,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
         } catch (ex) {
             console.warn('[LALIB]', '[ELSE]', 'failed to parse pipe', args.value, ex);
         }
-        if (data?.if !== undefined) {
+        if (data?.if !== undefined && !data?.isHandled) {
             if (!data.if) {
+                data.isHandled = true;
                 let result;
                 if (command instanceof SlashCommandClosure) {
                     result = await command.execute();
@@ -2369,7 +2371,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
                         },
                     );
                 }
-                return result.pipe;
+                return result.pipe ?? JSON.stringify(data);
             }
         }
         return args._scope.pipe;
@@ -2408,8 +2410,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
         } catch (ex) {
             console.warn('[LALIB]', '[THEN]', 'failed to parse pipe', args._scope.pipe, ex);
         }
-        if (data?.if !== undefined) {
+        if (data?.if !== undefined && !data?.isHandled) {
             if (data.if) {
+                data.isHandled = true;
                 let result;
                 if (command instanceof SlashCommandClosure) {
                     result = await command.execute();
@@ -2425,7 +2428,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
                         },
                     );
                 }
-                return result.pipe;
+                return result.pipe ?? JSON.stringify(data);
             }
         }
         return args._scope.pipe;
