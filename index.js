@@ -36,6 +36,11 @@ function parseBooleanOperands(args) {
             return operandNumber;
         }
 
+        if (args._scope.existsVariable(operand)) {
+            const operandVariable = args._scope.getVariable(operand);
+            return operandVariable ?? '';
+        }
+
         if (chat_metadata?.variables?.[operand] !== undefined) {
             const operandLocalVariable = chat_metadata.variables[operand];
             return operandLocalVariable ?? '';
