@@ -2058,7 +2058,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
         }
         if (!target) {
             toastr.warning(`No element found for query: ${query}`);
-            return;
+            return '';
         }
         switch (args.action) {
             case 'click': {
@@ -2068,34 +2068,40 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
             case 'value': {
                 if (target.value === undefined) {
                     toastr.warning(`Cannot set value on ${target.tagName}`);
-                    return;
+                    return '';
                 }
                 target.value = args.value;
                 target.dispatchEvent(new Event('change', { bubbles:true }));
                 target.dispatchEvent(new Event('input', { bubbles:true }));
                 target.dispatchEvent(new Event('mouseup', { bubbles:true }));
-                return;
+                return '';
             }
             case 'property': {
+                if (Object.keys(args).includes('value')) {
+                    target[args.property] = args.value;
+                }
                 if (target[args.property] === undefined) {
-                    toastr.warning(`Property does not exist: ${target.tagName}`);
-                    return;
+                    toastr.warning(`Property "${args.property}" does not exist on ${target.tagName}`);
+                    return '';
                 }
                 const propVal = target[args.property];
                 if (typeof propVal != 'string') {
                     return JSON.stringify(propVal);
                 }
-                return propVal;
+                return propVal ?? '';
             }
             case 'attribute': {
-                return target.getAttribute(args.attribute);
+                if (Object.keys(args).includes('value')) {
+                    target.setAttribute(args.attribute, args.value);
+                }
+                return target.getAttribute(args.attribute) ?? '';
             }
             case 'call': {
                 if (target[args.property] === undefined || !(target[args.property] instanceof Function)) {
-                    toastr.warning(`Property does not exist or is not callable ${target.tagName}`);
-                    return;
+                    toastr.warning(`Property "${args.property}" does not exist or is not callable on ${target.tagName}`);
+                    return '';
                 }
-                return target[args.property]();
+                return target[args.property]() ?? '';
             }
         }
     },
@@ -2109,17 +2115,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'value',
-            description: 'new value to set (for action=value)',
+            description: 'new value to set (for action=value or action=property or action=attribute)',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'property',
-            description: 'property name to get/call (for action=property or action=call)',
+            description: 'property name to get/set/call (for action=property or action=call)',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'attribute',
-            description: 'attribute name to get (for action=attribute)',
+            description: 'attribute name to get/set (for action=attribute)',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
