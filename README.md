@@ -4,10 +4,10 @@ Library of STScript commands.
 
 
 - Boolean Operations (test, and, or, not)
-- List Operations (foreach, map, filter, find, slice, shuffle, reverse, dict, keys)
+- List Operations (foreach, map, filter, find, slice, shuffle, pick, reverse, dict, keys)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
-- Regular Expressions (re-test, re-replace)
+- Regular Expressions (re-escape, re-test, re-replace)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
 - Null Handling (ifempty, ifnullish)
@@ -404,6 +404,37 @@ Returns a shuffled list.
 
 
 
+#### `/pick`
+- `[items:number]? = 1`  
+ *optional* how many items to pick (if greater than one, will return a list)
+- `[list=true|false]? = false`  
+ *optional* whether to return a list, even if only one item is picked
+- `(list)`  
+ the list to pick from
+
+Picks one random item or <code>items</code> number of random items from a list (no duplicates).
+
+##### Examples
+
+```stscript
+/pick [1,2,3,4] |
+/echo
+```
+
+```stscript
+/pick items=2 [1,2,3,4] |
+/echo
+```
+
+```stscript
+/pick list=true [1,2,3,4] |
+/echo
+```
+
+
+
+
+
 #### `/reverse`
 - `(list)`  
  the list to reverse
@@ -719,6 +750,30 @@ Return the graphemes (characters, basically), words or sentences found in the te
 
 
 ### Regular Expressions
+
+
+
+#### `/re-escape`
+- `(string)`  
+ text to escape
+
+<div>Escapes text to be used literally inside a regex.</div>
+
+
+##### Examples
+
+```stscript
+/re-escape foo/bar foo.bar |
+/echo
+```
+
+```stscript
+/re-escape {{char}} |
+/re-replace find=/\\b{{pipe}}\\b/g replace=FOO {{lastMessage}} |
+/echo
+```
+
+
 
 
 
@@ -1127,11 +1182,11 @@ Downloads value as a text file.
 - `[action=click|value|property|attribute|call]`  
  the action to perform
 - `[value:string]?`  
- *optional* new value to set (for action=value)
+ *optional* new value to set (for action=value or action=property or action=attribute)
 - `[property:string]?`  
- *optional* property name to get/call (for action=property or action=call)
+ *optional* property name to get/set/call (for action=property or action=call)
 - `[attribute:string]?`  
- *optional* attribute name to get (for action=attribute)
+ *optional* attribute name to get/set (for action=attribute)
 - `(string)`  
  CSS selector to target an element
 
@@ -1721,7 +1776,6 @@ Swap roles (user/AI) for all messages in the chat, or for a selected message or 
 // All messages except last 10: |
 /role-swap 0--10
 ```
-
 
 
 
