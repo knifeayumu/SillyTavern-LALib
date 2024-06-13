@@ -1539,48 +1539,46 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
     callback: async (namedArgs, unnamedArgs) => {
-        try {
-            const re = makeRegex(namedArgs.find);
-            if (namedArgs.cmd) {
-                const replacements = [];
-                /**@type {(function():Promise<string>)[]}*/
-                const cmds = [];
-                if (namedArgs.cmd instanceof SlashCommandClosure) {
-                    /**@type {SlashCommandClosure} */
-                    const closure = namedArgs.cmd;
-                    unnamedArgs.toString().replace(re, (...matches) => {
-                        const copy = closure.getCopy();
-                        matches.forEach((match, idx) => {
-                            copy.scope.setMacro(`$${idx}`, match);
-                        });
-                        cmds.push(async () => (await copy.execute())?.pipe);
-                        return '';
+        const re = makeRegex(namedArgs.find);
+        if (namedArgs.cmd) {
+            const replacements = [];
+            /**@type {(function():Promise<string>)[]}*/
+            const cmds = [];
+            if (namedArgs.cmd instanceof SlashCommandClosure) {
+                /**@type {SlashCommandClosure} */
+                const closure = namedArgs.cmd;
+                unnamedArgs.toString().replace(re, (...matches) => {
+                    const copy = closure.getCopy();
+                    matches.forEach((match, idx) => {
+                        copy.scope.setMacro(`$${idx}`, match);
                     });
-                } else {
-                    unnamedArgs.toString().replace(re, (...matches) => {
-                        const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
-                        cmds.push(async () => (await executeSlashCommandsWithOptions(
-                            cmd,
-                            {
-                                handleExecutionErrors: false,
-                                handleParserErrors: false,
-                                parserFlags: namedArgs._parserFlags,
-                                scope: namedArgs._scope,
-                                abortController: namedArgs._abortController,
-                            },
-                        ))?.pipe);
-                        return '';
-                    });
-                }
-                for (const cmd of cmds) {
-                    replacements.push(await cmd());
-                }
-                return unnamedArgs.toString().replace(re, () => replacements.shift());
+                    cmds.push(async () => (await copy.execute())?.pipe);
+                    return '';
+                });
+            } else {
+                unnamedArgs.toString().replace(re, (...matches) => {
+                    const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
+                    cmds.push(async () => (await executeSlashCommandsWithOptions(
+                        cmd,
+                        {
+                            handleExecutionErrors: false,
+                            handleParserErrors: false,
+                            parserFlags: namedArgs._parserFlags,
+                            scope: namedArgs._scope,
+                            abortController: namedArgs._abortController,
+                        },
+                    ))?.pipe);
+                    return '';
+                });
             }
+            for (const cmd of cmds) {
+                replacements.push(await cmd());
+            }
+            return unnamedArgs.toString().replace(re, () => replacements.shift());
+        } else if (namedArgs.replace) {
             return unnamedArgs.toString().replace(re, namedArgs.replace);
-        } catch (ex) {
-            toastr.error(ex.message);
         }
+        throw new Error('/re-replace requires either replace= or cmd= to be set.');
     },
     returns: 'the new text',
     namedArgumentList: [
