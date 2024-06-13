@@ -2494,7 +2494,7 @@ const getBookNamesWithSource = ()=>{
         global: world_info.globalSelect ?? [],
         chat: chat_metadata.world_info ?? null,
         character: characters[context.characterId]?.data?.character_book?.name ?? null,
-        characterAuxiliary: world_info.charLore?.find(it=>it.name == characters[context.characterId]?.avatar?.split('.')?.slice(0,-1)?.join('.'))?.map(it=>it.extraBooks) ?? [],
+        characterAuxiliary: world_info.charLore?.find(it=>it.name == characters[context.characterId]?.avatar?.split('.')?.slice(0,-1)?.join('.'))?.extraBooks ?? [],
         group: groups
             .find(it=>it.id == context.groupId)
             ?.members
