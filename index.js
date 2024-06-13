@@ -9,7 +9,7 @@ import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure
 import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandClosureResult.js';
 import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
-import { debounce, delay, isTrueBoolean } from '../../../utils.js';
+import { debounce, delay, escapeRegex, isTrueBoolean } from '../../../utils.js';
 import { world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
 
@@ -1471,6 +1471,32 @@ const makeRegex = (value)=>{
         ,
     );
 };
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-escape',
+    callback: (args, value) => escapeRegex(value),
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'text to escape',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'regex-escaped string',
+    helpString: `
+        <div>Escapes text to be used literally inside a regex.</div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/re-escape foo/bar foo.bar |\n/echo</code></pre>
+                    Will echo <code>foo\\/bar foo\\.bar</code>.
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/re-escape {{char}} |\n/re-replace find=/\\b{{pipe}}\\b/g replace=FOO {{lastMessage}} |\n/echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
     callback: (args, value) => {
