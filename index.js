@@ -3032,7 +3032,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
         const chatRange = value.length == 0 ? chat : getRange(value, chat);
         for (const mes of chatRange) {
             mes.is_user = !mes.is_user;
-            document.querySelector(`#chat .mes[mesid="${chat.indexOf(mes)}"]`).setAttribute('is_user', mes.is_user);
+            document.querySelector(`#chat .mes[mesid="${chat.indexOf(mes)}"]`)?.setAttribute('is_user', mes.is_user);
         }
         saveChatDebounced();
     },
