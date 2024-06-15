@@ -1575,9 +1575,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 replacements.push(await cmd());
             }
             return unnamedArgs.toString().replace(re, () => replacements.shift());
-        } else if (namedArgs.replace) {
+        } else if (namedArgs.replace != null) {
             return unnamedArgs.toString().replace(re, namedArgs.replace);
         }
+        console.warn('[LALIB]', namedArgs, unnamedArgs);
         throw new Error('/re-replace requires either replace= or cmd= to be set.');
     },
     returns: 'the new text',
