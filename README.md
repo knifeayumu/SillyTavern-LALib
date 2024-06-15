@@ -769,7 +769,7 @@ Return the graphemes (characters, basically), words or sentences found in the te
 
 ```stscript
 /re-escape {{char}} |
-/re-replace find=/\\b{{pipe}}\\b/g replace=FOO {{lastMessage}} |
+/re-replace find=/\b{{pipe}}\b/g replace=FOO {{lastMessage}} |
 /echo
 ```
 
