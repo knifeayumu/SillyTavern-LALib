@@ -1539,6 +1539,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
     callback: async (namedArgs, unnamedArgs) => {
+        if (namedArgs.find == null) {
+            throw new Error('/re-replace requires find= to be set.');
+        }
         const re = makeRegex(namedArgs.find);
         if (namedArgs.cmd) {
             const replacements = [];
