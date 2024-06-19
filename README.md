@@ -13,7 +13,8 @@ Library of STScript commands.
 - Null Handling (ifempty, ifnullish)
 - Copy & Download (copy, download)
 - DOM Interaction (dom)
-- Group Chats (memberpos)
+- Characters (char-get)
+- Group Chats (memberpos, group-get)
 - Conditionals - switch (switch, case)
 - Conditionals - if (ife, elseif, else, then)
 - World Info (wi-list-books, wi-list-entries)
@@ -1223,6 +1224,40 @@ Click on an element, change its value, retrieve a property, or retrieve an attri
 
 
 
+### Characters
+
+
+
+#### `/char-get`
+- `[index:string]?`  
+ *optional* the field to retrieve
+- `(string)`  
+ character avatar (filename) or name
+
+<div>
+Get a character object or one of its properties.
+</div>
+
+
+##### Examples
+
+```stscript
+/char-get Seraphina |
+/getat index=description |
+/echo
+```
+
+```stscript
+/char-get index=description Seraphina |
+/echo
+```
+
+
+
+
+
+
+
 ### Group Chats
 
 
@@ -1240,6 +1275,41 @@ Move group member to position (index starts with 0).
 ```stscript
 /memberpos Alice 3 |
 /echo Alice has been moved to position 3
+```
+
+
+
+
+
+#### `/group-get`
+- `[index:string]?`  
+ *optional* the field to retrieve
+- `[chars=true|false]? = false`  
+ *optional* resolve characters
+- `(string)?`  
+ *optional* group name
+
+<div>
+Get a group object or one of its properties.
+</div>
+
+
+##### Examples
+
+```stscript
+/group-get MyGroup |
+/getat index=description |
+/echo
+```
+
+```stscript
+/group-get index=description MyGroup |
+/echo
+```
+
+```stscript
+/group-get index=members chars=true MyGroup |
+/echo
 ```
 
 

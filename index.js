@@ -2157,6 +2157,60 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
 
 
 
+// GROUP: Characters
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'char-get',
+    /**
+     * @param {{index:string}} args
+     * @param {string} value
+     */
+    callback: (args, value)=>{
+        let char;
+        if (value) {
+            char = characters.find(it=>it.avatar.toLowerCase() == value.toLowerCase() || it.name.toLowerCase() == value.toLowerCase());
+        } else {
+            char = characters[getContext().characterId];
+        }
+        /**@type {import('../../../char-data.js').v1CharData|string|boolean|number} */
+        let result = char;
+        if (args.index) {
+            result = char[args.index];
+        }
+        if (result == null || result == undefined) return '';
+        if (typeof result == 'object') return JSON.stringify(result);
+        if (typeof result == 'boolean') return JSON.stringify(result);
+        return result.toString();
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'index',
+            description: 'the field to retrieve',
+            typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: ()=>Object.keys(characters[0] ?? {}).map(it=>new SlashCommandEnumValue(it)),
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'character avatar (filename) or name',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            enumProvider: ()=>characters.map(it=>new SlashCommandEnumValue(it.name, it.avatar)),
+        }),
+    ],
+    returns: 'char object or property',
+    helpString: `
+        <div>
+            Get a character object or one of its properties.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li><pre><code class="language-stscript">/char-get Seraphina |\n/getat index=description |\n/echo</code></pre></li>
+                <li><pre><code class="language-stscript">/char-get index=description Seraphina |\n/echo</code></pre></li>
+            </ul>
+        </div>
+    `,
+}));
+
+
+
 // GROUP: Group Chats
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
     callback: async(args, value) => {
@@ -2196,6 +2250,61 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
         }),
     ],
     helpString: 'Move group member to position (index starts with 0).',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'group-get',
+    /**
+     * @param {{index:string, chars:string}} args
+     * @param {string} value
+     */
+    callback: (args, value)=>{
+        const group = groups.find(it=>value ? (it.name.toLowerCase() == value.toLowerCase()) : (it.id == getContext().groupId));
+        /**@type {object|string|boolean|number} */
+        let result = structuredClone(group);
+        if (isTrueBoolean(args.chars)) {
+            result.members = result.members.map(ava=>characters.find(it=>it.avatar == ava));
+        }
+        if (args.index) {
+            result = result[args.index];
+        }
+        if (result == null || result == undefined) return '';
+        if (typeof result == 'object') return JSON.stringify(result);
+        if (typeof result == 'boolean') return JSON.stringify(result);
+        return result.toString();
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'index',
+            description: 'the field to retrieve',
+            typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: ()=>Object.keys(groups[0] ?? {}).map(it=>new SlashCommandEnumValue(it)),
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'chars',
+            description: 'resolve characters',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+            enumList: ['true', 'false'],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'group name',
+            typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: ()=>groups.map(it=>new SlashCommandEnumValue(it.name, it.members.join(', '))),
+        }),
+    ],
+    returns: 'char object or property',
+    helpString: `
+        <div>
+            Get a group object or one of its properties.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li><pre><code class="language-stscript">/group-get MyGroup |\n/getat index=description |\n/echo</code></pre></li>
+                <li><pre><code class="language-stscript">/group-get index=description MyGroup |\n/echo</code></pre></li>
+                <li><pre><code class="language-stscript">/group-get index=members chars=true MyGroup |\n/echo</code></pre></li>
+            </ul>
+        </div>
+    `,
 }));
 
 
