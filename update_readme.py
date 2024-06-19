@@ -90,6 +90,7 @@ for line in lines:
 	elif cmd and (is_named or is_unnamed) and re.match(re_arg_stop, line):
 		# print('END ARG', line)
 		arg += re.sub(re_arg_stop, r'\1', line)
+		arg = re.sub(r'(\s+)\s{4}enumProvider:.+?,\n(?:\1(?:\s{4})?)?(\S)', r'\2', arg, flags=re.DOTALL)
 		arg = re.sub(r'(ARGUMENT_TYPE\.[^,\s\]]+)', r'"\1"', arg, flags=re.DOTALL)
 		arg = re.sub(r'\s*new SlashCommandEnumValue\((.+)\),\n', r'[\1],', arg)
 		arg = re.sub(r'defaultValue:\s*`[^`]+`', r'defaultValue: "..."', arg)
