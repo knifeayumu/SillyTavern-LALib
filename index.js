@@ -1552,9 +1552,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 const closure = namedArgs.cmd;
                 unnamedArgs.toString().replace(re, (...matches) => {
                     const copy = closure.getCopy();
-                    matches.forEach((match, idx) => {
+                    matches.slice(0, -2).forEach((match, idx) => {
                         copy.scope.setMacro(`$${idx}`, match);
                     });
+                    copy.scope.setMacro('$index', matches.slice(-2)[0]);
+                    copy.scope.setMacro('$text', matches.slice(-1)[0]);
                     cmds.push(async () => (await copy.execute())?.pipe);
                     return '';
                 });
