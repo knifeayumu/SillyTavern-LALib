@@ -2759,7 +2759,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'costumes',
         const response = await fetch('/api/plugins/costumes/', {
             method: 'POST',
             headers: getRequestHeaders(),
-            body: JSON.stringify({ folder: unnamedArgs[0], recurse: namedArgs.recurse ?? true }),
+            body: JSON.stringify({ folder: unnamedArgs, recurse: namedArgs.recurse ?? true }),
         });
         if (!response.ok) {
             toastr.error(`Failed to retrieve costumes: ${response.status} - ${response.statusText}`);
