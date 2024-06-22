@@ -1538,10 +1538,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
-    callback: async (namedArgs, unnamedArgs) => {
+    callback: async (namedArgs, value) => {
         if (namedArgs.find == null) {
             throw new Error('/re-replace requires find= to be set.');
         }
+        const text = getVar(namedArgs.var, namedArgs.globalvar, value);
         const re = makeRegex(namedArgs.find);
         if (namedArgs.cmd) {
             const replacements = [];
@@ -1550,7 +1551,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
             if (namedArgs.cmd instanceof SlashCommandClosure) {
                 /**@type {SlashCommandClosure} */
                 const closure = namedArgs.cmd;
-                unnamedArgs.toString().replace(re, (...matches) => {
+                text.toString().replace(re, (...matches) => {
                     const copy = closure.getCopy();
                     matches.slice(0, -2).forEach((match, idx) => {
                         copy.scope.setMacro(`$${idx}`, match);
@@ -1561,7 +1562,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                     return '';
                 });
             } else {
-                unnamedArgs.toString().replace(re, (...matches) => {
+                text.toString().replace(re, (...matches) => {
                     const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
                     cmds.push(async () => (await executeSlashCommandsWithOptions(
                         cmd,
@@ -1579,11 +1580,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
             for (const cmd of cmds) {
                 replacements.push(await cmd());
             }
-            return unnamedArgs.toString().replace(re, () => replacements.shift());
+            return text.toString().replace(re, () => replacements.shift());
         } else if (namedArgs.replace != null) {
-            return unnamedArgs.toString().replace(re, namedArgs.replace);
+            return text.toString().replace(re, namedArgs.replace);
         }
-        console.warn('[LALIB]', namedArgs, unnamedArgs);
+        console.warn('[LALIB]', namedArgs, value, text);
         throw new Error('/re-replace requires either replace= or cmd= to be set.');
     },
     returns: 'the new text',
