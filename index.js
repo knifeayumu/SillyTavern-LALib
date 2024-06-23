@@ -166,7 +166,7 @@ function getVar(local, global, literal) {
     if (value === undefined && global) {
         value = extension_settings.variables?.global?.[global];
     }
-    if (value === undefined && literal) {
+    if (value === undefined && literal != null) {
         value = literal;
     }
     return value;
