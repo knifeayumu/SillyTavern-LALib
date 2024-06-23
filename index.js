@@ -3254,6 +3254,67 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
 
 
 
+//GROUP: Audio
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
+    /**
+     *
+     * @param {{volume:string, await:string}} args
+     * @param {string} value
+     * @returns
+     */
+    callback: async(args, value)=>{
+        const response = await fetch(value, { headers: { responseType: 'arraybuffer' } });
+        if (!response.ok) {
+            throw new Error(`${response.status} - ${response.statusText}: /sfx ${value}`);
+        }
+        const con = new AudioContext();
+        const src = con.createBufferSource();
+        src.buffer = await con.decodeAudioData(await response.arrayBuffer());
+        const volume = con.createGain();
+        volume.gain.value = Number(args.volume ?? '1');
+        volume.connect(con.destination);
+        src.connect(volume);
+        src.start();
+        if (isTrueBoolean(args.await)) {
+            await new Promise(resolve=>src.addEventListener('ended', resolve));
+        }
+        return '';
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'volume',
+            description: 'playback volume',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            defaultValue: '1.0',
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'await',
+            description: 'whether to wait for the sound to finish playing before continuing',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'url to audio file',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    helpString: `
+        <div>
+            Plays an audio file.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/sfx volume=1.5 await=true /user/audio/mySound.wav | /echo finished playing sound</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
+
+
 // GROUP: Undocumented
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
     callback: async (args, value) => {

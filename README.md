@@ -22,7 +22,7 @@ Library of STScript commands.
 - Quick Replies (qr-edit, qr-add)
 - Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, role-swap)
 - Time & Date (timestamp)
-- Async (fireandforget)
+- Async (fireandforget, sfx)
 
 
 
@@ -1231,8 +1231,8 @@ Click on an element, change its value, retrieve a property, or retrieve an attri
 #### `/char-get`
 - `[index:string]?`  
  *optional* the field to retrieve
-- `(string)`  
- character avatar (filename) or name
+- `(string)? = current character`  
+ *optional* character avatar (filename) or name
 
 <div>
 Get a character object or one of its properties.
@@ -1286,7 +1286,7 @@ Move group member to position (index starts with 0).
  *optional* the field to retrieve
 - `[chars=true|false]? = false`  
  *optional* resolve characters
-- `(string)?`  
+- `(string)? = current group`  
  *optional* group name
 
 <div>
@@ -1894,6 +1894,33 @@ Execute a closure or command without waiting for it to finish.
     /echo still firing
 :} |
 /echo outside
+```
+
+
+
+
+
+#### `/sfx`
+- `[volume:number]? = 1.0`  
+ *optional* playback volume
+- `[await:boolean]? = false`  
+ *optional* whether to wait for the sound to finish playing before continuing
+- `(string)`  
+ url to audio file
+
+<div>
+Plays an audio file.
+</div>
+
+
+##### Examples
+
+```stscript
+/sfx /user/audio/mySound.wav
+```
+```stscript
+/sfx volume=1.25 await=true /user/audio/mySound.wav |
+/echo finished playing sound
 ```
 
 
