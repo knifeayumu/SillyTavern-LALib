@@ -1918,6 +1918,7 @@ Plays an audio file.
 ```stscript
 /sfx /user/audio/mySound.wav
 ```
+
 ```stscript
 /sfx volume=1.25 await=true /user/audio/mySound.wav |
 /echo finished playing sound
