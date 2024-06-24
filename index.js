@@ -401,7 +401,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             }
             return result;
         }
-        if (typeof result == 'object') {
+        if (typeof result != 'string') {
             result = JSON.stringify(result);
         }
         return result;
@@ -496,7 +496,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         if (isTrueBoolean(args.asList) && !isList) {
             result = Object.keys(result).map(it => result[it]);
         }
-        if (typeof result == 'object') {
+        if (typeof result != 'string') {
             result = JSON.stringify(result);
         }
         return result;
@@ -614,7 +614,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         } else {
             result = list;
         }
-        if (typeof result == 'object') {
+        if (typeof result != 'string') {
             result = JSON.stringify(result);
         }
         return result;
@@ -722,15 +722,15 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     if (isTrueBoolean(args.index)) {
                         return index;
                     }
-                    if (typeof item === 'object') {
+                    if (typeof item != 'string') {
                         return JSON.stringify(item);
                     }
                     return item;
                 }
             }
-            return undefined;
+            return '';
         }
-        return undefined;
+        return '';
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({ name: 'list',
@@ -789,7 +789,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
         const list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
         let end = args.end ?? (args.length ? Number(args.start) + Number(args.length) : undefined);
         const result = list.slice(args.start, end);
-        if (typeof result == 'object') {
+        if (typeof result != 'string') {
             return JSON.stringify(result);
         }
         return result;
@@ -1658,7 +1658,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
             result = Array.isArray(result) ? result.slice(ci)[0] : result[ci];
             try { result = JSON.parse(result); } catch { /*empty*/ }
         }
-        if (typeof result == 'object') {
+        if (typeof result != 'string') {
             return JSON.stringify(result);
         }
         return result;
@@ -1721,7 +1721,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
             } catch { /*empty*/ }
         }
         if (list !== undefined) {
-            let result = (typeof list == 'object') ? JSON.stringify(list) : list;
+            let result = (typeof list != 'string') ? JSON.stringify(list) : list;
             if (args.var) {
                 await executeSlashCommands(`/setvar key="${args.var}" ${result.replace(/\|/g, '\\|')}`);
             }
@@ -2179,8 +2179,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'char-get',
             result = char[args.index];
         }
         if (result == null || result == undefined) return '';
-        if (typeof result == 'object') return JSON.stringify(result);
-        if (typeof result == 'boolean') return JSON.stringify(result);
+        if (typeof result != 'string') return JSON.stringify(result);
         return result.toString();
     },
     namedArgumentList: [
@@ -2271,8 +2270,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'group-get',
             result = result[args.index];
         }
         if (result == null || result == undefined) return '';
-        if (typeof result == 'object') return JSON.stringify(result);
-        if (typeof result == 'boolean') return JSON.stringify(result);
+        if (typeof result != 'string') return JSON.stringify(result);
         return result.toString();
     },
     namedArgumentList: [
@@ -3357,7 +3355,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
             return [...dom.children].map(it => it.outerHTML).join('\n');
         } else {
             const result = el?.[args.take ?? 'outerHTML'];
-            if (typeof result == 'object') {
+            if (typeof result != 'string') {
                 return JSON.stringify(result);
             }
             return result;
@@ -3405,7 +3403,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
             return [...dom.children].map(it => it.outerHTML).join('\n');
         } else {
             const result = els.map(el => el?.[args.take ?? 'outerHTML']);
-            if (typeof result == 'object') {
+            if (typeof result != 'string') {
                 return JSON.stringify(result);
             }
             return result;
