@@ -1554,7 +1554,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 text.toString().replace(re, (...matches) => {
                     const copy = closure.getCopy();
                     matches.slice(0, -2).forEach((match, idx) => {
-                        copy.scope.setMacro(`$${idx}`, match);
+                        copy.scope.setMacro(`$${idx}`, match ?? '');
                     });
                     copy.scope.setMacro('$index', matches.slice(-2)[0]);
                     copy.scope.setMacro('$text', matches.slice(-1)[0]);
