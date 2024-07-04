@@ -9,7 +9,7 @@ import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure
 import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandClosureResult.js';
 import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
-import { debounce, delay, escapeRegex, isTrueBoolean } from '../../../utils.js';
+import { debounce, delay, escapeRegex, isFalseBoolean, isTrueBoolean, uuidv4 } from '../../../utils.js';
 import { world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
 
@@ -3136,6 +3136,161 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
         }),
     ],
     helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
+}));
+
+/** @type {{listen:()=>void, unlisten:()=>void, event:string, query:string, id:string}[]} */
+const messageOnListeners = [];
+const messageOnUnlistenListen = ()=>messageOnListeners.forEach(it=>{
+    it.unlisten();
+    it.listen();
+});
+eventSource.on(event_types.CHAT_CHANGED, ()=>{
+    messageOnListeners.forEach(it=>it.unlisten());
+    while (messageOnListeners.pop());
+});
+eventSource.on(event_types.USER_MESSAGE_RENDERED, ()=>messageOnUnlistenListen());
+eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, ()=>messageOnUnlistenListen());
+eventSource.on(event_types.MESSAGE_SWIPED, ()=>messageOnUnlistenListen());
+eventSource.on(event_types.MESSAGE_UPDATED, ()=>messageOnUnlistenListen());
+eventSource.on(event_types.MESSAGE_DELETED, ()=>messageOnUnlistenListen());
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-on',
+    /**
+     * @param {{event:string, callback:SlashCommandClosure, quiet:string}} args
+     * @param {string} value
+     */
+    callback: (args, value)=>{
+        if (!args.event) throw new Error('/message-on requires event= to be set');
+        if (!args.callback) throw new Error('/message-on requires callback= to be set');
+        if (!value) throw new Error('/message-on requires a CSS query to select targeted elements');
+        const listen = ()=>{
+            const els = [...document.querySelector('#chat .last_mes').querySelectorAll(value)];
+            for (const el of els) {
+                el.addEventListener(args.event, listener, { once:true });
+            }
+            if (isFalseBoolean(args.quiet)) {
+                toastr.info(`Event listener attached to ${els.length} elements.`, '/message-on');
+            }
+        };
+        const els = [...document.querySelector('#chat .last_mes').querySelectorAll(value)];
+        const unlisten = ()=>{
+            for (const el of els) {
+                el?.removeEventListener(args.event, listener);
+            }
+        };
+        const listener = async(evt)=>{
+            args.callback.scope.setMacro('target', evt.currentTarget.outerHTML);
+            await args.callback.execute();
+        };
+        listen();
+        const id = uuidv4();
+        messageOnListeners.push({ listen, unlisten, event:args.event, query:value, id });
+        return id;
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'event',
+            description: 'event type to listen for',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'callback',
+            description: 'closure to run when triggered',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'quiet',
+            description: 'whether to show toast messages when event listeners are attached',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: false,
+            defaultValue: 'true',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'CSS selector to target an element in the last message',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    returns: 'listener ID',
+    helpString: `
+        <div>
+            Add event listeners to the last chat message.
+        </div>
+        <div>
+            Stops listening when changing to another chat.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/message-on event=click quiet=false callback={:\n    /$ take=textContent {{target}} |\n    /let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |\n    /inputhistory-add {{var::prompt}} |\n    /send {{var::prompt}} |\n    /trigger\n:} .custom-suggestion |\n/setvar key=listenerId |</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-off',
+    /**
+     *
+     * @param {{event:string, query:string, id:string, quiet:string}} args
+     */
+    callback: (args, value)=>{
+        const event = args.event ?? '';
+        const query = args.query ?? '';
+        const id = args.id ?? '';
+        if (event == '' && query == '' && id == '') throw new Error('/message-off requires event= or query= or id= to be set');
+        const check = it=>{
+            return (event == '' || it.event == event) && (query == '' || it.query == query) && (id == '' || it.id == id);
+        };
+        const listeners = messageOnListeners.filter(check);
+        let count = 0;
+        for (const listener of listeners) {
+            count++;
+            listener.unlisten();
+            messageOnListeners.splice(messageOnListeners.indexOf(listener), 1);
+        }
+        if (isFalseBoolean(args.quiet)) {
+            toastr.info(`${count} listeners removed.`, '/message-off');
+        }
+        return '';
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'id',
+            description: 'listener ID',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: false,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'event',
+            description: 'event type to listen for',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: false,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'query',
+            description: 'CSS selector to target an element in the last message',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: false,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'quiet',
+            description: 'whether to show toast messages when event listeners are attached',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            isRequired: false,
+            defaultValue: 'true',
+        }),
+    ],
+    helpString: `
+        <div>
+            Remove an event listener added with /message-on.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    All messages:
+                    <pre><code class="language-stscript">/message-off id={{getvar::listenerId}}</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
