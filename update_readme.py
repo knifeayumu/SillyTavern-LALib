@@ -94,6 +94,8 @@ for line in lines:
 		arg = re.sub(r'(ARGUMENT_TYPE\.[^,\s\]]+)', r'"\1"', arg, flags=re.DOTALL)
 		arg = re.sub(r'\s*new SlashCommandEnumValue\((.+)\),\n', r'[\1],', arg)
 		arg = re.sub(r'defaultValue:\s*`[^`]+`', r'defaultValue: "..."', arg)
+		arg = re.sub(r'isRequired:\s*true', 'isRequired: True', arg)
+		arg = re.sub(r'isRequired:\s*false', 'isRequired: False', arg)
 		if is_named:
 			print(arg)
 			cmd.named.append(eval(arg))
