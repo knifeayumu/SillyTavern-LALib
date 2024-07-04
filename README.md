@@ -20,7 +20,7 @@ Library of STScript commands.
 - World Info (wi-list-books, wi-list-entries)
 - Costumes / Sprites (costumes)
 - Quick Replies (qr-edit, qr-add)
-- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, role-swap)
+- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, message-on, message-off, role-swap)
 - Time & Date (timestamp)
 - Async (fireandforget, sfx)
 
@@ -1795,6 +1795,66 @@ Edit the current message or the message at the provided message ID. Use <code>ap
 /sendas name=Alice foo |
 /delay 1000 |
 /message-edit append=true bar
+```
+
+
+
+
+
+#### `/message-on`
+- `[event:string]`  
+ event type to listen for
+- `[callback:closure]`  
+ closure to run when triggered
+- `[quiet:boolean]? = true`  
+ *optional* whether to show toast messages when event listeners are attached
+- `(string)`  
+ CSS selector to target an element in the last message
+
+<div>
+Add event listeners to the last chat message.
+</div>
+<div>
+Stops listening when changing to another chat.
+</div>
+
+
+##### Examples
+
+```stscript
+/message-on event=click quiet=false callback={:
+	/$ take=textContent {{target}} |
+	/let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |
+	/inputhistory-add {{var::prompt}} |
+	/send {{var::prompt}} |
+	/trigger |
+:} .custom-suggestion |
+/setvar key=listenerId |
+```
+
+
+
+
+
+#### `/message-off`
+- `[id:string]?`  
+ *optional* listener ID
+- `[event:string]?`  
+ *optional* event type to listen for
+- `[query:string]?`  
+ *optional* CSS selector to target an element in the last message
+- `[quiet:boolean]? = true`  
+ *optional* whether to show toast messages when event listeners are attached
+
+<div>
+Remove an event listener added with /message-on.
+</div>
+
+
+##### Examples
+
+```stscript
+/message-off id={{getvar::listenerId}}
 ```
 
 
