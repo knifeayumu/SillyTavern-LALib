@@ -202,6 +202,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
         const html = converter.makeHtml(readme).replace(/<br\s*\/?>/g, '<br style="display:block;">');
         console.log('LALIB', html);
         sendSystemMessage('generic', html);
+        return '';
     },
     helpString: 'Lists LALib commands',
 }));
@@ -720,7 +721,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 outcome = commandResult.pipe;
                 if (isTrueBoolean(outcome)) {
                     if (isTrueBoolean(args.index)) {
-                        return index;
+                        return index.toString();
                     }
                     if (typeof item != 'string') {
                         return JSON.stringify(item);
@@ -2226,7 +2227,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
         let index = value.replace(/^(.+?)(\s+(\d+))?$/, '$2');
         let currentIndex = group.members.findIndex(it=>it == char.avatar);
         if (index === null) {
-            return currentIndex;
+            return currentIndex.toString();
         }
         index = Math.min(group.members.length - 1, parseInt(index));
         while (currentIndex < index) {
@@ -2237,7 +2238,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
             await executeSlashCommands(`/memberup ${name}`);
             currentIndex--;
         }
-        return currentIndex;
+        return currentIndex.toString();
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
@@ -2829,7 +2830,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-add',
         let set = namedArgs.set ?? quickReplyApi.listGlobalSets()[0] ?? quickReplyApi.listChatSets()[0];
         if (set === undefined) {
             toastr.error('No Quick Reply Set given and no active Quick Reply Sets to add the new Quick Reply to.');
-            return;
+            return '';
         }
         let label = namedArgs.label ?? unnamedArgs.toString();
         quickReplyApi.createQuickReply(set, label)?.showEditor();
@@ -2901,7 +2902,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-list'
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-count',
     callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
-        return chat[idx]?.swipes?.length ?? 0;
+        return `${chat[idx]?.swipes?.length ?? 0}`;
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
@@ -2917,7 +2918,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-count
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-index',
     callback: (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
-        return chat[idx]?.swipe_id ?? 0;
+        return `${chat[idx]?.swipe_id ?? 0}`;
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
@@ -3002,7 +3003,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
-            return;
+            return '';
         }
         const swipeId = Number(value == '' ? mes.swipe_id : value);
         if (swipeId + 1 < mes.swipes.length) {
@@ -3050,7 +3051,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
         // close current message editor
         document.querySelector('#curEditTextarea')?.closest('.mes')?.querySelector('.mes_edit_cancel')?.click();
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
-            return;
+            return '';
         }
         const swipeId = Number(value);
         mes.swipe_id = swipeId;
