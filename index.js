@@ -4,6 +4,7 @@ import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
 import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
+import { SlashCommandAbortController } from '../../../slash-commands/SlashCommandAbortController.js';
 import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
 import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure.js';
 import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandClosureResult.js';
@@ -3093,7 +3094,16 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe
         const currentMessage = document.querySelector(`#chat [mesid="${id}"]`);
         await executeSlashCommands('/swipes-count | /sub {{pipe}} 1 | /swipes-go');
         currentMessage.querySelector('.swipe_right:not(.stus--btn)').click();
-        await new Promise(resolve => eventSource.once(event_types.GENERATION_ENDED, resolve));
+        let ended = false;
+        const listener = ()=>{ ended = true; };
+        eventSource.once(event_types.GENERATION_ENDED, listener);
+        while (!ended) {
+            if (/**@type {SlashCommandAbortController}*/(args._abortController)?.signal?.aborted) {
+                eventSource.removeListener(event_types.GENERATION_ENDED, listener);
+                return '';
+            }
+            await delay(200);
+        }
         await delay(200);
         return chat[id].mes;
     },
@@ -3294,6 +3304,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-off'
     `,
 }));
 
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-listeners',
+    callback: (args, value)=>{
+        return JSON.stringify(messageOnListeners.map(it=>({ id:it.id, query:it.query, event:it.event })));
+    },
+    helpString: 'Lists all currently active listeners.',
+}));
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
     callback: (args, value)=>{
         const chatRange = value.length == 0 ? chat : getRange(value, chat);
@@ -3465,6 +3482,16 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
             </ul>
         </div>
     `,
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'bad-command',
+    callback: (args, value)=>{
+        switch (value) {
+            case '1': return [1,2,3];
+            case '2': return {a:1, b:2};
+            case '3': return class A{};
+            case '4': return new SlashCommand();
+        }
+    },
 }));
 
 
