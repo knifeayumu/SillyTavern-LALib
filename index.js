@@ -3111,7 +3111,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit',
-    callback: (args, value) => {
+    callback: async(args, value) => {
         /**@type {HTMLTextAreaElement}*/
         const input = document.querySelector('#send_textarea');
         const restoreFocus = document.activeElement == input;
@@ -3124,6 +3124,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
         }
         document.querySelector(`#chat [mesid="${args.message ?? chat.length - 1}"] .mes_edit_done`).click();
         if (restoreFocus) input.focus();
+        await delay(500);
+        return '';
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
