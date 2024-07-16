@@ -3151,6 +3151,82 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
     helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
 }));
 
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-move',
+    /**
+     * @param {{from:string, to:string, up:string, down:string}} args
+     */
+    callback: async(args)=>{
+        let idx = parseInt(args.from);
+        let dest = parseInt(args.to);
+        if (args.up !== undefined) {
+            dest = idx - parseInt(args.up);
+        } else if (args.down !== undefined) {
+            dest = idx + parseInt(args.down);
+        }
+        /**@type {HTMLTextAreaElement}*/
+        const input = document.querySelector('#send_textarea');
+        const restoreFocus = document.activeElement == input;
+        const edit = /**@type {HTMLElement}*/(document.querySelector(`#chat [mesid="${args.from}"] .mes_edit`));
+        const done = /**@type {HTMLElement}*/(document.querySelector(`#chat [mesid="${args.from}"] .mes_edit_done`));
+        edit.click();
+        if (idx < dest) {
+            const btn = /**@type {HTMLElement}*/(document.querySelector(`#chat [mesid="${args.from}"] .mes_edit_down`));
+            while (idx < dest && idx + 1 < chat.length) {
+                btn.click();
+                idx++;
+            }
+        } else if (idx > dest) {
+            const btn = /**@type {HTMLElement}*/(document.querySelector(`#chat [mesid="${args.from}"] .mes_edit_up`));
+            while (idx > dest && idx > 0) {
+                btn.click();
+                idx--;
+            }
+        }
+        done.click();
+        if (restoreFocus) input.focus();
+        await delay(500);
+        return '';
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'from',
+            description: 'the message ID to move',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'to',
+            description: 'where to move the message',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'up',
+            description: 'number of slots to move the message up (decrease message ID)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'down',
+            description: 'number of slots to move the message down (increase message ID)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+    ],
+    helpString: `
+        <div>
+            Move a message up or down in the chat.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/message-move from={{lastMessageId}} to=10 |</code></pre>
+                    <pre><code class="language-stscript">/message-move from={{lastMessageId}} up=2 |</code></pre>
+                    <pre><code class="language-stscript">/message-move from=3 down=10 |</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
 /** @type {{listen:()=>void, unlisten:()=>void, event:string, query:string, id:string}[]} */
 const messageOnListeners = [];
 const messageOnUnlistenListen = ()=>messageOnListeners.forEach(it=>{
