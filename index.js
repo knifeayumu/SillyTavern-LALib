@@ -3561,16 +3561,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
         </div>
     `,
 }));
-SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'bad-command',
-    callback: (args, value)=>{
-        switch (value) {
-            case '1': return [1,2,3];
-            case '2': return {a:1, b:2};
-            case '3': return class A{};
-            case '4': return new SlashCommand();
-        }
-    },
-}));
 
 
 
