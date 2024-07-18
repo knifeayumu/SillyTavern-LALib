@@ -20,7 +20,7 @@ Library of STScript commands.
 - World Info (wi-list-books, wi-list-entries)
 - Costumes / Sprites (costumes)
 - Quick Replies (qr-edit, qr-add)
-- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, message-on, message-off, role-swap)
+- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, message-move, message-on, message-off, message-listeners, role-swap)
 - Time & Date (timestamp)
 - Async (fireandforget, sfx)
 
@@ -1801,6 +1801,39 @@ Edit the current message or the message at the provided message ID. Use <code>ap
 
 
 
+#### `/message-move`
+- `[from:number]`  
+ the message ID to move
+- `[to:number]?`  
+ *optional* where to move the message
+- `[up:number]?`  
+ *optional* number of slots to move the message up (decrease message ID)
+- `[down:number]?`  
+ *optional* number of slots to move the message down (increase message ID)
+
+<div>
+Move a message up or down in the chat.
+</div>
+
+
+##### Examples
+
+```stscript
+/message-move from={{lastMessageId}} to=10 |
+```
+
+```stscript
+/message-move from={{lastMessageId}} up=2 |
+```
+
+```stscript
+/message-move from=3 down=10 |
+```
+
+
+
+
+
 #### `/message-on`
 - `[event:string]`  
  event type to listen for
@@ -1855,6 +1888,22 @@ Remove an event listener added with /message-on.
 
 ```stscript
 /message-off id={{getvar::listenerId}}
+```
+
+
+
+
+
+#### `/message-listeners`
+
+Lists all currently active listeners.
+
+##### Examples
+
+```stscript
+/message-on event=click callback={: /echo {{target}} :} .custom-suggestion |
+/message-listeners |
+/echo |
 ```
 
 
