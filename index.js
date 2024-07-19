@@ -2762,7 +2762,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-book
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entries',
-    callback: async (namedArgs, unnamedArgs) => {
+    callback: async (args, value) => {
         const loadBook = async (name) => {
             const result = await fetch('/api/worldinfo/get', {
                 method: 'POST',
@@ -2783,8 +2783,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
         };
         let names;
         let isNameGiven = false;
-        if (unnamedArgs.length && unnamedArgs[0]?.trim()?.length && unnamedArgs[0] != '""' && unnamedArgs[0] != 'null') {
-            names = [unnamedArgs.trim()];
+        if (value?.length) {
+            names = [value.trim()];
             isNameGiven = true;
         } else {
             names = getBookNames();
@@ -2793,7 +2793,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
         for (const book of names) {
             books[book] = await loadBook(book);
         }
-        if (isTrueBoolean(namedArgs.flat) || isNameGiven) {
+        if (isTrueBoolean(args.flat) || isNameGiven) {
             return JSON.stringify(Object.keys(books).map(it => books[it].entries).flat());
         }
         return JSON.stringify(books);
