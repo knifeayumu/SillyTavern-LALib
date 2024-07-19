@@ -2784,7 +2784,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
         let names;
         let isNameGiven = false;
         if (unnamedArgs.length && unnamedArgs[0]?.trim()?.length && unnamedArgs[0] != '""' && unnamedArgs[0] != 'null') {
-            names = [unnamedArgs[0].trim()];
+            names = [unnamedArgs.trim()];
             isNameGiven = true;
         } else {
             names = getBookNames();
