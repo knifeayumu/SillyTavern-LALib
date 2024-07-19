@@ -846,6 +846,71 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
     `,
 }));
 
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
+    callback: (args, value) => {
+        const list = getListVar(args.var, args.globalvar, args.value);
+        list.splice(args.start, args.delete, ...(value ?? []));
+        return JSON.stringify(list);
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'start',
+            description: 'the starting index of the slice, negative numbers start from the back',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'delete',
+            description: 'the number of elements to remove in the list from start',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'value',
+            description: 'the list to operate on',
+            typeList: [ARGUMENT_TYPE.LIST],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'var',
+            description: 'name of the chat variable to operate on',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
+            description: 'name of the global variable to operate on',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the elements to add, beginning from start',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+        }),
+    ],
+    splitUnnamedArgument: true,
+    returns: 'the new list',
+    helpString: `
+        <div>
+            Creates a new list with some elements removed and / or replaced at a given index.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 delete=3 30 40 50 |\n/echo |</code></pre>
+                    returns [0,1,2,30,40,50,6]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 delete=3 |\n/echo |</code></pre>
+                    returns [0,1,2,6]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 100 |\n/echo |</code></pre>
+                    returns [0,1,2,100,3,4,5,6]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=-1 delete=1 |\n/echo |</code></pre>
+                    returns [0,1,2,3,4,5]
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
 const shuffleList = (value)=>{
     const list = getListVar(null, null, value);
     for (let i = list.length - 1; i > 0; i--) {

@@ -4,7 +4,7 @@ Library of STScript commands.
 
 
 - Boolean Operations (test, and, or, not)
-- List Operations (foreach, map, filter, find, slice, shuffle, pick, reverse, dict, keys)
+- List Operations (foreach, map, filter, find, slice, splice, shuffle, pick, reverse, dict, keys)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
 - Regular Expressions (re-escape, re-test, re-replace)
@@ -382,6 +382,55 @@ Retrieves a slice of a list or string.
 ```stscript
 /slice start=-3 foo bar |
 /echo The result will be "bar": {{pipe}}
+```
+
+
+
+
+
+#### `/splice`
+- `[start:number]`  
+ the starting index of the slice, negative numbers start from the back
+- `[delete:number]?`  
+ *optional* the number of elements to remove in the list from start
+- `[value:list]?`  
+ *optional* the list to operate on
+- `[var:variable_name]?`  
+ *optional* name of the chat variable to operate on
+- `[globalvar:variable_name]?`  
+ *optional* name of the global variable to operate on
+- `(string|number|boolean|list|dictionary)?`  
+ *optional* the elements to add, beginning from start
+
+<div>
+Creates a new list with some elements removed and / or replaced at a given index.
+</div>
+
+
+##### Examples
+
+```stscript
+/splice value=[0,1,2,3,4,5,6] start=3 delete=3 30 40 50 |
+/echo |
+// result will be: [0,1,2,30,40,50,6] |
+```
+
+```stscript
+/splice value=[0,1,2,3,4,5,6] start=3 delete=3 |
+/echo |
+// result will be: [0,1,2,6] |
+```
+
+```stscript
+/splice value=[0,1,2,3,4,5,6] start=3 100 |
+/echo |
+// result will be: [0,1,2,100,3,4,5,6] |
+```
+
+```stscript
+/splice value=[0,1,2,3,4,5,6] start=-1 delete=1 |
+/echo |
+// result will be: [0,1,2,3,4,5] |
 ```
 
 
