@@ -1427,7 +1427,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'json-pretty'
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'substitute',
     callback: (args, value) => {
-        return substituteParams(value, name1, name2);
+        const closure = new SlashCommandClosure();
+        closure.scope = args._scope;
+        return closure.substituteParams(value);
     },
     returns: 'text with macros replaced',
     unnamedArgumentList: [
