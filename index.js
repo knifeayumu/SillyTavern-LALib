@@ -3570,7 +3570,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
 
 
 
-//GROUP: Audio
+// GROUP: Audio
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
     /**
      *
