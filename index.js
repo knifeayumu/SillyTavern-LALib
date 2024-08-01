@@ -3575,6 +3575,46 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
 
 
 
+// GROUP: Logging
+const toConsole = (level, value)=>{
+    try {
+        const data = JSON.parse(value.toString());
+        console[level](`[/console-${level}]`, data);
+    } catch {
+        console[level](`[/console-${level}]`, value);
+    }
+    return '';
+};
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-log',
+    callback: (args, value)=>toConsole('log', value),
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'the value to log',
+            isRequired: true,
+        }),
+    ],
+    helpString: 'logs a value to the browser console',
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-warn',
+    callback: (args, value)=>toConsole('warn', value),
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'the value to log',
+            isRequired: true,
+        }),
+    ],
+    helpString: 'logs a value to the browser console as a warning',
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-error',
+    callback: (args, value)=>toConsole('error', value),
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'the value to log',
+            isRequired: true,
+        }),
+    ],
+    helpString: 'logs a value to the browser console as an error',
+}));
+
+
+
 // GROUP: Audio
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
     /**
