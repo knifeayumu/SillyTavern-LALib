@@ -2059,19 +2059,24 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifnullish',
 // GROUP: Copy & Download
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'copy',
     callback: (args, value) => {
-        const ta = document.createElement('textarea'); {
-            ta.value = value;
-            ta.style.position = 'fixed';
-            ta.style.inset = '0';
-            document.body.append(ta);
-            ta.focus();
-            ta.select();
-            try {
-                document.execCommand('copy');
-            } catch (err) {
-                console.error('Unable to copy to clipboard', err);
+        try {
+            navigator.clipboard.writeText(value.toString());
+        } catch {
+            console.warn('/copy cannot use clipboard API, falling back to execCommand');
+            const ta = document.createElement('textarea'); {
+                ta.value = value.toString();
+                ta.style.position = 'fixed';
+                ta.style.inset = '0';
+                document.body.append(ta);
+                ta.focus();
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Unable to copy to clipboard', err);
+                }
+                ta.remove();
             }
-            ta.remove();
         }
     },
     unnamedArgumentList: [
