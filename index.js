@@ -1620,16 +1620,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
             if (namedArgs.cmd instanceof SlashCommandClosure) {
                 /**@type {SlashCommandClosure} */
                 const closure = namedArgs.cmd;
-                text.toString().replace(re, (...matches) => {
+                /**@type {RegExpExecArray} */
+                let matches;
+                while ((matches = re.exec(text)) != null) {
                     const copy = closure.getCopy();
-                    matches.slice(0, -2).forEach((match, idx) => {
+                    matches.forEach((match, idx) => {
                         copy.scope.setMacro(`$${idx}`, match ?? '');
                     });
-                    copy.scope.setMacro('$index', matches.slice(-2)[0]);
-                    copy.scope.setMacro('$text', matches.slice(-1)[0]);
+                    for (const key of Object.keys(matches.groups)) {
+                        copy.scope.setMacro(`$:${key}`, matches.groups[key]);
+                    }
+                    copy.scope.setMacro('$index', matches.index);
+                    copy.scope.setMacro('$text', matches.input);
                     cmds.push(async () => (await copy.execute())?.pipe);
-                    return '';
-                });
+                }
             } else {
                 text.toString().replace(re, (...matches) => {
                     const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
