@@ -2130,63 +2130,100 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'download',
 // GROUP: DOM Interaction
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
     callback: (args, query) => {
-        /**@type {HTMLElement} */
-        let target;
+        const quiet = isTrueBoolean(args.quiet);
+        /**@type {HTMLElement[]} */
+        let targets;
         try {
-            target = document.querySelector(query);
+            targets = isTrueBoolean(args.multi) ? [...document.querySelectorAll(query)] : [document.querySelector(query)];
+            targets.filter(it=>it);
         } catch (ex) {
             toastr.error(ex?.message ?? ex);
-        }
-        if (!target) {
-            toastr.warning(`No element found for query: ${query}`);
             return '';
         }
-        switch (args.action) {
-            case 'click': {
-                target.click();
-                break;
-            }
-            case 'value': {
-                if (target.value === undefined) {
-                    toastr.warning(`Cannot set value on ${target.tagName}`);
-                    return '';
-                }
-                target.value = args.value;
-                target.dispatchEvent(new Event('change', { bubbles:true }));
-                target.dispatchEvent(new Event('input', { bubbles:true }));
-                target.dispatchEvent(new Event('mouseup', { bubbles:true }));
-                return '';
-            }
-            case 'property': {
-                if (Object.keys(args).includes('value')) {
-                    target[args.property] = args.value;
-                }
-                if (target[args.property] === undefined) {
-                    toastr.warning(`Property "${args.property}" does not exist on ${target.tagName}`);
-                    return '';
-                }
-                const propVal = target[args.property];
-                if (typeof propVal != 'string') {
-                    return JSON.stringify(propVal);
-                }
-                return propVal ?? '';
-            }
-            case 'attribute': {
-                if (Object.keys(args).includes('value')) {
-                    target.setAttribute(args.attribute, args.value);
-                }
-                return target.getAttribute(args.attribute) ?? '';
-            }
-            case 'call': {
-                if (target[args.property] === undefined || !(target[args.property] instanceof Function)) {
-                    toastr.warning(`Property "${args.property}" does not exist or is not callable on ${target.tagName}`);
-                    return '';
-                }
-                return target[args.property]() ?? '';
-            }
+        if (!targets?.length) {
+            quiet || toastr.warning(`No element found for query: ${query}`);
+            return '';
         }
+        const result = targets.map((target,idx)=>{
+            if (args.target !== undefined && idx != Number(args.target)) return '';
+            switch (args.action) {
+                case 'click': {
+                    target.click();
+                    return '';
+                }
+                case 'value': {
+                    if (target.value === undefined) {
+                        quiet || toastr.warning(`Cannot set value on ${target.tagName}`);
+                        return '';
+                    }
+                    target.value = args.value;
+                    target.dispatchEvent(new Event('change', { bubbles:true }));
+                    target.dispatchEvent(new Event('input', { bubbles:true }));
+                    target.dispatchEvent(new Event('mouseup', { bubbles:true }));
+                    return '';
+                }
+                case 'property': {
+                    if (Object.keys(args).includes('value')) {
+                        target[args.property] = args.value;
+                    }
+                    if (target[args.property] === undefined) {
+                        quiet || toastr.warning(`Property "${args.property}" does not exist on ${target.tagName}`);
+                        return '';
+                    }
+                    const propVal = target[args.property];
+                    return propVal ?? '';
+                }
+                case 'attribute': {
+                    if (Object.keys(args).includes('value')) {
+                        target.setAttribute(args.attribute, args.value);
+                    }
+                    return target.getAttribute(args.attribute) ?? '';
+                }
+                case 'call': {
+                    if (target[args.property] === undefined || !(target[args.property] instanceof Function)) {
+                        quiet || toastr.warning(`Property "${args.property}" does not exist or is not callable on ${target.tagName}`);
+                        return '';
+                    }
+                    let callArgs = [];
+                    if (args.args !== undefined) {
+                        try {
+                            callArgs = JSON.parse(args.args);
+                            if (!Array.isArray(callArgs)) callArgs = [callArgs];
+                        } catch {
+                            callArgs = [args.args];
+                        }
+                    }
+                    return target[args.property](...callArgs) ?? '';
+                }
+            }
+        });
+        if (isTrueBoolean(args.multi) && args.target !== undefined) {
+            const r = result[args.target];
+            if (typeof r != 'string') return JSON.stringify(r);
+            return r;
+        }
+        if (isTrueBoolean(args.multi)) return JSON.stringify(result);
+        if (typeof result[0] != 'string') return JSON.stringify(result[0]);
+        return result[0];
     },
     namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'quiet',
+            description: 'true: don\'t show warnings',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'multi',
+            description: 'true: target all matching elements; false: target first matching element',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'target',
+            description: 'target the n-th matching element if multi=true (zero-based)',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+        }),
         SlashCommandNamedArgument.fromProps({
             name: 'action',
             description: 'the action to perform',
