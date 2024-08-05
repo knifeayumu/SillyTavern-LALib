@@ -47,7 +47,7 @@ function parseBooleanOperands(args) {
             return operandLocalVariable ?? '';
         }
 
-        if (extension_settings?.variables?.[operand] !== undefined) {
+        if (extension_settings?.variables?.global?.[operand] !== undefined) {
             const operandGlobalVariable = extension_settings.variables[operand];
             return operandGlobalVariable ?? '';
         }
