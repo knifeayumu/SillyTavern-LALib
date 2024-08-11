@@ -17,12 +17,14 @@ Library of STScript commands.
 - Group Chats (memberpos, group-get)
 - Conditionals - switch (switch, case)
 - Conditionals - if (ife, elseif, else, then)
-- World Info (wi-list-books, wi-list-entries)
+- World Info (wi-list-books, wi-list-entries, wi-activate)
 - Costumes / Sprites (costumes)
 - Quick Replies (qr-edit, qr-add)
 - Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, message-move, message-on, message-off, message-listeners, role-swap)
 - Time & Date (timestamp)
-- Async (fireandforget, sfx)
+- Async (fireandforget)
+- Logging (console-log, console-warn, console-error)
+- Audio (sfx)
 
 
 
@@ -1229,6 +1231,12 @@ Downloads value as a text file.
 
 
 #### `/dom`
+- `[quiet:boolean]? = false`  
+ *optional* true: don't show warnings
+- `[multi:boolean]? = false`  
+ *optional* true: target all matching elements; false: target first matching element
+- `[target:number]?`  
+ *optional* target the n-th matching element if multi=true (zero-based)
 - `[action=click|value|property|attribute|call]`  
  the action to perform
 - `[value:string]?`  
@@ -1545,6 +1553,20 @@ Get a list of World Info entries from currently active books or from the book wi
 
 
 
+#### `/wi-activate`
+
+Activate World Info entries based on the current chat and trigger their Automation IDs.
+
+##### Examples
+
+```stscript
+/wi-activate
+```
+
+
+
+
+
 
 
 ### Costumes / Sprites
@@ -1562,7 +1584,8 @@ Get a list of costume / sprite folders, recursive by default.
 ##### Examples
 
 ```stscript
-/costumes Alice | /echo Alice's costumes: {{pipe}}
+/costumes Alice |
+/echo Alice's costumes: {{pipe}}
 ```
 
 ```stscript
@@ -2058,6 +2081,69 @@ Execute a closure or command without waiting for it to finish.
 
 
 
+
+
+### Logging
+
+
+
+#### `/console-log`
+- `(string)`  
+ the value to log
+
+logs a value to the browser console
+
+##### Examples
+
+```stscript
+/console-log Hello, World!
+```
+
+
+
+
+
+#### `/console-warn`
+- `(string)`  
+ the value to log
+
+logs a value to the browser console as a warning
+
+##### Examples
+
+```stscript
+/console-warn This is a warning!
+```
+
+
+
+
+
+#### `/console-error`
+- `(string)`  
+ the value to log
+
+logs a value to the browser console as an error
+
+##### Examples
+
+```stscript
+/console-error OOPS!
+```
+
+
+
+### Audio
+
+
+
+
+```
+
+
+
+
+
 #### `/sfx`
 - `[volume:number]? = 1.0`  
  *optional* playback volume
@@ -2101,8 +2187,7 @@ UNDOCUMENTED
 ##### Examples
 
 ```stscript
-/fetch http://example.com |
-/echo
+some code here
 ```
 
 
@@ -2124,9 +2209,7 @@ UNDOCUMENTED
 ##### Examples
 
 ```stscript
-/fetch http://example.com |
-/$ query=h1 take=textContent |
-/echo
+some code here
 ```
 
 
@@ -2148,8 +2231,6 @@ UNDOCUMENTED
 ##### Examples
 
 ```stscript
-/fetch http://example.com |
-/$$ query=p call=remove |
-/echo
+some code here
 ```
 

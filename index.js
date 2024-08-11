@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, name1, name2, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage, substituteParams } from '../../../../script.js';
+import { Generate, callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, name1, name2, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage, substituteParams } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -11,7 +11,7 @@ import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandC
 import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
 import { debounce, delay, escapeRegex, isFalseBoolean, isTrueBoolean, uuidv4 } from '../../../utils.js';
-import { world_info } from '../../../world-info.js';
+import { getWorldInfoPrompt, world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
 
 
@@ -2863,6 +2863,14 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
     ],
     helpString: 'Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.',
     returns: 'a dictionary of book entries, or a flat list of entries',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-activate',
+    callback: (args, value)=>{
+        getWorldInfoPrompt(chat.filter(it=>!it.is_system).map(it=>it.mes).toReversed(), Number.MAX_SAFE_INTEGER, false);
+        return '';
+    },
+    helpString: 'Activate World Info entries based on the current chat and trigger their Automation IDs.',
 }));
 
 

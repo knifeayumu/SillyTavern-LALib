@@ -197,6 +197,8 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md'), 'w', encoding='u
 					f.write(f'  \n {opt}{arg["description"]}')
 				f.write('\n')
 			for arg in cmd.unnamed:
+				if 'typeList' not in arg:
+					arg['typeList'] = ['string']
 				f.write(f'- `(')
 				if 'enumList' in arg and arg['enumList']:
 					enums = '|'.join([x[0] if type(x) == list else x for x in arg['enumList']])
