@@ -1622,16 +1622,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 const closure = namedArgs.cmd;
                 /**@type {RegExpExecArray} */
                 let matches;
-                while ((matches = re.exec(text)) != null) {
+                let matchStart = -1;
+                while ((matches = re.exec(text)) != null && matchStart != matches.index) {
+                    matchStart = matches.index;
                     const copy = closure.getCopy();
                     matches.forEach((match, idx) => {
                         copy.scope.setMacro(`$${idx}`, match ?? '');
                     });
-                    for (const key of Object.keys(matches.groups)) {
+                    for (const key of Object.keys(matches.groups ?? {})) {
                         copy.scope.setMacro(`$:${key}`, matches.groups[key]);
                     }
                     copy.scope.setMacro('$index', matches.index);
                     copy.scope.setMacro('$text', matches.input);
+                    copy.scope.setMacro('$*', '');
                     cmds.push(async () => (await copy.execute())?.pipe);
                 }
             } else {
@@ -3728,13 +3731,30 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
 // GROUP: Undocumented
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
     callback: async (args, value) => {
-        if (!window.stfetch) {
-            toastr.error('Userscript missing: SillyTavern - Fetch');
-            throw new Error('Userscript missing: SillyTavern - Fetch');
-        }
         try {
-            const response = await window.stfetch({ url: value });
-            return response.responseText;
+            const fn = uuidv4();
+            const dlResponse = await fetch('/api/assets/download', {
+                method: 'POST',
+                headers: getRequestHeaders(),
+                body: JSON.stringify({
+                    url: value,
+                    filename: fn,
+                    category: 'ambient',
+                }),
+            });
+            if (!dlResponse.ok) throw new Error(`/fetch - failed to fetch URL: ${value}`);
+            const contentResponse = await fetch(`/assets/ambient/${fn}`);
+            if (!contentResponse.ok) throw new Error(`/fetch - failed to fetch URL: ${value}`);
+            const text = await contentResponse.text();
+            fetch('/api/assets/delete', {
+                method: 'POST',
+                headers: getRequestHeaders(),
+                body: JSON.stringify({
+                    filename: fn,
+                    category: 'ambient',
+                }),
+            });
+            return text;
         }
         catch (ex) {
             console.warn('[LALIB]', '[FETCH]', ex);
