@@ -2,6 +2,7 @@ import { Generate, callPopup, characters, chat, chat_metadata, eventSource, even
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
+import { Popup, POPUP_TYPE } from '../../../popup.js';
 import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { SlashCommandAbortController } from '../../../slash-commands/SlashCommandAbortController.js';
@@ -3732,6 +3733,85 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
     callback: async (args, value) => {
         try {
+            const whitelist = JSON.parse(localStorage.getItem('lalib-fetch') ?? '[]');
+            const url = new URL(value.toString());
+            let connect = whitelist.includes(url.hostname) || whitelist.includes(`${url.hostname}${url.pathname}`);
+            if (!connect) {
+                const dom = document.createElement('div'); {
+                    const h = document.createElement('h3'); {
+                        h.textContent = '/fetch';
+                        dom.append(h);
+                    }
+                    const q = document.createElement('h4'); {
+                        q.textContent = 'Do you want to connect to the following URL?';
+                        dom.append(q);
+                    }
+                    const v = document.createElement('var'); {
+                        v.textContent = value.toString();
+                        v.style.margin = '2em 0';
+                        v.style.display = 'block';
+                        dom.append(v);
+                    }
+                    const btns = document.createElement('div'); {
+                        btns.style.display = 'flex';
+                        btns.style.flexDirection = 'column';
+                        btns.style.alignItems = 'center';
+                        btns.style.gap = '0.5em';
+                        btns.style.marginTop = '1em';
+                        const list = [
+                            { text: 'Connect once', action:()=>{
+                                connect = true;
+                                dlg.completeAffirmative();
+                            } },
+                            { text: 'Allow connections to', url: `${url.hostname}${url.pathname}`, action:()=>{
+                                whitelist.push(`${url.hostname}${url.pathname}`);
+                                connect = true;
+                                dlg.completeAffirmative();
+                            } },
+                            { text: 'Allow connections to', url: url.hostname, action:()=>{
+                                whitelist.push(url.hostname);
+                                connect = true;
+                                dlg.completeAffirmative();
+                            } },
+                        ];
+                        for (const item of list) {
+                            const btn = document.createElement('div'); {
+                                btn.classList.add('menu_button');
+                                btn.style.width = '90%';
+                                btn.style.display = 'flex';
+                                btn.style.flexDirection = 'column';
+                                btn.style.height = 'auto';
+                                btn.style.padding = '0.75em';
+                                btn.addEventListener('click', ()=>item.action());
+                                const txt = document.createElement('div'); {
+                                    txt.textContent = item.text;
+                                    btn.append(txt);
+                                }
+                                if (item.url) {
+                                    const url = document.createElement('div'); {
+                                        url.style.fontSize = '0.7em';
+                                        url.style.fontFamily = 'var(--monoFontFamily)';
+                                        url.style.opacity = '0.6';
+                                        url.textContent = item.url;
+                                        btn.append(url);
+                                    }
+                                }
+                                btns.append(btn);
+                            }
+                        }
+                        dom.append(btns);
+                    }
+                }
+                const dlg = new Popup(dom, POPUP_TYPE.TEXT, null, {
+                    okButton: 'Block Connection',
+                });
+                await dlg.show();
+                localStorage.setItem('lalib-fetch', JSON.stringify(whitelist));
+            }
+            if (!connect) {
+                toastr.error(value.toString(), '/fetch - Connection blocked');
+                return '';
+            }
             const fn = uuidv4();
             const dlResponse = await fetch('/api/assets/download', {
                 method: 'POST',
