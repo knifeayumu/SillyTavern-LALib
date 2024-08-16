@@ -3004,6 +3004,15 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-add',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  message:string,
+     *  filter:SlashCommandClosure,
+     * }} args
+     * @param {*} value
+     * @returns
+     */
     callback: async (args, value) => {
         const idx = args.message && !isNaN(Number(args.message)) ? Number(args.message) : chat.length - 1;
         const mes = chat[idx];
@@ -3013,25 +3022,58 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         if (mes.swipe_id === undefined || (mes.swipes?.length ?? 0) < 2) {
             return '';
         }
-        const swipeId = Number(value == '' ? mes.swipe_id : value);
-        if (swipeId + 1 < mes.swipes.length) {
-            mes.swipe_id = swipeId;
+        const swipeList = [];
+        if (args.filter) {
+            if (args.filter.argumentList.length < 1) throw new Error('/swipes-del filter= closure requires at least one argument');
+            for (let i = 0; i < mes.swipes.length; i++) {
+                const swipeObject = Object.assign(
+                    { index:i, mes:mes.swipes[i] },
+                    mes.swipe_info[i],
+                );
+                args.filter.providedArgumentList.push(Object.assign(new SlashCommandNamedArgumentAssignment(), {
+                    start: 0,
+                    end: 0,
+                    name: args.filter.argumentList[0].name,
+                    value: JSON.stringify(swipeObject),
+                }));
+                if (isTrueBoolean((await args.filter.execute()).pipe)) {
+                    swipeList.push(i);
+                }
+            }
         } else {
-            mes.swipe_id = swipeId - 1;
+            swipeList.push(Number(value == '' ? mes.swipe_id : value));
         }
-        mes.swipes.splice(swipeId, 1);
-        mes.mes = mes.swipes[mes.swipe_id];
-        mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
-        mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
-        mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
-        mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
-        mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
-            mes.mes,
-            mes.name,
-            mes.is_system,
-            mes.is_user,
-            Number(mesDom.getAttribute('mesid')),
-        );
+        if (swipeList.length == mes.swipes.length) throw new Error('/swipes-del cannot delete all swipes');
+        swipeList.reverse();
+        const originalSwipe = mes.swipe_id ?? 0;
+        for (const swipeId of swipeList) {
+            const currentSwipe = mes.swipe_id ?? 0;
+            if (currentSwipe == swipeId) {
+                if (swipeId + 1 < mes.swipes.length) {
+                    mes.swipe_id = swipeId;
+                } else {
+                    mes.swipe_id = swipeId - 1;
+                }
+            } else if (currentSwipe > swipeId) {
+                mes.swipe_id = currentSwipe - 1;
+            }
+            mes.swipes.splice(swipeId, 1);
+            mes.swipe_info.splice(swipeId, 1);
+        }
+        if (originalSwipe != mes.swipe_id) {
+            mes.mes = mes.swipes[mes.swipe_id];
+            mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
+            mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
+            mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
+            mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
+            mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
+                mes.mes,
+                mes.name,
+                mes.is_system,
+                mes.is_user,
+                Number(mesDom.getAttribute('mesid')),
+            );
+        }
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
     },
@@ -3041,6 +3083,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             description: 'the id of the message to delete the swipe from',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'filter',
+            description: 'closure accepting a swipe dictionary as argument returning true or false',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+        }),
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
@@ -3048,7 +3095,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: 'Delete the current swipe or the swipe at the specified index (0-based).',
+    helpString: `
+        <div>
+            Delete the current swipe or the swipe at the specified index (0-based).
+        </div>
+        <div>
+            Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/swipes-del |</code></pre>
+                    <pre><code class="language-stscript">/swipes-del 5 |</code></pre>
+                    <pre><code class="language-stscript">/swipes-del message=20 |</code></pre>
+                    <pre><code class="language-stscript">/swipes-del filter={: swipe=\n\t/var key=swipe index=mes |\n\t/test left={{pipe}} rule=in right="bad word" |\n:} |</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
