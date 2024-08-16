@@ -3729,7 +3729,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
 
 
 
-// GROUP: Undocumented
+// GROUP: Web Requests
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
     callback: async (args, value) => {
         try {
@@ -3837,7 +3837,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
             return text;
         }
         catch (ex) {
-            console.warn('[LALIB]', '[FETCH]', ex);
+            console.error('[LALIB]', '[FETCH]', ex);
+            const dom = document.createElement('div'); {
+                const msg = document.createElement('div'); {
+                    msg.textContent = ex.message;
+                    dom.append(msg);
+                }
+                const url = document.createElement('code'); {
+                    url.textContent = value.toString();
+                    dom.append(url);
+                }
+            }
+            toastr.error(dom.outerHTML, '/fetch', { escapeHtml:false });
+            throw ex;
         }
     },
     unnamedArgumentList: [
@@ -3847,7 +3859,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
             isRequired: true,
         }),
     ],
-    helpString: 'UNDOCUMENTED',
+    helpString: `
+        <div>
+            Fetch the contents of the provided URL.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/fetch http://example.com |\n/echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
@@ -3898,7 +3922,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
             isRequired: true,
         }),
     ],
-    helpString: 'UNDOCUMENTED',
+    helpString: `
+        <div>
+            Retrieve the first matching element from the provided HTML or call a method on the first
+            matching element and return the resulting HTML.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/fetch http://example.com |\n/$ query=h1 take=textContent |\n/echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
@@ -3946,5 +3983,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
             isRequired: true,
         }),
     ],
-    helpString: 'UNDOCUMENTED',
+    helpString: `
+        <div>
+            Retrieve all matching elements from the provided HTML or call a method on all
+            matching elements and return the resulting HTML.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/fetch http://example.com |\n/$$ query=h1 take=textContent |\n/echo</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));

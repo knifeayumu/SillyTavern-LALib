@@ -25,6 +25,7 @@ Library of STScript commands.
 - Async (fireandforget)
 - Logging (console-log, console-warn, console-error)
 - Audio (sfx)
+- Web Requests (fetch, $, $$)
 
 
 
@@ -2133,14 +2134,11 @@ logs a value to the browser console as an error
 
 
 
+
+
+
+
 ### Audio
-
-
-
-
-```
-
-
 
 
 
@@ -2174,7 +2172,7 @@ Plays an audio file.
 
 
 
-### Undocumented
+### Web Requests
 
 
 
@@ -2182,12 +2180,16 @@ Plays an audio file.
 - `(string)`  
  the url to fetch
 
-UNDOCUMENTED
+<div>
+Fetch the contents of the provided URL.
+</div>
+
 
 ##### Examples
 
 ```stscript
-some code here
+/fetch http://example.com |
+/echo
 ```
 
 
@@ -2204,12 +2206,18 @@ some code here
 - `(string)`  
  the html to operate on
 
-UNDOCUMENTED
+<div>
+Retrieve the first matching element from the provided HTML or call a method on the first
+matching element and return the resulting HTML.
+</div>
+
 
 ##### Examples
 
 ```stscript
-some code here
+/fetch http://example.com |
+/$ query=h1 take=textContent |
+/echo
 ```
 
 
@@ -2226,11 +2234,17 @@ some code here
 - `(string)`  
  the html to operate on
 
-UNDOCUMENTED
+<div>
+Retrieve all matching elements from the provided HTML or call a method on all
+matching elements and return the resulting HTML.
+</div>
+
 
 ##### Examples
 
 ```stscript
-some code here
+/fetch http://example.com |
+/$$ query=p call=remove |
+/echo
 ```
 
