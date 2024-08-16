@@ -2984,6 +2984,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-add',
         );
         [...mesDom.querySelectorAll('.swipe_right .swipes-counter')].forEach(it=>it.textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`);
         saveChatConditional();
+        eventSource.emit(event_types.MESSAGE_SWIPED, idx);
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
@@ -3073,6 +3074,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
                 mes.is_user,
                 Number(mesDom.getAttribute('mesid')),
             );
+            eventSource.emit(event_types.MESSAGE_SWIPED, idx);
         }
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
@@ -3142,6 +3144,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
         );
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
+        eventSource.emit(event_types.MESSAGE_SWIPED, idx);
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
