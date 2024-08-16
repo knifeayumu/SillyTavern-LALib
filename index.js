@@ -3109,8 +3109,14 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             <ul>
                 <li>
                     <pre><code class="language-stscript">/swipes-del |</code></pre>
+                </li>
+                <li>
                     <pre><code class="language-stscript">/swipes-del 5 |</code></pre>
+                </li>
+                <li>
                     <pre><code class="language-stscript">/swipes-del message=20 |</code></pre>
+                </li>
+                <li>
                     <pre><code class="language-stscript">/swipes-del filter={: swipe=\n\t/var key=swipe index=mes |\n\t/test left={{pipe}} rule=in right="bad word" |\n:} |</code></pre>
                 </li>
             </ul>
