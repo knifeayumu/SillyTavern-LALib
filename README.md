@@ -7,7 +7,7 @@ Library of STScript commands.
 - List Operations (foreach, map, filter, find, slice, splice, shuffle, pick, reverse, dict, keys)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
-- Regular Expressions (re-escape, re-test, re-replace)
+- Regular Expressions (re-escape, re-test, re-replace, re-exec)
 - Accessing & Manipulating Structured Data (getat, setat)
 - Exception Handling (try, catch)
 - Null Handling (ifempty, ifnullish)
@@ -924,6 +924,36 @@ Searches the provided variable or value with the regular expression and replaces
 
 
 
+#### `/re-exec`
+- `[find:string]`  
+ the regular expression (/pattern/flags)
+- `[first:boolean]? = false`  
+ *optional* return only the first match instead of a list
+- `(string)?`  
+ *optional* the value to execute the regex on
+
+<div>
+Searches the provided value with the regular expression and returns a list of all matches.
+</div>
+
+
+##### Examples
+
+```stscript
+/re-exec find=/\b(?<word>\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
+/json-pretty |
+/comment ```{{newline}}{{pipe}}{{newline}}```
+```
+```stscript
+/re-exec first= find=/\b(?<word>\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
+/json-pretty |
+/comment ```{{newline}}{{pipe}}{{newline}}```
+```
+
+
+
+
+
 
 
 ### Accessing & Manipulating Structured Data
@@ -1778,10 +1808,18 @@ Add a new swipe to the last message or the message with the provided messageId.
 #### `/swipes-del`
 - `[message:number]?`  
  *optional* the id of the message to delete the swipe from
+- `[filter:closure]?`  
+ *optional* closure accepting a swipe dictionary as argument returning true or false
 - `(number)?`  
  *optional* the index of the swipe to delete (0-based)
 
+<div>
 Delete the current swipe or the swipe at the specified index (0-based).
+</div>
+<div>
+Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
+</div>
+
 
 ##### Examples
 
