@@ -3061,21 +3061,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             mes.swipes.splice(swipeId, 1);
             mes.swipe_info.splice(swipeId, 1);
         }
-        if (originalSwipe != mes.swipe_id) {
-            mes.mes = mes.swipes[mes.swipe_id];
-            mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
-            mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
-            mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
-            mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
-            mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
-                mes.mes,
-                mes.name,
-                mes.is_system,
-                mes.is_user,
-                Number(mesDom.getAttribute('mesid')),
-            );
-            eventSource.emit(event_types.MESSAGE_SWIPED, idx);
-        }
+        mes.mes = mes.swipes[mes.swipe_id];
+        mes.extra = structuredClone(mes.swipe_info?.[mes.swipe_id]?.extra);
+        mes.send_date = mes.swipe_info?.[mes.swipe_id]?.send_date;
+        mes.gen_started = mes.swipe_info?.[mes.swipe_id]?.gen_started;
+        mes.gen_finished = mes.swipe_info?.[mes.swipe_id]?.gen_finished;
+        mesDom.querySelector('.mes_text').innerHTML = messageFormatting(
+            mes.mes,
+            mes.name,
+            mes.is_system,
+            mes.is_user,
+            Number(mesDom.getAttribute('mesid')),
+        );
+        eventSource.emit(event_types.MESSAGE_SWIPED, idx);
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
     },
