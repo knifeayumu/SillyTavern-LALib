@@ -1516,7 +1516,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                         copy.scope.setMacro(`$:${key}`, matches.groups[key]);
                     }
                     copy.scope.setMacro('$index', matches.index);
-                    copy.scope.setMacro('$text', matches.input);
+                    copy.scope.setMacro('$input', matches.input);
                     copy.scope.setMacro('$*', '');
                     cmds.push(async () => (await copy.execute())?.pipe);
                 }
