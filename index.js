@@ -1601,6 +1601,79 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
     `,
 }));
 
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-exec',
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  find:string,
+     *  first:string,
+     * }} namedArgs
+     * @param {string} value
+     */
+    callback: (namedArgs, value)=>{
+        if (namedArgs.find == null) {
+            throw new Error('/re-replace requires find= to be set.');
+        }
+        const returnFirst = isTrueBoolean((namedArgs.first ?? 'false') || 'true');
+        const text = value;
+        const re = makeRegex(namedArgs.find);
+        const matchList = [];
+        let matches;
+        let matchStart = -1;
+        while ((matches = re.exec(text)) != null && matchStart != matches.index) {
+            matchStart = matches.index;
+            const dict = {};
+            matches.forEach((match, idx) => {
+                dict[idx] = match;
+            });
+            for (const key of Object.keys(matches.groups ?? {})) {
+                dict[`:${key}`] = matches.groups[key];
+            }
+            dict.index = matches.index;
+            dict.input = matches.input;
+            matchList.push(dict);
+        }
+        if (returnFirst) return matchList.length ? JSON.stringify(matchList[0]) : '';
+        return JSON.stringify(matchList);
+    },
+    returns: 'list of match dictionaries',
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+            name: 'find',
+            description: 'the regular expression (/pattern/flags)',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+        SlashCommandNamedArgument.fromProps({
+            name: 'first',
+            description: 'return only the first match instead of a list',
+            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            defaultValue: 'false',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the value to execute the regex on',
+            typeList: [ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    helpString: `
+        <div>
+            Searches the provided value with the regular expression and returns a list of all matches.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/re-exec find=/\\b(?<word>\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |\n/json-pretty |\n/comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/re-exec first= find=/\\b(?<word>\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |\n/json-pretty |\n/comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
 
 
 // GROUP: Accessing & Manipulating Structured Data
