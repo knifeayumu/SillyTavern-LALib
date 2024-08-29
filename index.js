@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage, showSwipeButtons } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -3058,6 +3058,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-add',
         [...mesDom.querySelectorAll('.swipe_right .swipes-counter')].forEach(it=>it.textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`);
         saveChatConditional();
         eventSource.emit(event_types.MESSAGE_SWIPED, idx);
+        showSwipeButtons();
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
