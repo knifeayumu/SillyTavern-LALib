@@ -731,7 +731,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
     callback: (args, value) => {
-        const list = getListVar(args.var, args.globalvar, args.value);
+        let list = getListVar(args.var, args.globalvar, args.value);
+        if (!list) {
+            list = [...getVar(args.var, args.globalvar, args.value)];
+            list.splice(args.start, args.delete, ...(value ?? ''));
+            return list.join('');
+        }
         list.splice(args.start, args.delete, ...(value ?? []));
         return JSON.stringify(list);
     },
@@ -746,8 +751,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
         SlashCommandNamedArgument.fromProps({ name: 'value',
-            description: 'the list to operate on',
-            typeList: [ARGUMENT_TYPE.LIST],
+            description: 'the list or string to operate on',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.STRING],
         }),
         SlashCommandNamedArgument.fromProps({ name: 'var',
             description: 'name of the chat variable to operate on',
@@ -3150,6 +3155,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         eventSource.emit(event_types.MESSAGE_SWIPED, idx);
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
+        showSwipeButtons();
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
@@ -3223,6 +3229,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
         mesDom.querySelector('.swipe_right .swipes-counter').textContent = `${mes.swipe_id + 1}/${mes.swipes.length}`;
         saveChatConditional();
         eventSource.emit(event_types.MESSAGE_SWIPED, idx);
+        showSwipeButtons();
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({
