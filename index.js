@@ -2075,7 +2075,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the command to try',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
@@ -2145,7 +2145,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the command to execute if an exception occurred',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
