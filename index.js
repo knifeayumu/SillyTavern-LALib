@@ -441,12 +441,38 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
     /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {(string|SlashCommandClosure)[]} value
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  list:string,
+     *  aslist:string,
+     *  asList:string,
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure|string]} value
      */
     callback: async (args, value) => {
-        let list = getListVar(args.var, args.globalvar, args.list);
+        /**@type {Array} */
+        let list;
+        /**@type {string} */
+        let command;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
+            toastr.warning('Using var= or globalvar= or list= in /map is deprecated, please update your script to use unnamed arguments instead.', '/map (LALib)');
+            list = getListVar(args.var, args.globalvar, args.list);
+            if (value[0] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[0]);
+            } else {
+                command = value.join(' ');
+            }
+        } else {
+            list = getListVar(null, null, value[0]);
+            if (value[1] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[1]);
+            } else {
+                command = value[1];
+            }
+        }
         let result;
         const isList = Array.isArray(list);
         if (isList) {
@@ -456,27 +482,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             list = Object.entries(list);
             result = {};
         }
-        /**@type {string|SlashCommandClosure} */
-        let command;
-        if (value) {
-            if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
-            } else {
-                command = value.join(' ');
-            }
-        }
-        if (Array.isArray(list)) {
+        if (!Array.isArray(list)) {
+            throw new Error('/map requires a list or dictionary to operate on.');
+        } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
-                if (command instanceof SlashCommandClosure) {
-                    command.scope.setMacro('item', item);
-                    command.scope.setMacro('index', index);
-                    commandResult = (await command.execute());
+                if (closure) {
+                    closure.scope.setMacro('item', item);
+                    closure.scope.setMacro('index', index);
+                    closure.breakController = new SlashCommandBreakController();
+                    commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
+                    if (commandResult.isBreak) break;
                 } else {
                     commandResult = (await executeSlashCommandsWithOptions(
                         command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
@@ -496,10 +517,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
                 result[index] = commandResult.pipe;
                 try { result[index] = JSON.parse(result[index]); } catch { /*empty*/ }
             }
-        } else {
-            result = list;
         }
-        if (isTrueBoolean(args.asList) && !isList) {
+        if (isTrueFlag(args.aslist ?? args.asList) && !isList) {
             result = Object.keys(result).map(it => result[it]);
         }
         if (typeof result != 'string') {
@@ -508,29 +527,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         return result;
     },
     namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'asList',
-            description: 'whether to return the results of a dictionary/object as a list',
+        SlashCommandNamedArgument.fromProps({ name: 'aslist',
+            description: 'whether to return the results of a dictionary as a list',
             typeList: [ARGUMENT_TYPE.BOOLEAN],
             defaultValue: 'false',
             enumList: ['true', 'false'],
         }),
-        SlashCommandNamedArgument.fromProps({ name: 'list',
-            description: 'the list to map over',
-            typeList: [ARGUMENT_TYPE.LIST],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to use as the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to use as the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
+            description: 'the list or dictionary to iterate over',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
             description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
@@ -541,10 +553,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
         </div>
         <div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
+        <div>
             <strong>Examples:</strong>
             <ul>
                 <li>
-                    <pre><code class="language-stscript">/map list=[1,2,3] {: /mul {{item}} {{item}} :}</code></pre>
+                    <pre><code class="language-stscript">/map [1,2,3] {: /mul {{item}} {{item}} :}</code></pre>
+                    Calculates the square of each number.
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}</code></pre>
+                    Calculates the square of each number.
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}</code></pre>
                     Calculates the square of each number.
                 </li>
             </ul>
