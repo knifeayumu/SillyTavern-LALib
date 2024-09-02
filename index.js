@@ -1153,8 +1153,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'keys',
 
 // GROUP: Split & Join
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  find:string,
+     *  trim:string,
+     * }} args
+     * @param {string} value
+     */
     callback: (args, value)=>{
-        value = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /split is deprecated, please update your script to use the unnamed argument instead.', '/split (LALib)');
+            value = getVar(args.var, args.globalvar, value);
+        }
+        /**@type {string|RegExp} */
         let find = args.find ?? ',';
         if (find.match(/^\/.+\/[a-z]*$/)) {
             find = new RegExp(find.replace(/^\/(.+)\/([a-z]*)$/, '$1'), find.replace(/^\/(.+)\/([a-z]*)$/, '$2'));
@@ -1172,14 +1185,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
             typeList: [ARGUMENT_TYPE.BOOLEAN],
             defaultValue: 'true',
             enumList: ['true', 'false'],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to split',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to split',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
