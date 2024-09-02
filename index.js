@@ -7,15 +7,18 @@ import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { SlashCommandAbortController } from '../../../slash-commands/SlashCommandAbortController.js';
 import { ARGUMENT_TYPE, SlashCommandArgument, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
+import { SlashCommandBreakController } from '../../../slash-commands/SlashCommandBreakController.js';
 import { SlashCommandClosure } from '../../../slash-commands/SlashCommandClosure.js';
 import { SlashCommandClosureResult } from '../../../slash-commands/SlashCommandClosureResult.js';
-import { SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
+import { enumIcons } from '../../../slash-commands/SlashCommandCommonEnumsProvider.js';
+import { enumTypes, SlashCommandEnumValue } from '../../../slash-commands/SlashCommandEnumValue.js';
 import { SlashCommandNamedArgumentAssignment } from '../../../slash-commands/SlashCommandNamedArgumentAssignment.js';
 import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
 import { debounce, delay, escapeRegex, isFalseBoolean, isTrueBoolean, uuidv4 } from '../../../utils.js';
 import { evalBoolean, parseBooleanOperands } from '../../../variables.js';
 import { getWorldInfoPrompt, world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
+import { QuickReplySet } from '../../quick-reply/src/QuickReplySet.js';
 
 
 function getListVar(local, global, literal) {
