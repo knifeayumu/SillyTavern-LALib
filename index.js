@@ -173,27 +173,59 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'and',
-    callback: (args) => {
-        let left = args.left;
-        try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
-        let right = args.right;
-        try { right = isTrueBoolean(args.right); } catch { /*empty*/ }
-        return JSON.stringify((left && right) == true);
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  left:string,
+     *  right:string
+     * }} args
+     * @param {string[]} value
+     * @returns
+     */
+    callback: (args, value) => {
+        if (args.left !== undefined && args.right !== undefined) {
+            toastr.warning('Using left= and right= in /and is deprecated, please update your script to use unnamed arguments instead.', '/and (LALib)');
+            /**@type {string|boolean} */
+            let left = args.left;
+            try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
+            /**@type {string|boolean} */
+            let right = args.right;
+            try { right = isTrueBoolean(args.right); } catch { /*empty*/ }
+            return JSON.stringify((left && right) == true);
+        }
+        for (let v of value) {
+            let vv;
+            try { vv = isTrueBoolean(v); } catch { /*empty*/ }
+            if (!(vv ?? v)) return JSON.stringify(false);
+        }
+        return JSON.stringify(true);
     },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'left',
-            description: 'the left value to evaluate',
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'the values to evaluate',
             typeList: [ARGUMENT_TYPE.BOOLEAN],
-            isRequired: true,
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'right',
-            description: 'the right value to evaluate',
-            typeList: [ARGUMENT_TYPE.BOOLEAN],
+            acceptsMultiple: true,
             isRequired: true,
         }),
     ],
-    helpString: 'Returns true if both left and right are true, otherwise false.',
+    splitUnnamedArgument: true,
     returns: 'true or false',
+    helpString: `
+        <div>
+            Returns true if all values are true, otherwise false.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/and true true true</code></pre>
+                    Returns true.
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/and true false true</code></pre>
+                    Returns false.
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 
