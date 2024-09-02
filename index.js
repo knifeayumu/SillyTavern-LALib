@@ -1697,19 +1697,30 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
-    callback: async (namedArgs, value) => {
-        if (namedArgs.find == null) {
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  find:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async(args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /re-replace is deprecated, please update your script to use the unnamed argument instead.', '/re-replace (LALib)');
+        }
+        if (args.find == null) {
             throw new Error('/re-replace requires find= to be set.');
         }
-        const text = getVar(namedArgs.var, namedArgs.globalvar, value);
-        const re = makeRegex(namedArgs.find);
-        if (namedArgs.cmd) {
+        const text = getVar(args.var, args.globalvar, value);
+        const re = makeRegex(args.find);
+        if (args.cmd) {
             const replacements = [];
             /**@type {(function():Promise<string>)[]}*/
             const cmds = [];
-            if (namedArgs.cmd instanceof SlashCommandClosure) {
+            if (args.cmd instanceof SlashCommandClosure) {
                 /**@type {SlashCommandClosure} */
-                const closure = namedArgs.cmd;
+                const closure = args.cmd;
                 /**@type {RegExpExecArray} */
                 let matches;
                 let matchStart = -1;
@@ -1729,15 +1740,15 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 }
             } else {
                 text.toString().replace(re, (...matches) => {
-                    const cmd = namedArgs.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
+                    const cmd = args.cmd.replace(/\$(\d+)/g, (_, idx) => matches[idx]);
                     cmds.push(async () => (await executeSlashCommandsWithOptions(
                         cmd,
                         {
                             handleExecutionErrors: false,
                             handleParserErrors: false,
-                            parserFlags: namedArgs._parserFlags,
-                            scope: namedArgs._scope,
-                            abortController: namedArgs._abortController,
+                            parserFlags: args._parserFlags,
+                            scope: args._scope,
+                            abortController: args._abortController,
                         },
                     ))?.pipe);
                     return '';
@@ -1747,10 +1758,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
                 replacements.push(await cmd());
             }
             return text.toString().replace(re, () => replacements.shift());
-        } else if (namedArgs.replace != null) {
-            return text.toString().replace(re, namedArgs.replace);
+        } else if (args.replace != null) {
+            return text.toString().replace(re, args.replace);
         }
-        console.warn('[LALIB]', namedArgs, value, text);
+        console.warn('[LALIB]', args, value, text);
         throw new Error('/re-replace requires either replace= or cmd= to be set.');
     },
     returns: 'the new text',
@@ -1770,16 +1781,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
             name: 'cmd',
             description: 'a closure or slash command to execute for each match',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'var',
-            description: 'name of the chat variable to perform the replacement on',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'globalvar',
-            description: 'name of the global variable to perform the replacement on',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
