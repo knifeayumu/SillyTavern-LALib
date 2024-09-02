@@ -698,34 +698,50 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
     /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {(string|SlashCommandClosure)[]} value
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  list:string,
+     *  index:string,
+     *  last:string,
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure|string]} value
      */
     callback: async (args, value) => {
-        let list = getListVar(args.var, args.globalvar, args.list);
-        let result;
-        const isList = Array.isArray(list);
-        if (isList) {
-            list = list.map((it, idx) => [idx, it]);
-            result = [];
-        } else if (typeof list === 'object') {
-            list = Object.entries(list);
-            result = {};
-        }
-        /**@type {string|SlashCommandClosure} */
+        /**@type {Array} */
+        let list;
+        /**@type {string} */
         let command;
-        if (value) {
+        /**@type {SlashCommandClosure} */
+        let closure;
+        if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
+            toastr.warning('Using var= or globalvar= or list= in /find is deprecated, please update your script to use unnamed arguments instead.', '/find (LALib)');
+            list = getListVar(args.var, args.globalvar, args.list);
             if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
+                closure = /**@type {SlashCommandClosure}*/(value[0]);
             } else {
                 command = value.join(' ');
             }
+        } else {
+            list = getListVar(null, null, value[0]);
+            if (value[1] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[1]);
+            } else {
+                command = value[1];
+            }
         }
-        if (Array.isArray(list)) {
+        const isList = Array.isArray(list);
+        if (isList) {
+            list = list.map((it, idx) => [idx, it]);
+        } else if (typeof list == 'object') {
+            list = Object.entries(list);
+        }
+        if (!Array.isArray(list)) {
+            throw new Error('/find requires a list or dictionary to operate on.');
+        } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
-            if (isTrueBoolean(args.last)) {
+            if (isTrueFlag(args.last)) {
                 list.reverse();
             }
             for (let [index, item] of list) {
@@ -733,10 +749,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     item = JSON.stringify(item);
                 }
                 let outcome;
-                if (command instanceof SlashCommandClosure) {
-                    command.scope.setMacro('item', item);
-                    command.scope.setMacro('index', index);
-                    commandResult = (await command.execute());
+                if (closure) {
+                    closure.scope.setMacro('item', item);
+                    closure.scope.setMacro('index', index);
+                    commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
                 } else {
                     commandResult = (await executeSlashCommandsWithOptions(
@@ -756,7 +772,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 }
                 outcome = commandResult.pipe;
                 if (isTrueBoolean(outcome)) {
-                    if (isTrueBoolean(args.index)) {
+                    if (isTrueFlag(args.index)) {
                         return index.toString();
                     }
                     if (typeof item != 'string') {
@@ -767,21 +783,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             }
             return '';
         }
-        return '';
     },
     namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'list',
-            description: 'the list or dictionary to search',
-            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable containing the list or dictionary',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable containing the list or dictionary',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
         SlashCommandNamedArgument.fromProps({ name: 'index',
             description: 'return the matching item\'s index instead of the item',
             typeList: [ARGUMENT_TYPE.BOOLEAN],
@@ -797,8 +800,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
+            description: 'the list or dictionary to iterate over',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
             description: 'the command to execute for each item, using {{item}} and {{index}} as placeholders',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
@@ -811,7 +819,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             <strong>Example:</strong>
             <ul>
                 <li>
-                    <pre><code class="language-stscript">/find list=[1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo</code></pre>
+                    <pre><code class="language-stscript">/find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo</code></pre>
                     returns 3
                 </li>
             </ul>
