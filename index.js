@@ -578,12 +578,36 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
     /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {(string|SlashCommandClosure)[]} value
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  list:string,
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure|string]} value
      */
     callback: async (args, value) => {
-        let list = getListVar(args.var, args.globalvar, args.list);
+        /**@type {Array} */
+        let list;
+        /**@type {string} */
+        let command;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
+            toastr.warning('Using var= or globalvar= or list= in /filter is deprecated, please update your script to use unnamed arguments instead.', '/filter (LALib)');
+            list = getListVar(args.var, args.globalvar, args.list);
+            if (value[0] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[0]);
+            } else {
+                command = value.join(' ');
+            }
+        } else {
+            list = getListVar(null, null, value[0]);
+            if (value[1] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[1]);
+            } else {
+                command = value[1];
+            }
+        }
         let result;
         const isList = Array.isArray(list);
         if (isList) {
@@ -593,16 +617,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             list = Object.entries(list);
             result = {};
         }
-        /**@type {string|SlashCommandClosure} */
-        let command;
-        if (value) {
-            if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
-            } else {
-                command = value.join(' ');
-            }
-        }
-        if (Array.isArray(list)) {
+        if (!Array.isArray(list)) {
+            throw new Error('/filter requires a list or dictionary to operate on.');
+        } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
             for (let [index, item] of list) {
@@ -610,11 +627,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                     item = JSON.stringify(item);
                 }
                 let outcome;
-                if (command instanceof SlashCommandClosure) {
-                    command.scope.setMacro('item', item);
-                    command.scope.setMacro('index', index);
-                    commandResult = (await command.execute());
+                if (closure) {
+                    closure.scope.setMacro('item', item);
+                    closure.scope.setMacro('index', index);
+                    closure.breakController = new SlashCommandBreakController();
+                    commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
+                    if (commandResult.isBreak) break;
                 } else {
                     commandResult = (await executeSlashCommandsWithOptions(
                         command.toString().replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
@@ -634,38 +653,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                 outcome = commandResult.pipe;
                 if (isTrueBoolean(outcome)) {
                     if (isList) {
-                        result.push(item);
+                        /**@type {Array}*/(result).push(item);
                     } else {
                         result[index] = item;
                     }
                 }
             }
-        } else {
-            result = list;
         }
         if (typeof result != 'string') {
             result = JSON.stringify(result);
         }
         return result;
     },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'list',
-            description: 'the list or dictionary to filter',
-            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable containing the list or dictionary',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable containing the list or dictionary',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
+            description: 'the list or dictionary to iterate over',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
             description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
@@ -678,7 +686,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             <strong>Example:</strong>
             <ul>
                 <li>
-                    <pre><code class="language-stscript">/filter list=[1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}</code></pre>
+                    <pre><code class="language-stscript">/filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}</code></pre>
                     returns [3, 4, 5]
                 </li>
             </ul>
