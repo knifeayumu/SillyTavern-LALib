@@ -1934,7 +1934,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
-    callback: async (args, value) => {
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  index:string,
+     *  value:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async(args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /setat is deprecated, please update your script to use value= instead.', '/setat (LALib)');
+        }
         try { value = JSON.parse(value); } catch { /*empty*/ }
         let index = getListVar(null, null, args.index) ?? [args.index];
         const list = getListVar(args.var, args.globalvar, args.value) ?? (Number.isNaN(Number(index[0])) ? {} : []);
@@ -1980,16 +1992,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
             isRequired: true,
         }),
         SlashCommandNamedArgument.fromProps({
-            name: 'var',
-            description: 'name of the chat variable to update',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'globalvar',
-            description: 'name of the global variable to update',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
             name: 'value',
             description: 'the value to update',
             typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
@@ -2014,7 +2016,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
                     returns <code>[1,"X",3]</code>
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/setat var=myVariable index=[1,2,"someProperty"] foobar</code></pre>
+                    <pre><code class="language-stscript">/setat value={{var::myVariable}} index=[1,2,"someProperty"] foobar</code></pre>
                     sets the value of <code>myVariable[1][2].someProperty</code> to "foobar" (the variable will be updated and the resulting value of myVariable will be returned)
                 </li>
             </ul>
