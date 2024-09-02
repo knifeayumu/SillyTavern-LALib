@@ -1886,7 +1886,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-exec',
 
 // GROUP: Accessing & Manipulating Structured Data
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
-    callback: (args, value) => {
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  index:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async(args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /getat is deprecated, please update your script to use the unnamed argument instead.', '/getat (LALib)');
+        }
         let index = getListVar(null, null, args.index) ?? [args.index];
         if (!Array.isArray(index)) {
             index = [index];
@@ -1909,16 +1920,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
             description: 'the index, field name, or list of indices/field names to retrieve',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.LIST],
             isRequired: true,
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'var',
-            description: 'name of the chat variable to retrieve from',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'globalvar',
-            description: 'name of the global variable to retrieve from',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
