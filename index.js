@@ -301,7 +301,24 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
             isRequired: true,
         }),
     ],
-    helpString: 'Returns true if value is false, otherwise true.',
+    helpString: `
+        <div>
+            Returns true if value is false, otherwise true.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/not false</code></pre>
+                    Returns true.
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/not true</code></pre>
+                    Returns false.
+                </li>
+            </ul>
+        </div>
+    `,
     returns: 'true or false',
 }));
 
