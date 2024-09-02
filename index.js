@@ -3120,17 +3120,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-edit',
             name: 'set',
             description: 'the name of the quick reply set',
             typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: (executor) => QuickReplySet.list.
+                filter(qrSet => qrSet.name != String(executor.namedArgumentList.find(x => x.name == 'set')?.value))
+                .map(qrSet => new SlashCommandEnumValue(qrSet.name, null, enumTypes.enum, 'S'))
+            ,
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'label',
             description: 'the label of the quick reply',
             typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: (executor) => QuickReplySet.get(String(executor.namedArgumentList.find(x => x.name == 'set')?.value))?.qrList.map(qr => {
+                const message = `${qr.automationId ? `[${qr.automationId}]` : ''} ${qr.title || qr.message}`.trim();
+                return new SlashCommandEnumValue(qr.label, message, enumTypes.enum, enumIcons.qr);
+            }) ?? [],
         }),
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the label of the quick reply',
             typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: (executor) => QuickReplySet.get(String(executor.namedArgumentList.find(x => x.name == 'set')?.value))?.qrList.map(qr => {
+                const message = `${qr.automationId ? `[${qr.automationId}]` : ''} ${qr.title || qr.message}`.trim();
+                return new SlashCommandEnumValue(qr.label, message, enumTypes.enum, enumIcons.qr);
+            }) ?? [],
         }),
     ],
     helpString: 'Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.',
@@ -3151,6 +3163,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-add',
             name: 'set',
             description: 'the name of the quick reply set',
             typeList: [ARGUMENT_TYPE.STRING],
+            enumProvider: (executor) => QuickReplySet.list.
+                filter(qrSet => qrSet.name != String(executor.namedArgumentList.find(x => x.name == 'set')?.value))
+                .map(qrSet => new SlashCommandEnumValue(qrSet.name, null, enumTypes.enum, 'S'))
+            ,
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'label',
