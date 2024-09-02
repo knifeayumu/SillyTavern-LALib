@@ -81,6 +81,10 @@ function getRange(text, value) {
     return value.slice(start, Number(end) + 1);
 }
 
+function isTrueFlag(value) {
+    return isTrueBoolean((value ?? 'false') || 'true');
+}
+
 
 
 
