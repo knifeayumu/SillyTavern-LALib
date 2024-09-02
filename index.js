@@ -918,7 +918,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
         let isList = true;
         let insert;
         let start = Number(args.start);
-        let deleteCount = Number(args.delete);
+        let deleteCount = args.delete === '' ? Number.MAX_SAFE_INTEGER : Number(args.delete);
         if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
             toastr.warning('Using var= or globalvar= or value= in /splice is deprecated, please update your script to use insert= and the unnamed argument instead.', '/splice (LALib)');
             list = getListVar(args.var, args.globalvar, args.value);
@@ -949,7 +949,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
             isRequired: true,
         }),
         SlashCommandNamedArgument.fromProps({ name: 'delete',
-            description: 'the number of elements to remove in the list from start',
+            description: 'the number of elements to remove in the list from start (use delete= to remove everything)',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
         SlashCommandNamedArgument.fromProps({ name: 'insert',
