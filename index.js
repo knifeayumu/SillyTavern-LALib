@@ -327,12 +327,38 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
 // GROUP: List Operations
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {(string|SlashCommandClosure)[]} value
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  list:string,
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure|string]} value
      */
     callback: async (args, value) => {
-        let list = getListVar(args.var, args.globalvar, args.list);
+        /**@type {Array} */
+        let list;
+        /**@type {string} */
+        let command;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
+            toastr.warning('Using var= or globalvar= or list= in /foreach is deprecated, please update your script to use unnamed arguments instead.', '/foreach (LALib)');
+            const err = new Error();
+            console.warn('[LALIB]', '[DEPRECATED]', err.stack);
+            list = getListVar(args.var, args.globalvar, args.list);
+            if (value[0] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[0]);
+            } else {
+                command = value.join(' ');
+            }
+        } else {
+            list = getListVar(null, null, value[0]);
+            if (value[1] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(value[1]);
+            } else {
+                command = value[1];
+            }
+        }
         let result;
         const isList = Array.isArray(list);
         if (isList) {
@@ -340,28 +366,23 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         } else if (typeof list == 'object') {
             list = Object.entries(list);
         }
-        /**@type {string|SlashCommandClosure} */
-        let command;
-        if (value) {
-            if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
-            } else {
-                command = value.join(' ');
-            }
-        }
-        if (Array.isArray(list)) {
+        if (!Array.isArray(list)) {
+            throw new Error('/foreach requires a list or dictionary to operate on.');
+        } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
-                if (command instanceof SlashCommandClosure) {
-                    command.scope.setMacro('item', item);
-                    command.scope.setMacro('index', index);
-                    commandResult = (await command.execute());
+                if (closure) {
+                    closure.scope.setMacro('item', item);
+                    closure.scope.setMacro('index', index);
+                    closure.breakController = new SlashCommandBreakController();
+                    commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
-                } else {
+                    if (commandResult.isBreak) break;
+                } else if (command) {
                     commandResult = (await executeSlashCommandsWithOptions(
                         command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
                         {
@@ -381,34 +402,39 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             }
             return result;
         }
-        if (typeof result != 'string') {
-            result = JSON.stringify(result);
-        }
-        return result;
     },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'list',
-            description: 'the list to iterate over',
-            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to use as the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to use as the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
+            description: 'the list or dictionary to iterate over',
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
             description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
-            typeList: [ARGUMENT_TYPE.SUBCOMMAND, ARGUMENT_TYPE.CLOSURE],
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: 'Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.',
+    helpString: `
+        <div>
+            Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
+        </div>
+        <div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/foreach ["A", "B", "C"] {:\n\t/echo Item {{index}} is {{item}} |\n\t/delay 400 |\n:}</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x {"a":"foo","b":"bar"} |\n/foreach {{var::x}} {:\n\t/echo Item {{index}} is {{item}} |\n\t/delay 400 |\n:}</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
     returns: 'result of executing the command on the last item',
 }));
 
