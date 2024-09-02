@@ -1657,7 +1657,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-escape',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
-    callback: (args, value) => {
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  find:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: (args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /re-test is deprecated, please update your script to use the unnamed argument instead.', '/re-test (LALib)');
+        }
         try {
             const re = makeRegex(args.find);
             const text = getVar(args.var, args.globalvar, value) ?? '';
@@ -1672,16 +1683,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
             description: 'the regular expression to test against',
             typeList: [ARGUMENT_TYPE.STRING],
             isRequired: true,
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'var',
-            description: 'name of the chat variable to test',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'globalvar',
-            description: 'name of the global variable to test',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
