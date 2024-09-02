@@ -36,7 +36,10 @@ function getListVar(local, global, literal) {
     if (!list && literal) {
         if (typeof literal == 'string') {
             try {
-                list = JSON.parse(literal);
+                const parsed = JSON.parse(literal);
+                if (Array.isArray(parsed) || typeof parsed == 'object') {
+                    list = parsed;
+                }
             } catch { /* empty */ }
         } else if (typeof literal == 'object') {
             list = literal;
