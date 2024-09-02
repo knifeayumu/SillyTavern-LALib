@@ -2598,29 +2598,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'group-get',
 
 // GROUP: Conditionals - switch
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
-    callback: (namedArgs, unnamedArgs) => {
-        const val = getVar(namedArgs.var, namedArgs.globalvar, unnamedArgs.toString());
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async(args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /switch is deprecated, please update your script to use the unnamed argument instead.', '/switch (LALib)');
+        }
+        const val = getVar(args.var, args.globalvar, value.toString());
         return JSON.stringify({
             switch: val,
             break: false,
         });
     },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({
-            name: 'var',
-            description: 'name of the chat variable to use as the switch value',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({
-            name: 'globalvar',
-            description: 'name of the global variable to use as the switch value',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the value to use as the switch value',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
         }),
     ],
     helpString: 'Use with /case to conditionally execute commands based on a value.',
@@ -2629,18 +2628,41 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
     /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {(string|SlashCommandClosure)[]} value
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  value:string,
+     *  index:string,
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure|string]} unnamedArgs
      */
-    callback: async (args, value) => {
-        /**@type {string|SlashCommandClosure} */
+    callback: async(args, unnamedArgs)=>{
+        /**@type {string} */
+        let value;
+        /**@type {string} */
         let command;
-        if (value) {
-            if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
+        /**@type {SlashCommandClosure} */
+        let closure;
+        if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
+            toastr.warning('Using var= or globalvar= or value= in /case is deprecated, please update your script to use unnamed arguments instead.', '/case (LALib)');
+            value = getVar(args.var, args.globalvar, args.value);
+            if (unnamedArgs[0] instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(unnamedArgs[0]);
             } else {
-                command = value.join(' ');
+                command = unnamedArgs.join(' ');
+            }
+        } else {
+            let cmdArg;
+            if (unnamedArgs.length > 1) {
+                value = getVar(null, null, unnamedArgs[0]);
+                cmdArg = unnamedArgs[1];
+            } else {
+                cmdArg = unnamedArgs[0];
+            }
+            if (cmdArg instanceof SlashCommandClosure) {
+                closure = /**@type {SlashCommandClosure}*/(cmdArg);
+            } else {
+                command = cmdArg;
             }
         }
         let data;
@@ -2651,12 +2673,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
         }
         if (data?.break) return args._scope.pipe;
         if (data?.switch !== undefined) {
-            if (data.switch == args.value || args.value === undefined) {
+            if (data.switch == value || value === undefined) {
                 data.break = true;
                 args._scope.pipe = JSON.stringify(data);
-                if (command instanceof SlashCommandClosure) {
-                    command.scope.setMacro('value', data.switch);
-                    return (await command.execute())?.pipe;
+                if (closure) {
+                    closure.scope.setMacro('value', data.switch);
+                    return (await closure.execute())?.pipe;
                 }
                 const commandResult = await executeSlashCommandsWithOptions(
                     command.toString().replace(/{{value}}/ig, data.switch),
@@ -2673,15 +2695,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
         }
         return args._scope.pipe;
     },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({
-            name: 'value',
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
             description: 'the value to compare against the switch value',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER],
             isRequired: true,
         }),
-    ],
-    unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the command to execute if the value matches the switch value',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
