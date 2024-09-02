@@ -1210,7 +1210,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
-    callback: (args, value) => {
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  glue:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: (args, value)=>{
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /join is deprecated, please update your script to use the unnamed argument instead.', '/join (LALib)');
+        }
         let list = getListVar(args.var, args.globalvar, value);
         if (Array.isArray(list)) {
             const glue = (args.glue ?? ', ')
@@ -1224,14 +1235,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
             description: 'the string to join the list items with',
             typeList: [ARGUMENT_TYPE.STRING],
             defaultValue: ', ',
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable containing the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable containing the list',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
