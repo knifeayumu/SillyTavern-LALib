@@ -3890,6 +3890,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
                 },
             );
         }
+        return '';
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
