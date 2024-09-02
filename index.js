@@ -830,10 +830,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
-    callback: (args, value) => {
-        const list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
-        let end = args.end ?? (args.length ? Number(args.start) + Number(args.length) : undefined);
-        const result = list.slice(args.start, end);
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  list:string,
+     *  start:string,
+     *  end:string,
+     *  length:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async (args, value) => {
+        /**@type {Array} */
+        let list;
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /slice is deprecated, please update your script to use unnamed arguments instead.', '/slice (LALib)');
+            list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
+        } else {
+            list = getListVar(null, null, value) ?? value;
+        }
+        const start = Number(args.start);
+        const end = args.end !== undefined ? Number(args.end) : (args.length ? start + Number(args.length) : undefined);
+        const result = list.slice(start, end);
         if (typeof result != 'string') {
             return JSON.stringify(result);
         }
@@ -852,14 +871,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
         SlashCommandNamedArgument.fromProps({ name: 'length',
             description: 'the length of the slice',
             typeList: [ARGUMENT_TYPE.NUMBER],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to slice',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to slice',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
