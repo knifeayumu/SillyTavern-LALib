@@ -1814,16 +1814,16 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-exec',
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
      *  find:string,
      *  first:string,
-     * }} namedArgs
+     * }} args
      * @param {string} value
      */
-    callback: (namedArgs, value)=>{
-        if (namedArgs.find == null) {
-            throw new Error('/re-replace requires find= to be set.');
+    callback: async(args, value)=>{
+        if (args.find == null) {
+            throw new Error('/re-exec requires find= to be set.');
         }
-        const returnFirst = isTrueBoolean((namedArgs.first ?? 'false') || 'true');
+        const returnFirst = isTrueBoolean((args.first ?? 'false') || 'true');
         const text = value;
-        const re = makeRegex(namedArgs.find);
+        const re = makeRegex(args.find);
         const matchList = [];
         let matches;
         let matchStart = -1;
