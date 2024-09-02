@@ -901,19 +901,50 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
-    callback: (args, value) => {
-        let list = getListVar(args.var, args.globalvar, args.value);
-        if (!list) {
-            list = [...getVar(args.var, args.globalvar, args.value)];
-            list.splice(args.start, args.delete, ...(value ?? ''));
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  var:string,
+     *  globalvar:string,
+     *  value:string,
+     *  start:string,
+     *  delete:string,
+     *  insert:string,
+     * }} args
+     * @param {string} value
+     */
+    callback: async (args, value) => {
+        /**@type {Array} */
+        let list;
+        let isList = true;
+        let insert;
+        let start = Number(args.start);
+        let deleteCount = Number(args.delete);
+        if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
+            toastr.warning('Using var= or globalvar= or value= in /splice is deprecated, please update your script to use insert= and the unnamed argument instead.', '/splice (LALib)');
+            list = getListVar(args.var, args.globalvar, args.value);
+            insert = getListVar(null, null, value) ?? value.split(' ').filter(it=>it);
+            if (!list) {
+                isList = false;
+                list = [...getVar(args.var, args.globalvar, args.value)];
+            }
+        } else {
+            list = getListVar(null, null, value);
+            insert = getListVar(null, null, args.insert) ?? [args.insert].filter(it=>it);
+            if (!list) {
+                isList = false;
+                list = [...value];
+            }
+        }
+        list.splice(start, deleteCount, ...(insert ?? []));
+        if (isList) {
+            return JSON.stringify(list);
+        } else {
             return list.join('');
         }
-        list.splice(args.start, args.delete, ...(value ?? []));
-        return JSON.stringify(list);
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({ name: 'start',
-            description: 'the starting index of the slice, negative numbers start from the back',
+            description: 'the starting index of the splice, negative numbers start from the back',
             typeList: [ARGUMENT_TYPE.NUMBER],
             isRequired: true,
         }),
@@ -921,26 +952,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
             description: 'the number of elements to remove in the list from start',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
-        SlashCommandNamedArgument.fromProps({ name: 'value',
-            description: 'the list or string to operate on',
+        SlashCommandNamedArgument.fromProps({ name: 'insert',
+            description: 'the elements to add at index start=',
             typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.STRING],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to operate on',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to operate on',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
         }),
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the elements to add, beginning from start',
+            description: 'the list or string to operate on',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.DICTIONARY],
         }),
     ],
-    splitUnnamedArgument: true,
     returns: 'the new list',
     helpString: `
         <div>
@@ -950,19 +972,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
             <strong>Example:</strong>
             <ul>
                 <li>
-                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 delete=3 30 40 50 |\n/echo |</code></pre>
+                    <pre><code class="language-stscript">/splice insert=[30, 40, 50] start=3 delete=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
                     returns [0,1,2,30,40,50,6]
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 delete=3 |\n/echo |</code></pre>
+                    <pre><code class="language-stscript">/splice start=3 delete=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
                     returns [0,1,2,6]
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=3 100 |\n/echo |</code></pre>
+                    <pre><code class="language-stscript">/splice insert=100 start=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
                     returns [0,1,2,100,3,4,5,6]
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/splice value=[0,1,2,3,4,5,6] start=-1 delete=1 |\n/echo |</code></pre>
+                    <pre><code class="language-stscript">/splice start=-1 delete=1 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
                     returns [0,1,2,3,4,5]
                 </li>
             </ul>
