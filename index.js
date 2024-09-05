@@ -2,7 +2,7 @@ import { callPopup, characters, chat, chat_metadata, eventSource, event_types, e
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
-import { Popup, POPUP_TYPE } from '../../../popup.js';
+import { callGenericPopup, Popup, POPUP_TYPE } from '../../../popup.js';
 import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { SlashCommandAbortController } from '../../../slash-commands/SlashCommandAbortController.js';
@@ -1297,7 +1297,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
             const style = document.createElement('style');
             style.innerHTML = `
                 html > body {
-                    #dialogue_popup.wide_dialogue_popup.large_dialogue_popup:has(.lalib--diffContainer) {
+                    .popup.wide_dialogue_popup.large_dialogue_popup:has(.lalib--diffContainer) {
                         aspect-ratio: unset;
                     }
                     .lalib--diffWrapper {
@@ -1381,7 +1381,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
         };
         let oldText = args.old;
         let newText = args.new;
-        if (isTrueBoolean(args.stripcode)) {
+        if (isTrueFlag(args.stripcode)) {
             const stripcode = (text)=>text.split('```').filter((_,idx)=>idx % 2 == 0).join('');
             oldText = stripcode(oldText);
             newText = stripcode(newText);
@@ -1401,7 +1401,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
             }
             const container = document.createElement('div'); {
                 container.classList.add('lalib--diffContainer');
-                if (isTrueBoolean(args.all)) {
+                if (isTrueFlag(args.all)) {
                     const old = document.createElement('div'); {
                         old.classList.add('lalib--diffOld');
                         old.textContent = oldText;
@@ -1424,7 +1424,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
                 }
                 dom.append(container);
             }
-            if (isTrueBoolean(args.buttons)) {
+            if (isTrueFlag(args.buttons)) {
                 const buttons = document.createElement('div'); {
                     buttons.classList.add('lalib--diffButtons');
                     const btnOld = document.createElement('div'); {
@@ -1433,7 +1433,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
                         btnOld.textContent = 'Use Old Text';
                         btnOld.addEventListener('click', ()=>{
                             result = oldText;
-                            document.querySelector('#dialogue_popup_ok').click();
+                            dlg.completeAffirmative();
                         });
                         buttons.append(btnOld);
                     }
@@ -1443,7 +1443,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
                         btnNew.textContent = 'Use New Text';
                         btnNew.addEventListener('click', ()=>{
                             result = newText;
-                            document.querySelector('#dialogue_popup_ok').click();
+                            dlg.completeAffirmative();
                         });
                         buttons.append(btnNew);
                     }
@@ -1452,7 +1452,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
             }
         }
         let result = '';
-        await callPopup(dom, 'text', null, { wide:true, large:true, okButton:'Close' });
+        const dlg = new Popup(dom, POPUP_TYPE.TEXT, null, { wide:true, large:true, okButton:'Close' });
+        await dlg.show();
         return result;
     },
     namedArgumentList: [
