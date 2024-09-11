@@ -407,7 +407,11 @@ export class BoolParser {
                 }
             }
         }
-        return values[0];
+        if (this.testExpressionEnd()) {
+            return values[0];
+        } else if (this.testComparison()) {
+            return this.parseComparison(values[0]);
+        }
     }
 
     testOperator() {
