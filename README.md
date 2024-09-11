@@ -4,7 +4,7 @@ Library of STScript commands.
 
 
 - Boolean Operations (test, and, or, not)
-- List Operations (foreach, map, filter, find, slice, splice, shuffle, pick, reverse, dict, keys)
+- List Operations and Loops (foreach, map, filter, find, slice, splice, shuffle, pick, reverse, dict, keys)
 - Split & Join (split, join)
 - Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
 - Regular Expressions (re-escape, re-test, re-replace, re-exec)
@@ -195,7 +195,7 @@ Returns true if value is false, otherwise true.
 
 
 
-### List Operations
+### List Operations and Loops
 
 
 

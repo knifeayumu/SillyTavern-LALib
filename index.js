@@ -381,7 +381,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
 
 
 
-// GROUP: List Operations
+// GROUP: List Operations and Loops
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     /**
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
@@ -493,6 +493,40 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         </div>
     `,
     returns: 'result of executing the command on the last item',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
+    callback: async(args, value)=>{
+        /**@type {SlashCommandClosure} */
+        let runClosure;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        /**@type {()=>boolean} */
+        let expression;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                closure = value[0];
+            } else {
+                const text = value.slice(0, -1).join(' ');
+                const parser = new BoolParser(args._scope, args);
+                expression = parser.parse(text);
+            }
+            runClosure = value.at(-1);
+        }
+        const test = async()=>{
+            if (closure) return isTrueBoolean((await closure.execute()).pipe);
+            return expression();
+        };
+        runClosure.breakController = new SlashCommandBreakController();
+        let commandResult;
+        while (await test()) {
+            commandResult = await runClosure.execute();
+            if (commandResult.isAborted) break;
+            if (commandResult.isBreak) break;
+        }
+        if (commandResult) return commandResult.pipe;
+        return '';
+    },
 }));
 
 
