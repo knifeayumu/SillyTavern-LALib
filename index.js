@@ -89,7 +89,7 @@ function isTrueFlag(value) {
 function makeBoolEnumProvider() {
     return (executor, scope)=>[
         new SlashCommandEnumValue('variable', 'a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
-        new SlashCommandEnumValue('string', '"..."', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('string', '\'...\' ← single quotes!', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('number', '1.23', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('bool', 'true  |  false', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('sub-expression', '(...)', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),

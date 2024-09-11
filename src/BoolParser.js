@@ -267,14 +267,14 @@ export class BoolParser {
     }
 
     testString() {
-        return this.testSymbol('"');
+        return this.testSymbol('\'');
     }
     testStringEnd() {
         if (this.endOfText) {
             if (this.verify) throw new Error('Unexpected end of string');
             return true;
         }
-        return this.testSymbol('"');
+        return this.testSymbol('\'');
     }
     parseString() {
         this.take(); // discard opening quote
