@@ -19,6 +19,7 @@ import { evalBoolean, parseBooleanOperands } from '../../../variables.js';
 import { getWorldInfoPrompt, world_info } from '../../../world-info.js';
 import { quickReplyApi } from '../../quick-reply/index.js';
 import { QuickReplySet } from '../../quick-reply/src/QuickReplySet.js';
+import { BoolParser } from './src/BoolParser.js';
 
 
 function getListVar(local, global, literal) {
@@ -83,6 +84,27 @@ function getRange(text, value) {
 
 function isTrueFlag(value) {
     return isTrueBoolean((value ?? 'false') || 'true');
+}
+
+function makeBoolEnumProvider() {
+    return (executor, scope)=>[
+        new SlashCommandEnumValue('variable', 'a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('string', '"..."', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('number', '1.23', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('bool', 'true  |  false', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('sub-expression', '(...)', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('arithmetic operator', 'a+b  |  a-b  |  a*b  |  a/b  |  a**b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('logical operator', 'a and b  |  a or b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('negation', '!a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+    ];
+}
+function makeBoolArgument() {
+    return SlashCommandArgument.fromProps({ description: 'boolean / arithmetic expression',
+        enumProvider: makeBoolEnumProvider(),
+        isRequired: true,
+        acceptsMultiple: true,
+    });
 }
 
 
@@ -169,6 +191,41 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
         </div>
     `,
     returns: 'true or false',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
+    callback: (args, value)=>{
+        const parser = new BoolParser(args._scope, args);
+        const result = parser.parse(value.join(' '));
+        return result();
+    },
+    unnamedArgumentList: [
+        makeBoolArgument(),
+    ],
+    splitUnnamedArgument: true,
+    returns: 'result of the expression',
+    helpString: `
+        <div>
+            Evaluates a boolean or arithmetic expression
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/= true or false</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= 1 &lt; 2 and ("a" in x or "b" not in y) and !z</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= 1 + 2 * 3 ** 4</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= (1 + 2) * 3 ** 4</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 
