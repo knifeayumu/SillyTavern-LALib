@@ -173,7 +173,7 @@ export class BoolParser {
             const v = this.parseExpression();
             value = ()=>!v();
         } else if (this.testLiteral()) {
-            const v = this.parseLiteral(false);
+            const v = this.parseLiteral(false, false, false);
             value = ()=>!v();
         } else if (this.verify) {
             throw new Error('What?');
@@ -200,38 +200,32 @@ export class BoolParser {
     testLiteral() {
         return this.testBool() || this.testVar() || this.testString() || this.testNumber() || this.testList();
     }
-    parseLiteral(open = true) {
+    parseLiteral(openMath = true, openOp = true, openComp = true) {
         let value;
-        let isOpen = false;
         if (this.testBool()) {
             value = this.parseBool();
-            isOpen = open;
         } else if (this.testVar()) {
             value = this.parseVar();
-            isOpen = open;
         } else if (this.testString()) {
             value = this.parseString();
-            isOpen = open;
         } else if (this.testNumber()) {
             value = this.parseNumber();
-            isOpen = open;
         } else if (this.testList()) {
             value = this.parseList();
-            isOpen = open;
         } else if (this.verify) {
             throw new Error('What?');
         }
-        if (isOpen) {
+        if (openMath || openOp) {
             this.discardWhitespace();
             // value can be followed by:
             // - comparison
             // - operator
             // - math operator
-            if (this.testComparison()) {
+            if (openComp && this.testComparison()) {
                 value = this.parseComparison(value);
-            } else if (this.testOperator()) {
+            } else if (openOp && this.testOperator()) {
                 value = this.parseOperator(value);
-            } else if (this.testMath()) {
+            } else if (openMath && this.testMath()) {
                 value = this.parseMath(value);
             }
         }
@@ -333,27 +327,65 @@ export class BoolParser {
         if (this.testExpression()) {
             b = this.parseExpression();
         } else if (this.testLiteral()) {
-            b = this.parseLiteral();
+            b = this.parseLiteral(true, false, false);
         } else if (this.testFlip()) {
             b = this.parseFlip();
         } else if (this.verify) {
             throw new Error('What?');
         }
+        let value;
         switch (op.trim()) {
-            case '==': return ()=>a() == b();
-            case '!=': return ()=>a() != b();
-            case '<': return ()=>a() < b();
-            case '<=': return ()=>a() <= b();
-            case '>': return ()=>a() > b();
-            case '>=': return ()=>a() >= b();
-            case 'in': return ()=>b().includes(a());
-            case 'not in': return ()=>!b().includes(a());
-            case 'starts with': return ()=>a().startsWith(b());
-            case 'ends with': return ()=>a().endsWith(b());
+            case '==': {
+                value = ()=>a() == b();
+                break;
+            }
+            case '!=': {
+                value = ()=>a() != b();
+                break;
+            }
+            case '<': {
+                value = ()=>a() < b();
+                break;
+            }
+            case '<=': {
+                value = ()=>a() <= b();
+                break;
+            }
+            case '>': {
+                value = ()=>a() > b();
+                break;
+            }
+            case '>=': {
+                value = ()=>a() >= b();
+                break;
+            }
+            case 'in': {
+                value = ()=>b().includes(a());
+                break;
+            }
+            case 'not in': {
+                value = ()=>!b().includes(a());
+                break;
+            }
+            case 'starts with': {
+                value = ()=>a().startsWith(b());
+                break;
+            }
+            case 'ends with': {
+                value = ()=>a().endsWith(b());
+                break;
+            }
             default: {
                 throw new Error('What?');
             }
         }
+
+        if (this.testExpressionEnd()) {
+            // ok
+        } else if (this.testOperator()) {
+            return this.parseOperator(value);
+        }
+        return value;
     }
 
     testMath() {
@@ -370,7 +402,7 @@ export class BoolParser {
         if (this.testExpression()) {
             value = this.parseExpression();
         } else if (this.testLiteral()) {
-            value = this.parseLiteral(false);
+            value = this.parseLiteral(false, false, false);
         } else if (this.verify) {
             throw new Error('What?');
         }
@@ -431,7 +463,7 @@ export class BoolParser {
         } else if (this.testExpression()) {
             value = this.parseExpression();
         } else if (this.testLiteral()) {
-            value = this.parseLiteral(false);
+            value = this.parseLiteral(true, false, true);
         } else if (this.verify) {
             throw new Error('What?');
         }
