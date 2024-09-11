@@ -94,7 +94,7 @@ function makeBoolEnumProvider() {
         new SlashCommandEnumValue('bool', 'true  |  false', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('sub-expression', '(...)', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('arithmetic operator', 'a+b  |  a-b  |  a*b  |  a/b  |  a**b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
-        new SlashCommandEnumValue('logical operator', 'a and b  |  a or b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('logical operator', 'a and b  |  a xor b  |  a or b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('negation', '!a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
     ];

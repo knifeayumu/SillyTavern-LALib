@@ -447,10 +447,10 @@ export class BoolParser {
     }
 
     testOperator() {
-        return this.testSymbol(/(and|or) /i);
+        return this.testSymbol(/(and|xor|or) /i);
     }
     parseOperatorPair() {
-        let op = /^(and|or) /i.exec(this.charAhead)[0];
+        let op = /^(and|xor|or) /i.exec(this.charAhead)[0];
         this.take(op.length);
         op = op.trim();
         this.discardWhitespace();
@@ -480,10 +480,11 @@ export class BoolParser {
         }
         const opsDict = {
             'and': (a,b)=>a() && b(),
+            'xor': (a,b)=>(!a() && b()) || (a() && !b()),
             'or': (a,b)=>a() || b(),
         };
         // make sub-expressions
-        const ooo = ['and', 'or'];
+        const ooo = ['and', 'xor', 'or'];
         for (const o of ooo) {
             for (let i = 0; i < ops.length; i++) {
                 if (ops[i] == o) {
