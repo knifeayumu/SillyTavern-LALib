@@ -2814,20 +2814,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
-        /**@type {string|SlashCommandClosure} */
+        /**@type {SlashCommandClosure} */
+        let closure;
+        /**@type {string} */
         let command;
+        /**@type {string} */
+        let expression;
         if (value) {
             if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
+                closure = value[0];
             } else {
-                command = value.join(' ');
+                const text = value.join(' ');
+                if (text[0] == '/') {
+                    command = value.join(' ');
+                } else {
+                    expression = text;
+                }
             }
         }
         let result;
-        if (command instanceof SlashCommandClosure) {
-            result = await command.execute();
-        } else {
-            result = await executeSlashCommandsWithOptions(
+        if (closure) {
+            result = isTrueBoolean((await closure.execute()).pipe);
+        } else if (command) {
+            result = isTrueBoolean((await executeSlashCommandsWithOptions(
                 command,
                 {
                     handleExecutionErrors: false,
@@ -2836,18 +2845,43 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
                     scope: args._scope,
                     abortController: args._abortController,
                 },
-            );
+            ))?.pipe);
+        } else if (expression) {
+            const parser = new BoolParser(args._scope, args);
+            parser.scope = args._scope;
+            result = parser.parse(expression)();
+        } else {
+            throw new Error('/ife - something went wrong');
         }
         return JSON.stringify({
-            if: isTrueBoolean(result?.pipe),
+            if: result,
             isHandled: false,
         });
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the command to evaluate',
-            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            description: 'the expression or command to evaluate',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: (executor, scope)=>{
+                if (executor.unnamedArgumentList.length == 0 || executor.unnamedArgumentList[0].value == '') {
+                    return [
+                        ...makeBoolEnumProvider()(),
+                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+                        new SlashCommandEnumValue('Subcommand', 'Subcommand returning true or false', enumTypes.command, enumIcons.disabled, (input)=>true, (input)=>input),
+                    ];
+                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('{')) {
+                    return [
+                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+                    ];
+                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('/')) {
+                    return [
+                        new SlashCommandEnumValue('Subcommand', 'Subcommand returning true or false', enumTypes.command, enumIcons.disabled, (input)=>true, (input)=>input),
+                    ];
+                }
+                return makeBoolEnumProvider()();
+            },
         }),
     ],
     splitUnnamedArgument: true,
@@ -2862,13 +2896,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
-        /**@type {string|SlashCommandClosure} */
+        /**@type {SlashCommandClosure} */
+        let closure;
+        /**@type {string} */
         let command;
+        /**@type {string} */
+        let expression;
         if (value) {
             if (value[0] instanceof SlashCommandClosure) {
-                command = value[0];
+                closure = value[0];
             } else {
-                command = value.join(' ');
+                const text = value.join(' ');
+                if (text[0] == '/') {
+                    command = value.join(' ');
+                } else {
+                    expression = text;
+                }
             }
         }
         let data;
@@ -2880,10 +2923,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
         if (data?.if !== undefined) {
             if (!data.if) {
                 let result;
-                if (command instanceof SlashCommandClosure) {
-                    result = await command.execute();
-                } else {
-                    result = await executeSlashCommandsWithOptions(
+                if (closure) {
+                    result = isTrueBoolean((await closure.execute()).pipe);
+                } else if (command) {
+                    result = isTrueBoolean((await executeSlashCommandsWithOptions(
                         command,
                         {
                             handleExecutionErrors: false,
@@ -2892,10 +2935,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
                             scope: args._scope,
                             abortController: args._abortController,
                         },
-                    );
+                    ))?.pipe);
+                } else if (expression) {
+                    const parser = new BoolParser(args._scope, args);
+                    parser.scope = args._scope;
+                    result = parser.parse(expression)();
+                } else {
+                    throw new Error('/ife - something went wrong');
                 }
                 return JSON.stringify({
-                    if: isTrueBoolean(result?.pipe),
+                    if: result,
+                    isHandled: false,
                 });
             }
         }
@@ -2903,9 +2953,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the command to evaluate',
-            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            description: 'the expression or command to evaluate',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: makeBoolEnumProvider(),
         }),
     ],
     splitUnnamedArgument: true,
