@@ -198,7 +198,13 @@ export class BoolParser {
 
 
     testLiteral() {
-        return this.testBool() || this.testVar() || this.testString() || this.testNumber() || this.testList();
+        return this.testBool()
+            || this.testVar()
+            || this.testString()
+            || this.testNumber()
+            || this.testList()
+            || this.testRegex()
+        ;
     }
     parseLiteral(openMath = true, openOp = true, openComp = true) {
         let value;
@@ -212,6 +218,8 @@ export class BoolParser {
             value = this.parseNumber();
         } else if (this.testList()) {
             value = this.parseList();
+        } else if (this.testRegex()) {
+            value = this.parseRegex();
         } else if (this.verify) {
             throw new Error('What?');
         }
@@ -311,6 +319,21 @@ export class BoolParser {
         return ()=>value;
     }
 
+    testRegex() {
+        return this.testSymbol('/');
+    }
+    testRegexEnd() {
+        return this.testSymbol(/\/([dgimsuvy]*)/);
+    }
+    parseRegex() {
+        this.take(); // discard opening slash "/"
+        let pattern = '';
+        while (!this.testRegexEnd()) pattern += this.take();
+        const flags = /\/([dgimsuvy]*)/.exec(this.charAhead)[1];
+        this.take(flags.length + 1); // discard closing slash and flags (flags already collected)
+        return ()=>new RegExp(pattern, flags);
+    }
+
 
     testComparison() {
         return this.testSymbol(/==|!=|<=?|>=?|in |not in |starts with |ends with /);
@@ -334,49 +357,87 @@ export class BoolParser {
             throw new Error('What?');
         }
         let value;
-        switch (op.trim()) {
-            case '==': {
-                value = ()=>a() == b();
-                break;
+        if (a() instanceof RegExp) {
+            switch (op.trim()) {
+                case '==': {
+                    value = ()=>a().test(b());
+                    break;
+                }
+                case '!=': {
+                    value = ()=>!a().test(b());
+                    break;
+                }
+                case 'in': {
+                    value = ()=>b().find(it=>a().test(it)) != null;
+                    break;
+                }
+                case 'not in': {
+                    value = ()=>!b().find(it=>a().test(it));
+                    break;
+                }
+                default: {
+                    throw new Error('What?');
+                }
             }
-            case '!=': {
-                value = ()=>a() != b();
-                break;
+        } else if (b() instanceof RegExp) {
+            switch (op.trim()) {
+                case '==': {
+                    value = ()=>b().test(a());
+                    break;
+                }
+                case '!=': {
+                    value = ()=>!b().test(a());
+                    break;
+                }
+                default: {
+                    throw new Error('What?');
+                }
             }
-            case '<': {
-                value = ()=>a() < b();
-                break;
-            }
-            case '<=': {
-                value = ()=>a() <= b();
-                break;
-            }
-            case '>': {
-                value = ()=>a() > b();
-                break;
-            }
-            case '>=': {
-                value = ()=>a() >= b();
-                break;
-            }
-            case 'in': {
-                value = ()=>b().includes(a());
-                break;
-            }
-            case 'not in': {
-                value = ()=>!b().includes(a());
-                break;
-            }
-            case 'starts with': {
-                value = ()=>a().startsWith(b());
-                break;
-            }
-            case 'ends with': {
-                value = ()=>a().endsWith(b());
-                break;
-            }
-            default: {
-                throw new Error('What?');
+        } else {
+            switch (op.trim()) {
+                case '==': {
+                    value = ()=>a() == b();
+                    break;
+                }
+                case '!=': {
+                    value = ()=>a() != b();
+                    break;
+                }
+                case '<': {
+                    value = ()=>a() < b();
+                    break;
+                }
+                case '<=': {
+                    value = ()=>a() <= b();
+                    break;
+                }
+                case '>': {
+                    value = ()=>a() > b();
+                    break;
+                }
+                case '>=': {
+                    value = ()=>a() >= b();
+                    break;
+                }
+                case 'in': {
+                    value = ()=>b().includes(a());
+                    break;
+                }
+                case 'not in': {
+                    value = ()=>!b().includes(a());
+                    break;
+                }
+                case 'starts with': {
+                    value = ()=>a().startsWith(b());
+                    break;
+                }
+                case 'ends with': {
+                    value = ()=>a().endsWith(b());
+                    break;
+                }
+                default: {
+                    throw new Error('What?');
+                }
             }
         }
 
