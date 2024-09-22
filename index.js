@@ -107,6 +107,91 @@ function makeBoolArgument() {
         acceptsMultiple: true,
     });
 }
+function makeIfWhileEnumProvider(type) {
+    return (executor, scope)=>{
+        // no args
+        //  -> start expression, start bool closure
+        if (executor.unnamedArgumentList.length == 0 || executor.unnamedArgumentList.at(0).value == '') {
+            return [
+                ...makeBoolEnumProvider()(),
+                new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1 arg, starts curly
+        //  -> continue bool closure
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value.toString().at(0) == '{') {
+            return [
+                new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1 arg, closure
+        //  -> start then closure
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure) {
+            return [
+                new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1 arg, whitespace after
+        //  -> continue expression, start then closure
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).end < executor.endUnnamedArgs) {
+            return [
+                ...makeBoolEnumProvider()(),
+                new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1 arg
+        //  -> continue expression
+        if (executor.unnamedArgumentList.length == 1) {
+            return [
+                ...makeBoolEnumProvider()(),
+            ];
+        }
+        // >1 args, 2 closures
+        //  -> nothing
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.filter(it=>it.value instanceof SlashCommandClosure).length >= 2) {
+            return [
+            ];
+        }
+        // >1 args, [>1] is closure
+        //  -> nothing
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.slice(1).find(it=>it.value instanceof SlashCommandClosure)) {
+            return [
+            ];
+        }
+        // >1 args, [0] is closure
+        //  -> continue then closure
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure) {
+            return [
+                new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // >1 args, [-1] starts curly
+        //  -> continue then closure
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).value.toString().at(0) == '{') {
+            return [
+                new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // >1 args, whitespace after
+        //  -> continue expression, start then closure
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).end < executor.endUnnamedArgs) {
+            return [
+                ...makeBoolEnumProvider()(),
+                new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // >1 args
+        //  -> continue expression
+        if (executor.unnamedArgumentList.length > 1) {
+            return [
+                ...makeBoolEnumProvider()(),
+            ];
+        }
+        return [
+            new SlashCommandEnumValue('What?', 'What?', enumTypes.enum, enumIcons.undefined, (input)=>true, (input)=>input),
+        ];
+    };
+}
 
 
 
@@ -534,24 +619,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
             acceptsMultiple: true,
-            enumProvider: (executor, scope)=>{
-                if (executor.unnamedArgumentList.length == 0 || executor.unnamedArgumentList[0].value == '') {
-                    return [
-                        ...makeBoolEnumProvider()(),
-                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                    ];
-                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('{')) {
-                    return [
-                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                    ];
-                }
-                return makeBoolEnumProvider()();
-            },
-        }),
-        SlashCommandArgument.fromProps({
-            description: 'the closure to execute repeatedly',
-            typeList: [ARGUMENT_TYPE.CLOSURE],
-            isRequired: true,
+            enumProvider: makeIfWhileEnumProvider('while'),
         }),
     ],
     splitUnnamedArgument: true,
@@ -2921,19 +2989,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             isRequired: true,
             acceptsMultiple: true,
-            enumProvider: (executor, scope)=>{
-                if (executor.unnamedArgumentList.length == 0 || executor.unnamedArgumentList[0].value == '') {
-                    return [
-                        ...makeBoolEnumProvider()(),
-                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                    ];
-                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('{')) {
-                    return [
-                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                    ];
-                }
-                return makeBoolEnumProvider()();
-            },
+            enumProvider: makeIfWhileEnumProvider('if'),
         }),
     ],
     splitUnnamedArgument: true,
@@ -3030,7 +3086,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             isRequired: true,
             acceptsMultiple: true,
-            enumProvider: makeBoolEnumProvider(),
+            enumProvider: makeIfWhileEnumProvider('if'),
         }),
     ],
     splitUnnamedArgument: true,
