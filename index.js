@@ -2824,12 +2824,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             if (value[0] instanceof SlashCommandClosure) {
                 closure = value[0];
             } else {
-                const text = value.join(' ');
-                if (text[0] == '/') {
-                    command = value.join(' ');
-                } else {
-                    expression = text;
-                }
+                const text = value.join(' ').trim();
+                expression = text;
             }
         }
         let result;
@@ -2869,15 +2865,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
                     return [
                         ...makeBoolEnumProvider()(),
                         new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                        new SlashCommandEnumValue('Subcommand', 'Subcommand returning true or false', enumTypes.command, enumIcons.disabled, (input)=>true, (input)=>input),
                     ];
                 } else if (executor.unnamedArgumentList[0].value.toString().startsWith('{')) {
                     return [
                         new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
-                    ];
-                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('/')) {
-                    return [
-                        new SlashCommandEnumValue('Subcommand', 'Subcommand returning true or false', enumTypes.command, enumIcons.disabled, (input)=>true, (input)=>input),
                     ];
                 }
                 return makeBoolEnumProvider()();
