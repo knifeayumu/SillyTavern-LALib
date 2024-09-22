@@ -3090,7 +3090,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /ife and /else. The provided closure must return true or false.</div>',
+    helpString: `
+        <div>
+            Execute a closure if none of the preceeding <code>/if</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
+        </div>
+        <div>
+            Use with <code>/if</code> and <code>/else</code>.
+        </div>
+        <div>
+            See <code>/=</code> for more details on expressions.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            ${ifExamples}
+        </div>
+    `,
     returns: 'an object with a boolean "if" property',
 }));
 
@@ -3147,7 +3161,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /ife and /elseif. The provided command will be executed if the previous /if or /elseif was false.</div>',
+    helpString: `
+        <div>
+            Execute a closure if none of the preceeding <code>/if</code> and <code>/elseif</code> executed.
+        </div>
+        <div>
+            Use with <code>/if</code> and <code>/elseif</code>.
+        </div>
+        <div>
+            See <code>/=</code> for more details on expressions.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            ${ifExamples}
+        </div>
+    `,
     returns: 'the result of the executed command',
 }));
 
