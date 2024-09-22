@@ -530,7 +530,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the expression or command to evaluate',
+            description: 'the expression or closure to evaluate',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
             acceptsMultiple: true,
