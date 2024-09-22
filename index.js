@@ -527,6 +527,33 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
         if (commandResult) return commandResult.pipe;
         return '';
     },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the expression or command to evaluate',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: (executor, scope)=>{
+                if (executor.unnamedArgumentList.length == 0 || executor.unnamedArgumentList[0].value == '') {
+                    return [
+                        ...makeBoolEnumProvider()(),
+                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+                    ];
+                } else if (executor.unnamedArgumentList[0].value.toString().startsWith('{')) {
+                    return [
+                        new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+                    ];
+                }
+                return makeBoolEnumProvider()();
+            },
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the closure to execute repeatedly',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
 }));
 
 
