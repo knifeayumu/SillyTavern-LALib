@@ -280,10 +280,16 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {string[]} value
+     * @returns {string}
+     */
     callback: (args, value)=>{
         const parser = new BoolParser(args._scope, args);
         const result = parser.parse(value.join(' '));
-        return result();
+        return result().toString();
     },
     unnamedArgumentList: [
         makeBoolArgument(),

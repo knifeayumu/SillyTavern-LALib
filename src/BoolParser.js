@@ -100,6 +100,12 @@ export class BoolParser {
     }
 
 
+    /**
+     *
+     * @param {string} text boolean expression
+     * @param {boolean} verify whether to throw exception on parser errors (false allows incomplete expressions to be parsed)
+     * @returns {()=>boolean|string|number}
+     */
     parse(text, verify = true) {
         this.verify = verify;
         this.text = text;
