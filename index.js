@@ -2835,6 +2835,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
 
 
 // GROUP: Conditionals - if
+const ifExamples = `
+        <ul>
+            <li>
+                <pre><code class="language-stscript">
+                    /let a {{roll:1d6}} |
+                    /ife (a == 1) {:
+                        /echo a is one |
+                    :} |
+                    /elseif (a == 2) {:
+                        /echo a is two |
+                    :} |
+                    /else {:
+                        /echo a is something else ({{var::a}})
+                    :} |
+                </code></pre>
+            </li>
+        </ul>
+    `.replace(/(<pre><code .+?>)\n(\s+)(.+?)\n(\s+<\/code>)/sg, (_, start, indent, script, end)=>{
+        const indentRegex = new RegExp(`^${indent}`, 'gm');
+        return `${start}${script.replace(indentRegex, '')}${end}`;
+    })
+;
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
     /**
      *
@@ -2843,12 +2865,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
      */
     callback: async (args, value) => {
         /**@type {SlashCommandClosure} */
+        let then;
+        /**@type {SlashCommandClosure} */
         let closure;
         /**@type {string} */
         let command;
         /**@type {string} */
         let expression;
         if (value) {
+            if (value.length > 1 && value.at(-1) instanceof SlashCommandClosure) {
+                then = /**@type {SlashCommandClosure}*/(value.pop());
+            }
             if (value[0] instanceof SlashCommandClosure) {
                 closure = value[0];
             } else {
@@ -2877,15 +2904,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
         } else {
             throw new Error('/ife - something went wrong');
         }
-        return JSON.stringify({
+        const data = {
             if: result,
             isHandled: false,
-        });
+        };
+        if (result && then) {
+            data.isHandled = true;
+            const thenResult = await then.execute();
+            return thenResult?.pipe ?? JSON.stringify(data);
+        }
+        return JSON.stringify(data);
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the expression or command to evaluate',
-            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            description: 'the expression or closure to evaluate, followed by the closure to execute if true',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             isRequired: true,
             acceptsMultiple: true,
             enumProvider: (executor, scope)=>{
@@ -2904,7 +2937,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>',
+    helpString: `
+        <div>
+            Execute a closure if the expression or first closure returns <code>true</code>.
+        </div>
+        <div>
+            Use with <code>/elseif</code> and <code>/else</code>.
+        </div>
+        <div>
+            See <code>/=</code> for more details on expressions.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            ${ifExamples}
+        </div>
+    `,
     returns: 'an object with a boolean "if" property',
 }));
 
@@ -2916,21 +2963,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
      */
     callback: async (args, value) => {
         /**@type {SlashCommandClosure} */
+        let then;
+        /**@type {SlashCommandClosure} */
         let closure;
         /**@type {string} */
         let command;
         /**@type {string} */
         let expression;
         if (value) {
+            if (value.length > 1 && value.at(-1) instanceof SlashCommandClosure) {
+                then = /**@type {SlashCommandClosure}*/(value.pop());
+            }
             if (value[0] instanceof SlashCommandClosure) {
                 closure = value[0];
             } else {
                 const text = value.join(' ');
-                if (text[0] == '/') {
-                    command = value.join(' ');
-                } else {
-                    expression = text;
-                }
+                expression = text;
             }
         }
         let data;
@@ -2962,25 +3010,31 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
                 } else {
                     throw new Error('/ife - something went wrong');
                 }
-                return JSON.stringify({
+                const data = {
                     if: result,
                     isHandled: false,
-                });
+                };
+                if (result && then) {
+                    data.isHandled = true;
+                    const thenResult = await then.execute();
+                    return thenResult?.pipe ?? JSON.stringify(data);
+                }
+                return JSON.stringify(data);
             }
         }
         return args._scope.pipe;
     },
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the expression or command to evaluate',
-            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            description: 'the expression or closure to evaluate, followed by the closure to execute if true',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             isRequired: true,
             acceptsMultiple: true,
             enumProvider: makeBoolEnumProvider(),
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /ife, /then, and /else. The provided command must return true or false.</div>',
+    helpString: '<div>Use with /ife and /else. The provided closure must return true or false.</div>',
     returns: 'an object with a boolean "if" property',
 }));
 
@@ -3037,7 +3091,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>',
+    helpString: '<div>Use with /ife and /elseif. The provided command will be executed if the previous /if or /elseif was false.</div>',
     returns: 'the result of the executed command',
 }));
 
@@ -3048,6 +3102,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
+        toastr.warning('/then is deprecated, please update your script to use the unnamed arguments in /ife or /elseif instead.', '/then (LALib)');
         /**@type {string|SlashCommandClosure} */
         let command;
         if (value) {
