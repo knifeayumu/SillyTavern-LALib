@@ -2736,8 +2736,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
-            toastr.warning('Using var= or globalvar= or value= in /case is deprecated, please update your script to use unnamed arguments instead.', '/case (LALib)');
-            value = getVar(args.var, args.globalvar, args.value);
+            toastr.warning('Using value= in /case is deprecated, please update your script to use unnamed arguments instead.', '/case (LALib)');
+            value = getVar(null, null, args.value);
             if (unnamedArgs[0] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(unnamedArgs[0]);
             } else {
