@@ -126,7 +126,7 @@ function makeIfWhileEnumProvider(type) {
         }
         // 1 arg, closure
         //  -> start then closure
-        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure) {
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure && !executor.unnamedArgumentList.at(0).value.executeNow) {
             return [
                 new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
             ];
@@ -148,19 +148,19 @@ function makeIfWhileEnumProvider(type) {
         }
         // >1 args, 2 closures
         //  -> nothing
-        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.filter(it=>it.value instanceof SlashCommandClosure).length >= 2) {
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.filter(it=>it.value instanceof SlashCommandClosure && !it.value.executeNow).length >= 2) {
             return [
             ];
         }
         // >1 args, [>1] is closure
         //  -> nothing
-        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.slice(1).find(it=>it.value instanceof SlashCommandClosure)) {
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.slice(1).find(it=>it.value instanceof SlashCommandClosure && !it.value.executeNow)) {
             return [
             ];
         }
         // >1 args, [0] is closure
         //  -> continue then closure
-        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure) {
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(0).value instanceof SlashCommandClosure && !executor.unnamedArgumentList.at(0).value.executeNow) {
             return [
                 new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
             ];
