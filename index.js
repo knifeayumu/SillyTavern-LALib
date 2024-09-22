@@ -307,7 +307,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
                     <pre><code class="language-stscript">/= true or false</code></pre>
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/= 1 &lt; 2 and ("a" in x or "b" not in y) and !z</code></pre>
+                    <pre><code class="language-stscript">/= 1 &lt; 2 and ('a' in x or 'b' not in y) and !z</code></pre>
                 </li>
                 <li>
                     <pre><code class="language-stscript">/= 1 + 2 * 3 ** 4</code></pre>
