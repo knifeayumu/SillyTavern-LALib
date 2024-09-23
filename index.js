@@ -4314,6 +4314,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
 
 
 
+// GROUP: Miscallaneous
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fonts',
+    callback: async(args, value)=>{
+        if (!window.queryLocalFonts) {
+            toastr.warning('Your browser cannot do that.', '/fonts (LALib)');
+            return '[]';
+        }
+        const fonts = await window.queryLocalFonts();
+        return JSON.stringify(
+            fonts
+                .map(it=>it.family)
+                .filter((it,idx,list)=>idx == list.indexOf(it))
+            ,
+        );
+    },
+    returns: 'list of available fonts',
+    helpString: 'returns a list of all system fonts available to you',
+}));
+
+
+
 // GROUP: Web Requests
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
     callback: async (args, value) => {
