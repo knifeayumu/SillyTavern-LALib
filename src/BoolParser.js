@@ -42,6 +42,22 @@ export class BoolParser {
         }
     }
 
+    resolveVariable(name, scope = null) {
+        if (scope?.existsVariable(name)) {
+            return scope.getVariable(name);
+        }
+
+        if (chat_metadata.variables && chat_metadata.variables[name] !== undefined) {
+            return resolveVariable(name);
+        }
+
+        if (extension_settings.variables.global && extension_settings.variables.global[name] !== undefined) {
+            return resolveVariable(name);
+        }
+
+        return '';
+    }
+
 
 
 
@@ -270,7 +286,7 @@ export class BoolParser {
         const name = /^[a-z_][a-z_0-9]*/i.exec(this.charAhead)[0];
         this.take(name.length);
         return ()=>{
-            const val = resolveVariable(name, this.scope);
+            const val = this.resolveVariable(name, this.scope);
             try {
                 return JSON.parse(val);
             } catch { /* empty */ }
