@@ -1,6 +1,6 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, sendSystemMessage, showSwipeButtons } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, saveSettingsDebounced, sendSystemMessage, showSwipeButtons } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
-import { extension_settings, getContext } from '../../../extensions.js';
+import { extension_settings, getContext, saveMetadataDebounced } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
 import { callGenericPopup, Popup, POPUP_TYPE } from '../../../popup.js';
 import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
@@ -486,6 +486,51 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
 
 
 // GROUP: List Operations and Loops
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {[target:string, ...items:string]} param1
+     * @returns {string}
+     */
+    callback: (args, [target, ...items])=>{
+        let get;
+        let set;
+        if (args._scope.existsVariable(target)) {
+            get = ()=>JSON.parse(args._scope.getVariable(target));
+            set = ()=>args._scope.setVariable(target, JSON.stringify(list));
+        } else if (chat_metadata.variables && chat_metadata.variables[target] !== undefined) {
+            get = ()=>JSON.parse(chat_metadata.variables[target]);
+            set = ()=>{
+                chat_metadata.variables[target] = list;
+                saveMetadataDebounced();
+            };
+        } else if (extension_settings.variables.global && extension_settings.variables.global[target] !== undefined) {
+            get = ()=>JSON.parse(extension_settings.variables.global[target]);
+            set = ()=>{
+                extension_settings.variables.global[target] = list;
+                saveSettingsDebounced();
+            };
+        }
+        const list = get();
+        list.push(...items);
+        set();
+        return JSON.stringify(list);
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'target list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({ description: 'items to add',
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            acceptsMultiple: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+}));
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     /**
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
