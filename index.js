@@ -88,16 +88,20 @@ function isTrueFlag(value) {
 
 function makeBoolEnumProvider() {
     return (executor, scope)=>[
+        new SlashCommandEnumValue('assignment', 'only at start:  a = b  |  a += b  |  a -= b  |  a *= b  |  a /= b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('variable', 'a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('string', '\'...\' ← single quotes!', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('macro', '{...} ← single curlies!', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('number', '1.23', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('bool', 'true  |  false', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('sub-expression', '(...)', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('arithmetic operator', 'a+b  |  a-b  |  a*b  |  a/b  |  a**b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('logical operator', 'a and b  |  a xor b  |  a or b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('negation', '!a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('pre / post increment / decrement', '++a  |  a++  |  --a  |  a--', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('regex', '/pattern/flags', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('type check', 'a is string  |  a is number  |  a is boolean  |  a is list  |  a is dictionary  |  a is closure', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
     ];
 }
 function makeBoolArgument() {
@@ -133,7 +137,8 @@ function makeIfWhileEnumProvider(type) {
         }
         // 1 arg, whitespace after
         //  -> continue expression, start then closure
-        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).end < executor.endUnnamedArgs) {
+        // if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).end < executor.endUnnamedArgs) {
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).end > executor.unnamedArgumentList.at(0).start + executor.unnamedArgumentList.at(0).value.length) {
             return [
                 ...makeBoolEnumProvider()(),
                 new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
@@ -174,7 +179,7 @@ function makeIfWhileEnumProvider(type) {
         }
         // >1 args, whitespace after
         //  -> continue expression, start then closure
-        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).end < executor.endUnnamedArgs) {
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).end > executor.unnamedArgumentList.at(-1).start + executor.unnamedArgumentList.at(-1).value.length) {
             return [
                 ...makeBoolEnumProvider()(),
                 new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
@@ -283,18 +288,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
     /**
      *
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {string[]} value
+     * @param {string} value
      * @returns {string}
      */
     callback: (args, value)=>{
         const parser = new BoolParser(args._scope, args);
-        const result = parser.parse(value.join(' '));
+        const result = parser.parse(value);
         return result().toString();
     },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
     unnamedArgumentList: [
         makeBoolArgument(),
     ],
-    splitUnnamedArgument: true,
+    // splitUnnamedArgument: true,
     returns: 'result of the expression',
     helpString: `
         <div>
@@ -619,6 +631,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
         if (commandResult) return commandResult.pipe;
         return '';
     },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the expression or closure to evaluate',
@@ -628,7 +647,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
             enumProvider: makeIfWhileEnumProvider('while'),
         }),
     ],
-    splitUnnamedArgument: true,
+    // splitUnnamedArgument: true,
 }));
 
 
@@ -2973,7 +2992,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             ))?.pipe);
         } else if (expression) {
             const parser = new BoolParser(args._scope, args);
-            parser.scope = args._scope;
             result = parser.parse(expression)();
         } else {
             throw new Error('/ife - something went wrong');
@@ -2989,6 +3007,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
         }
         return JSON.stringify(data);
     },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the expression or closure to evaluate, followed by the closure to execute if true',
@@ -2998,7 +3023,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             enumProvider: makeIfWhileEnumProvider('if'),
         }),
     ],
-    splitUnnamedArgument: true,
+    // splitUnnamedArgument: true,
     helpString: `
         <div>
             Execute a closure if the expression or first closure returns <code>true</code>.
@@ -3067,7 +3092,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
                     ))?.pipe);
                 } else if (expression) {
                     const parser = new BoolParser(args._scope, args);
-                    parser.scope = args._scope;
                     result = parser.parse(expression)();
                 } else {
                     throw new Error('/ife - something went wrong');
@@ -3086,6 +3110,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
         }
         return args._scope.pipe;
     },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the expression or closure to evaluate, followed by the closure to execute if true',
@@ -3095,7 +3126,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
             enumProvider: makeIfWhileEnumProvider('if'),
         }),
     ],
-    splitUnnamedArgument: true,
+    // splitUnnamedArgument: true,
     helpString: `
         <div>
             Execute a closure if none of the preceeding <code>/if</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
