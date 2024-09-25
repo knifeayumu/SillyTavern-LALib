@@ -187,8 +187,6 @@ export class BoolParser {
             value = this.parseFlip();
         } else if (this.testPreMath()) {
             value = this.parsePreMath();
-        } else if (this.testPostMath()) {
-            value = this.parsePostMath();
         } else if (this.testLiteral()) {
             value = this.parseLiteral();
         } else if (this.verify) {
@@ -222,6 +220,7 @@ export class BoolParser {
         return this.testSymbol('!');
     }
     parseFlip() {
+        this.partIndex.push(BOOL_PART.Flip);
         this.take(); // take "!"
         // flip must be followed by one of:
         // - expression: (...)
@@ -240,7 +239,6 @@ export class BoolParser {
         } else if (this.verify) {
             throw new Error('What?');
         }
-        this.partIndex.push(BOOL_PART.Flip);
         this.discardWhitespace();
         // flipped value must be directly followed by one of:
         // - end of expression
@@ -273,7 +271,9 @@ export class BoolParser {
         const func = ()=>{
             const outcome = (value() + (op == '++' ? 1 : -1)).toString();
             const scope = this.scope.parent;
-            if (scope.existsVariable(value.varName)) {
+            if (this.scope.existsVariableInScope(value.varName)) {
+                this.scope.setVariable(value.varName, outcome);
+            } else if (scope.existsVariable(value.varName)) {
                 scope.setVariable(value.varName, outcome);
             } else if (chat_metadata.variables && chat_metadata.variables[value.varName] !== undefined) {
                 chat_metadata.variables[value.varName] = outcome;
@@ -287,7 +287,22 @@ export class BoolParser {
             return outcome;
         };
         func.varName = value.varName;
-        return func;
+        this.discardWhitespace();
+        // preMath'ed value must be directly followed by one of:
+        // - end of expression
+        // - comparison
+        // - operator
+        let postOp;
+        if (this.testExpressionEnd()) {
+            // ok
+        } else if (this.testComparison()) {
+            postOp = this.parseComparison(func);
+        } else if (this.testOperator()) {
+            postOp = this.parseOperator(func);
+        } else if (this.verify) {
+            throw new Error('What?');
+        }
+        return postOp ?? func;
     }
 
     testPostMath() {
@@ -300,7 +315,9 @@ export class BoolParser {
             const before = value();
             const outcome = (before + (op == '++' ? 1 : -1)).toString();
             const scope = this.scope.parent;
-            if (scope.existsVariable(value.varName)) {
+            if (this.scope.existsVariableInScope(value.varName)) {
+                this.scope.setVariable(value.varName, outcome);
+            } else if (scope.existsVariable(value.varName)) {
                 scope.setVariable(value.varName, outcome);
             } else if (chat_metadata.variables && chat_metadata.variables[value.varName] !== undefined) {
                 chat_metadata.variables[value.varName] = outcome;
@@ -338,7 +355,11 @@ export class BoolParser {
                     break;
                 }
                 case '+=': {
-                    outcome += value;
+                    if (Array.isArray(outcome)) {
+                        outcome.push(value);
+                    } else {
+                        outcome += value;
+                    }
                     break;
                 }
                 case '-=': {
@@ -506,7 +527,7 @@ export class BoolParser {
         return this.testSymbol(/-?(\d+(\.\d+)?|\.\d+)/);
     }
     parseNumber() {
-        this.partIndex.push(BOOL_PART.List);
+        this.partIndex.push(BOOL_PART.Number);
         const match = /^-?(\d+(\.\d+)?|\.\d+)/.exec(this.charAhead)[0];
         this.take(match.length);
         const value = Number(match);
@@ -517,6 +538,10 @@ export class BoolParser {
         return this.testSymbol('/');
     }
     testRegexEnd() {
+        if (this.endOfText) {
+            if (this.verify) throw new Error('Unexpected end of regex');
+            return true;
+        }
         return this.testSymbol(/\/([dgimsuvy]*)/);
     }
     parseRegex() {
@@ -533,6 +558,10 @@ export class BoolParser {
         return this.testSymbol('{');
     }
     testMacroEnd() {
+        if (this.endOfText) {
+            if (this.verify) throw new Error('Unexpected end of macro');
+            return true;
+        }
         return this.testSymbol('}');
     }
     parseMacro() {
@@ -544,6 +573,7 @@ export class BoolParser {
         return ()=>{
             const value = new SlashCommandClosure().substituteParams(text, this.scope);
             const parser = new BoolParser(this.scope, {});
+            parser.index = 0;
             parser.text = value;
             if (parser.testBool()) {
                 return parser.parseBool()();
@@ -580,8 +610,6 @@ export class BoolParser {
             b = this.parseFlip();
         } else if (this.testPreMath()) {
             b = this.parsePreMath();
-        } else if (this.testPostMath()) {
-            b = this.parsePostMath();
         } else if (this.verify) {
             throw new Error('What?');
         }
@@ -797,8 +825,6 @@ export class BoolParser {
             value = this.parseFlip();
         } else if (this.testPreMath()) {
             value = this.parsePreMath();
-        } else if (this.testPostMath()) {
-            value = this.parsePostMath();
         } else if (this.testExpression()) {
             value = this.parseExpression();
         } else if (this.testLiteral()) {
