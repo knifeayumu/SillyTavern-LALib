@@ -332,7 +332,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'and',
      */
     callback: (args, value) => {
         if (args.left !== undefined && args.right !== undefined) {
-            toastr.warning('Using left= and right= in /and is deprecated, please update your script to use unnamed arguments instead.', '/and (LALib)');
+            toastr.warning('Using left= and right= in /and is deprecated, please update your script to use unnamed arguments instead.', '/and (LALib)', { preventDuplicates:true });
             /**@type {string|boolean} */
             let left = args.left;
             try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
@@ -389,7 +389,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'or',
      */
     callback: (args, value) => {
         if (args.left !== undefined && args.right !== undefined) {
-            toastr.warning('Using left= and right= in /or is deprecated, please update your script to use unnamed arguments instead.', '/or (LALib)');
+            toastr.warning('Using left= and right= in /or is deprecated, please update your script to use unnamed arguments instead.', '/or (LALib)', { preventDuplicates:true });
             /**@type {string|boolean} */
             let left = args.left;
             try { left = isTrueBoolean(args.left); } catch { /*empty*/ }
@@ -491,7 +491,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
-            toastr.warning('Using var= or globalvar= or list= in /foreach is deprecated, please update your script to use unnamed arguments instead.', '/foreach (LALib)');
+            toastr.warning('Using var= or globalvar= or list= in /foreach is deprecated, please update your script to use unnamed arguments instead.', '/foreach (LALib)', { preventDuplicates:true });
             const err = new Error();
             console.warn('[LALIB]', '[DEPRECATED]', err.stack);
             list = getListVar(args.var, args.globalvar, args.list);
@@ -651,7 +651,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
-            toastr.warning('Using var= or globalvar= or list= in /map is deprecated, please update your script to use unnamed arguments instead.', '/map (LALib)');
+            toastr.warning('Using var= or globalvar= or list= in /map is deprecated, please update your script to use unnamed arguments instead.', '/map (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.list);
             if (value[0] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[0]);
@@ -786,7 +786,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
-            toastr.warning('Using var= or globalvar= or list= in /filter is deprecated, please update your script to use unnamed arguments instead.', '/filter (LALib)');
+            toastr.warning('Using var= or globalvar= or list= in /filter is deprecated, please update your script to use unnamed arguments instead.', '/filter (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.list);
             if (value[0] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[0]);
@@ -908,7 +908,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
-            toastr.warning('Using var= or globalvar= or list= in /find is deprecated, please update your script to use unnamed arguments instead.', '/find (LALib)');
+            toastr.warning('Using var= or globalvar= or list= in /find is deprecated, please update your script to use unnamed arguments instead.', '/find (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.list);
             if (value[0] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[0]);
@@ -1038,7 +1038,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
         /**@type {Array} */
         let list;
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /slice is deprecated, please update your script to use unnamed arguments instead.', '/slice (LALib)');
+            toastr.warning('Using var= or globalvar= in /slice is deprecated, please update your script to use unnamed arguments instead.', '/slice (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
         } else {
             list = getListVar(null, null, value) ?? value;
@@ -1113,7 +1113,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
         let start = Number(args.start);
         let deleteCount = args.delete === '' ? Number.MAX_SAFE_INTEGER : Number(args.delete);
         if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
-            toastr.warning('Using var= or globalvar= or value= in /splice is deprecated, please update your script to use insert= and the unnamed argument instead.', '/splice (LALib)');
+            toastr.warning('Using var= or globalvar= or value= in /splice is deprecated, please update your script to use insert= and the unnamed argument instead.', '/splice (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.value);
             insert = getListVar(null, null, value) ?? value.split(' ').filter(it=>it);
             if (!list) {
@@ -1357,7 +1357,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
      */
     callback: (args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /split is deprecated, please update your script to use the unnamed argument instead.', '/split (LALib)');
+            toastr.warning('Using var= or globalvar= in /split is deprecated, please update your script to use the unnamed argument instead.', '/split (LALib)', { preventDuplicates:true });
             value = getVar(args.var, args.globalvar, value);
         }
         /**@type {string|RegExp} */
@@ -1413,7 +1413,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
      */
     callback: (args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /join is deprecated, please update your script to use the unnamed argument instead.', '/join (LALib)');
+            toastr.warning('Using var= or globalvar= in /join is deprecated, please update your script to use the unnamed argument instead.', '/join (LALib)', { preventDuplicates:true });
         }
         let list = getListVar(args.var, args.globalvar, value);
         if (Array.isArray(list)) {
@@ -1861,7 +1861,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
      */
     callback: (args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /re-test is deprecated, please update your script to use the unnamed argument instead.', '/re-test (LALib)');
+            toastr.warning('Using var= or globalvar= in /re-test is deprecated, please update your script to use the unnamed argument instead.', '/re-test (LALib)', { preventDuplicates:true });
         }
         try {
             const re = makeRegex(args.find);
@@ -1901,7 +1901,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
      */
     callback: async(args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /re-replace is deprecated, please update your script to use the unnamed argument instead.', '/re-replace (LALib)');
+            toastr.warning('Using var= or globalvar= in /re-replace is deprecated, please update your script to use the unnamed argument instead.', '/re-replace (LALib)', { preventDuplicates:true });
         }
         if (args.find == null) {
             throw new Error('/re-replace requires find= to be set.');
@@ -2090,7 +2090,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
      */
     callback: async(args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /getat is deprecated, please update your script to use the unnamed argument instead.', '/getat (LALib)');
+            toastr.warning('Using var= or globalvar= in /getat is deprecated, please update your script to use the unnamed argument instead.', '/getat (LALib)', { preventDuplicates:true });
         }
         let index = getListVar(null, null, args.index) ?? [args.index];
         if (!Array.isArray(index)) {
@@ -2139,7 +2139,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
      */
     callback: async(args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /setat is deprecated, please update your script to use value= instead.', '/setat (LALib)');
+            toastr.warning('Using var= or globalvar= in /setat is deprecated, please update your script to use value= instead.', '/setat (LALib)', { preventDuplicates:true });
         }
         try { value = JSON.parse(value); } catch { /*empty*/ }
         let index = getListVar(null, null, args.index) ?? [args.index];
@@ -2801,7 +2801,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
      */
     callback: async(args, value)=>{
         if (args.var !== undefined || args.globalvar !== undefined) {
-            toastr.warning('Using var= or globalvar= in /switch is deprecated, please update your script to use the unnamed argument instead.', '/switch (LALib)');
+            toastr.warning('Using var= or globalvar= in /switch is deprecated, please update your script to use the unnamed argument instead.', '/switch (LALib)', { preventDuplicates:true });
         }
         const val = getVar(args.var, args.globalvar, value.toString());
         return JSON.stringify({
@@ -2838,7 +2838,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
         /**@type {SlashCommandClosure} */
         let closure;
         if (args.var !== undefined || args.globalvar !== undefined || args.value !== undefined) {
-            toastr.warning('Using value= in /case is deprecated, please update your script to use unnamed arguments instead.', '/case (LALib)');
+            toastr.warning('Using value= in /case is deprecated, please update your script to use unnamed arguments instead.', '/case (LALib)', { preventDuplicates:true });
             value = getVar(null, null, args.value);
             if (unnamedArgs[0] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(unnamedArgs[0]);
@@ -3192,7 +3192,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
-        toastr.warning('/then is deprecated, please update your script to use the unnamed arguments in /ife or /elseif instead.', '/then (LALib)');
+        toastr.warning('/then is deprecated, please update your script to use the unnamed arguments in /ife or /elseif instead.', '/then (LALib)', { preventDuplicates:true });
         /**@type {string|SlashCommandClosure} */
         let command;
         if (value) {
