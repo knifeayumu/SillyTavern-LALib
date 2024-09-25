@@ -174,12 +174,16 @@ export class BoolParser {
         // flip must be followed by one of:
         // - expression: (...)
         // - literal: var/string/number/bool
+        // - flip: !
         let value;
         if (this.testExpression()) {
             const v = this.parseExpression();
             value = ()=>!v();
         } else if (this.testLiteral()) {
             const v = this.parseLiteral(false, false, false);
+            value = ()=>!v();
+        } else if (this.testFlip()) {
+            const v = this.parseFlip();
             value = ()=>!v();
         } else if (this.verify) {
             throw new Error('What?');
