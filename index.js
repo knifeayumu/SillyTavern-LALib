@@ -561,6 +561,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
                 extension_settings.variables.global[target] = list;
                 saveSettingsDebounced();
             };
+        } else {
+            get = ()=>JSON.parse(target);
+            set = ()=>{};
         }
         const list = get();
         list.push(...items);
