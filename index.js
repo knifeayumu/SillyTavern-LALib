@@ -1,4 +1,4 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, saveSettingsDebounced, sendSystemMessage, showSwipeButtons } from '../../../../script.js';
+import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, saveSettingsDebounced, sendSystemMessage, showSwipeButtons, this_chid } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext, saveMetadataDebounced } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
@@ -4226,6 +4226,60 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-move
             </ul>
         </div>
     `,
+}));
+
+
+
+// GROUP: Chat Management
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'chat-list',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  char:string,
+     * }} args
+     * @param {*} value
+     */
+    callback: async(args, value)=>{
+        const result = await fetch('/api/characters/chats', {
+            method: 'POST',
+            headers: getRequestHeaders(),
+            body: JSON.stringify({ avatar_url: args.char ?? characters[this_chid]?.avatar, simple: true }),
+        });
+        if (!result.ok) {
+            return '[]';
+        }
+        const data = await result.json();
+        return JSON.stringify(data.map(x => String(x.file_name).replace('.jsonl', '')));
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'char',
+            description: 'avatar name of the char',
+            defaultValue: 'current char',
+        }),
+    ],
+    returns: 'list of all chats of current or selected character',
+    helpString: `
+        <div>
+            Get a list of all chats of the current or provided character.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/chat-list |</code></pre>
+                    <pre><code class="language-stscript">/chat-list char=default_Seraphina.png |</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'chat-parent',
+    callback: (args, value)=>{
+        return chat_metadata['main_chat'] ?? '';
+    },
+    returns: 'name of parent chat',
+    helpString: 'returns the name of the parent chat',
 }));
 
 /** @type {{listen:()=>void, unlisten:()=>void, event:string, query:string, id:string}[]} */
