@@ -486,6 +486,56 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
 
 
 // GROUP: List Operations and Loops
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {string} target
+     * @returns {string}
+     */
+    callback: (args, target)=>{
+        let get;
+        let set;
+        if (args._scope.existsVariable(target)) {
+            get = ()=>JSON.parse(args._scope.getVariable(target));
+            set = ()=>args._scope.setVariable(target, JSON.stringify(list));
+        } else if (chat_metadata.variables && chat_metadata.variables[target] !== undefined) {
+            get = ()=>JSON.parse(chat_metadata.variables[target]);
+            set = ()=>{
+                chat_metadata.variables[target] = list;
+                saveMetadataDebounced();
+            };
+        } else if (extension_settings.variables.global && extension_settings.variables.global[target] !== undefined) {
+            get = ()=>JSON.parse(extension_settings.variables.global[target]);
+            set = ()=>{
+                extension_settings.variables.global[target] = list;
+                saveSettingsDebounced();
+            };
+        } else {
+            get = ()=>JSON.parse(target);
+            set = ()=>{};
+        }
+        const list = get();
+        const value = list.pop();
+        set();
+        if (typeof value == 'string') {
+            return value;
+        }
+        return JSON.stringify(value);
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'target list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({ description: 'items to add',
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            acceptsMultiple: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+}));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
     /**
      *
