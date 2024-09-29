@@ -1538,6 +1538,169 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'trim',
     ],
     helpString: 'Removes whitespace at the start and end of the text.',
 }));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-start',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  fill:string
+     * }} args
+     * @param {string[]} param1
+     */
+    callback: (args, [length, target]) => {
+        return target.padStart(parseInt(length), args.fill);
+    },
+    returns: 'the padded text',
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'fill',
+            description: 'the character to use to pad the text',
+            defaultValue: ' ',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'target length',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the text to pad',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    splitUnnamedArgumentCount: 1,
+    helpString: `
+        <div>
+            Pad the provided text at the start if it is shorter then the target length.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/pad-start 5 foo</code></pre>
+                    returns <code>  foo</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/pad-start fill=+ 5 foo</code></pre>
+                    returns <code>++foo</code>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-end',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  fill:string
+     * }} args
+     * @param {string[]} param1
+     */
+    callback: (args, [length, target]) => {
+        return target.padEnd(parseInt(length), args.fill);
+    },
+    returns: 'the padded text',
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'fill',
+            description: 'the character to use to pad the text',
+            defaultValue: ' ',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'target length',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the text to pad',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    splitUnnamedArgumentCount: 1,
+    helpString: `
+        <div>
+            Pad the provided text at the end if it is shorter then the target length.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/pad-end 5 foo</code></pre>
+                    returns <code>foo  </code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/pad-end fill=+ 5 foo</code></pre>
+                    returns <code>foo++</code>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-both',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  fill:string
+     * }} args
+     * @param {string[]} param1
+     */
+    callback: (args, [length, target]) => {
+        const add = (parseInt(length) - target.length) / 2;
+        const fill = args.fill ?? ' ';
+        return `${fill.repeat(Math.floor(add)).slice(0, Math.floor(add))}${target}${fill.repeat(Math.ceil(add)).slice(0, Math.ceil(add))}`;
+    },
+    returns: 'the padded text',
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'fill',
+            description: 'the character to use to pad the text',
+            defaultValue: ' ',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'target length',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the text to pad',
+            typeList: [ARGUMENT_TYPE.STRING],
+            isRequired: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    splitUnnamedArgumentCount: 1,
+    helpString: `
+        <div>
+            Pad the provided text at both ends if it is shorter then the target length.
+        </div>
+        <div>
+            If an odd number of characters needs to be added, the remaining character will be added
+            at the end of the text.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/pad-both 5 foo</code></pre>
+                    returns <code> foo </code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/pad-both fill=+ 5 foo</code></pre>
+                    returns <code>+foo+</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/pad-both fill=+ 6 foo</code></pre>
+                    returns <code>+foo++</code>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
 
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
