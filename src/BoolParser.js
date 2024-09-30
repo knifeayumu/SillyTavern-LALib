@@ -73,19 +73,38 @@ export class BoolParser {
     }
 
     resolveVariable(name, scope = null) {
-        if (scope?.existsVariable(name)) {
-            return scope.getVariable(name);
+        const parts = name.split('.');
+        let part = parts.shift();
+        let value;
+
+        if (scope?.existsVariable(part)) {
+            value = scope.getVariable(part);
+        } else if (chat_metadata.variables && chat_metadata.variables[part] !== undefined) {
+            value = resolveVariable(part);
+        } else if (extension_settings.variables.global && extension_settings.variables.global[part] !== undefined) {
+            value = resolveVariable(part);
+        } else {
+            return '';
         }
 
-        if (chat_metadata.variables && chat_metadata.variables[name] !== undefined) {
-            return resolveVariable(name);
+        if (parts.length) {
+            let parsed;
+            try { parsed = JSON.parse(value); } catch { /* empty */ }
+            part = parts.shift();
+            while (parsed !== undefined && part) {
+                if (Array.isArray(parsed)) {
+                    parsed = parsed.at(part);
+                } else {
+                    parsed = (parsed ?? {})[part];
+                }
+                part = parts.shift();
+            }
+            if (typeof parsed == 'string') return parsed;
+            if (parsed === undefined || parsed === null) return '';
+            return JSON.stringify(parsed);
+        } else {
+            return value;
         }
-
-        if (extension_settings.variables.global && extension_settings.variables.global[name] !== undefined) {
-            return resolveVariable(name);
-        }
-
-        return '';
     }
 
 
@@ -460,11 +479,11 @@ export class BoolParser {
     }
 
     testVar() {
-        return this.testSymbol(/[a-z_][a-z_0-9]*/i);
+        return this.testSymbol(/[a-z_][a-z_0-9]*(\.(-?\d+|[a-z_][a-z_0-9]*))*/i);
     }
     parseVar(openPost = true) {
         this.partIndex.push(BOOL_PART.Var);
-        const name = /^[a-z_][a-z_0-9]*/i.exec(this.charAhead)[0];
+        const name = /^[a-z_][a-z_0-9]*(\.(-?\d+|[a-z_][a-z_0-9]*))*/i.exec(this.charAhead)[0];
         this.take(name.length);
         const func = ()=>{
             const val = this.resolveVariable(name, this.scope);
