@@ -494,6 +494,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
      * @returns {string}
      */
     callback: (args, target)=>{
+        /**@type {()=>[]} */
         let get;
         let set;
         if (args._scope.existsVariable(target)) {
@@ -535,6 +536,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
         }),
     ],
     splitUnnamedArgument: true,
+    returns: 'The removed element',
+    helpString: `
+        <div>
+            Removes the last element from a list and returns it.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/pop ["A", "B", "C"] |</code></pre>
+                    returns <code>C</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/pop x |</code></pre>
+                    returns <code>5</code>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
     /**
@@ -544,6 +564,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
      * @returns {string}
      */
     callback: (args, [target, ...items])=>{
+        /**@type {()=>Array} */
         let get;
         let set;
         if (args._scope.existsVariable(target)) {
@@ -582,6 +603,162 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
         }),
     ],
     splitUnnamedArgument: true,
+    returns: 'The updated list',
+    helpString: `
+        <div>
+            Appends new elements to the end of a list, and returns the list.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/push ["A", "B", "C"] foo bar |</code></pre>
+                    returns <code>["A", "B", "C", "foo", "bar"]</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/push x 10 |</code></pre>
+                    returns <code>[1, 2, 3, 4, 5, 10]</code>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {string} target
+     * @returns {string}
+     */
+    callback: (args, target)=>{
+        /**@type {()=>[]} */
+        let get;
+        let set;
+        if (args._scope.existsVariable(target)) {
+            get = ()=>JSON.parse(args._scope.getVariable(target));
+            set = ()=>args._scope.setVariable(target, JSON.stringify(list));
+        } else if (chat_metadata.variables && chat_metadata.variables[target] !== undefined) {
+            get = ()=>JSON.parse(chat_metadata.variables[target]);
+            set = ()=>{
+                chat_metadata.variables[target] = list;
+                saveMetadataDebounced();
+            };
+        } else if (extension_settings.variables.global && extension_settings.variables.global[target] !== undefined) {
+            get = ()=>JSON.parse(extension_settings.variables.global[target]);
+            set = ()=>{
+                extension_settings.variables.global[target] = list;
+                saveSettingsDebounced();
+            };
+        } else {
+            get = ()=>JSON.parse(target);
+            set = ()=>{};
+        }
+        const list = get();
+        const value = list.shift();
+        set();
+        if (typeof value == 'string') {
+            return value;
+        }
+        return JSON.stringify(value);
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'target list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({ description: 'items to add',
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            acceptsMultiple: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    returns: 'The removed element',
+    helpString: `
+        <div>
+            Removes the first element from a list and returns it.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/shift ["A", "B", "C"] |</code></pre>
+                    returns <code>A</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/shift x |</code></pre>
+                    returns <code>1</code>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'unshift',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {[target:string, ...items:string]} param1
+     * @returns {string}
+     */
+    callback: (args, [target, ...items])=>{
+        /**@type {()=>Array} */
+        let get;
+        let set;
+        if (args._scope.existsVariable(target)) {
+            get = ()=>JSON.parse(args._scope.getVariable(target));
+            set = ()=>args._scope.setVariable(target, JSON.stringify(list));
+        } else if (chat_metadata.variables && chat_metadata.variables[target] !== undefined) {
+            get = ()=>JSON.parse(chat_metadata.variables[target]);
+            set = ()=>{
+                chat_metadata.variables[target] = list;
+                saveMetadataDebounced();
+            };
+        } else if (extension_settings.variables.global && extension_settings.variables.global[target] !== undefined) {
+            get = ()=>JSON.parse(extension_settings.variables.global[target]);
+            set = ()=>{
+                extension_settings.variables.global[target] = list;
+                saveSettingsDebounced();
+            };
+        } else {
+            get = ()=>JSON.parse(target);
+            set = ()=>{};
+        }
+        const list = get();
+        list.unshift(...items);
+        set();
+        return JSON.stringify(list);
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'target list',
+            typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({ description: 'items to add',
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+            isRequired: true,
+            acceptsMultiple: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    returns: 'The updated list',
+    helpString: `
+        <div>
+            Inserts new elements at the start of a list, and returns the list.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/unshift ["A", "B", "C"] foo bar |</code></pre>
+                    returns <code>["foo", "bar", "A", "B", "C"]</code>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/unshift x 10 |</code></pre>
+                    returns <code>[10, 1, 2, 3, 4, 5]</code>
+                </li>
+            </ul>
+        </div>
+    `,
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
