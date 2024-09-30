@@ -294,7 +294,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
     callback: (args, value)=>{
         const parser = new BoolParser(args._scope, args);
         const result = parser.parse(value);
-        return result().toString();
+        const resultValue = result();
+        if (typeof resultValue == 'string') return resultValue;
+        if (resultValue === undefined || resultValue === null) return '';
+        return JSON.stringify(resultValue);
     },
     namedArgumentList: [
         SlashCommandNamedArgument.fromProps({ name: 'expression variables',
