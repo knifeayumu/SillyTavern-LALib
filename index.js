@@ -1079,6 +1079,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         let command;
         /**@type {SlashCommandClosure} */
         let closure;
+        /**@type {string} */
+        let expression;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
             toastr.warning('Using var= or globalvar= or list= in /filter is deprecated, please update your script to use unnamed arguments instead.', '/filter (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.list);
@@ -1092,7 +1094,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
             } else {
-                command = value[1];
+                expression = value.slice(1).join(' ');
             }
         }
         let result;
@@ -1121,6 +1123,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
                     if (commandResult.isBreak) break;
+                } else if (expression !== undefined) {
+                    const parser = new BoolParser(args._scope, args);
+                    parser.scope.setMacro('item', item, true);
+                    parser.scope.setMacro('index', index, true);
+                    const exp = parser.parse(expression);
+                    commandResult = new SlashCommandClosureResult();
+                    commandResult.pipe = exp().toString();
                 } else {
                     commandResult = (await executeSlashCommandsWithOptions(
                         command.toString().replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
@@ -1159,8 +1168,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
-            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            description: 'the closure or expression to execute for each item, with {{item}} and {{index}} placeholders',
+            typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.STRING],
             isRequired: true,
         }),
     ],
@@ -1174,6 +1183,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             <ul>
                 <li>
                     <pre><code class="language-stscript">/filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}</code></pre>
+                    returns [3, 4, 5]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/filter [1,2,3,4,5] ({item} > 2)</code></pre>
                     returns [3, 4, 5]
                 </li>
             </ul>
@@ -1201,6 +1214,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         let command;
         /**@type {SlashCommandClosure} */
         let closure;
+        /**@type {string} */
+        let expression;
         if (args.var !== undefined || args.globalvar !== undefined || args.list !== undefined) {
             toastr.warning('Using var= or globalvar= or list= in /find is deprecated, please update your script to use unnamed arguments instead.', '/find (LALib)', { preventDuplicates:true });
             list = getListVar(args.var, args.globalvar, args.list);
@@ -1214,7 +1229,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
             } else {
-                command = value[1];
+                expression = value.slice(1).join(' ');
             }
         }
         const isList = Array.isArray(list);
@@ -1241,6 +1256,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     closure.scope.setMacro('index', index);
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
+                } else if (expression !== undefined) {
+                    const parser = new BoolParser(args._scope, args);
+                    parser.scope.setMacro('item', item, true);
+                    parser.scope.setMacro('index', index, true);
+                    const exp = parser.parse(expression);
+                    commandResult = new SlashCommandClosureResult();
+                    commandResult.pipe = exp().toString();
                 } else {
                     commandResult = (await executeSlashCommandsWithOptions(
                         command.replace(/{{item}}/ig, item).replace(/{{index}}/ig, index),
@@ -1300,13 +1322,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
     splitUnnamedArgument: true,
     helpString: `
         <div>
-            Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
+            Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
         </div>
         <div>
             <strong>Example:</strong>
             <ul>
                 <li>
                     <pre><code class="language-stscript">/find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo</code></pre>
+                    returns 3
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/find [1,2,3,4,5] ({item} > 2) | /echo</code></pre>
                     returns 3
                 </li>
             </ul>
