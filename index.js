@@ -3598,10 +3598,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
     // splitUnnamedArgument: true,
     helpString: `
         <div>
-            Execute a closure if none of the preceeding <code>/if</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
+            Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
         </div>
         <div>
-            Use with <code>/if</code> and <code>/else</code>.
+            Use with <code>/ife</code> and <code>/else</code>.
         </div>
         <div>
             See <code>/=</code> for more details on expressions.
@@ -3669,10 +3669,10 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
     splitUnnamedArgument: true,
     helpString: `
         <div>
-            Execute a closure if none of the preceeding <code>/if</code> and <code>/elseif</code> executed.
+            Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed.
         </div>
         <div>
-            Use with <code>/if</code> and <code>/elseif</code>.
+            Use with <code>/ife</code> and <code>/elseif</code>.
         </div>
         <div>
             See <code>/=</code> for more details on expressions.
