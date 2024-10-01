@@ -89,7 +89,7 @@ function isTrueFlag(value) {
 function makeBoolEnumProvider() {
     return (executor, scope)=>[
         new SlashCommandEnumValue('assignment', 'only at start:  a = b  |  a += b  |  a -= b  |  a *= b  |  a /= b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
-        new SlashCommandEnumValue('variable', 'a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('variable', 'a  |  a.property', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('string', '\'...\' ← single quotes!', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('macro', '{...} ← single curlies!', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('number', '1.23', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
@@ -100,7 +100,7 @@ function makeBoolEnumProvider() {
         new SlashCommandEnumValue('negation', '!a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('pre / post increment / decrement', '++a  |  a++  |  --a  |  a--', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
-        new SlashCommandEnumValue('regex', '/pattern/flags', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('regex', '/pattern/flags ← escape pipes! \\|', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('type check', 'a is string  |  a is number  |  a is boolean  |  a is list  |  a is dictionary  |  a is closure', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
     ];
 }
