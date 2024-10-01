@@ -4151,20 +4151,36 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         }
         const swipeList = [];
         if (args.filter) {
-            if (args.filter.argumentList.length < 1) throw new Error('/swipes-del filter= closure requires at least one argument');
-            for (let i = 0; i < mes.swipes.length; i++) {
-                const swipeObject = Object.assign(
-                    { index:i, mes:mes.swipes[i] },
-                    mes.swipe_info[i],
-                );
-                args.filter.providedArgumentList.push(Object.assign(new SlashCommandNamedArgumentAssignment(), {
-                    start: 0,
-                    end: 0,
-                    name: args.filter.argumentList[0].name,
-                    value: JSON.stringify(swipeObject),
-                }));
-                if (isTrueBoolean((await args.filter.execute()).pipe)) {
-                    swipeList.push(i);
+            if (args.filter instanceof SlashCommandClosure) {
+                if (args.filter.argumentList.length < 1) throw new Error('/swipes-del filter= closure requires at least one argument');
+                for (let i = 0; i < mes.swipes.length; i++) {
+                    const swipeObject = Object.assign(
+                        { index:i, mes:mes.swipes[i] },
+                        mes.swipe_info[i],
+                    );
+                    args.filter.providedArgumentList.push(Object.assign(new SlashCommandNamedArgumentAssignment(), {
+                        start: 0,
+                        end: 0,
+                        name: args.filter.argumentList[0].name,
+                        value: JSON.stringify(swipeObject),
+                    }));
+                    if (isTrueBoolean((await args.filter.execute()).pipe)) {
+                        swipeList.push(i);
+                    }
+                }
+            } else if (typeof args.filter == 'string') {
+                const parser = new BoolParser(args._scope, args);
+                parser.scope.letVariable('swipe');
+                const exp = parser.parse(args.filter);
+                for (let i = 0; i < mes.swipes?.length ?? 0; i++) {
+                    const swipeObject = Object.assign(
+                        { index:i, mes:mes.swipes[i] },
+                        mes.swipe_info[i],
+                    );
+                    parser.scope.setVariable('swipe', JSON.stringify(swipeObject));
+                    if (exp()) {
+                        swipeList.push(i);
+                    }
                 }
             }
         } else {
@@ -4212,8 +4228,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         }),
         SlashCommandNamedArgument.fromProps({
             name: 'filter',
-            description: 'closure accepting a swipe dictionary as argument returning true or false',
-            typeList: [ARGUMENT_TYPE.CLOSURE],
+            description: 'expression or closure accepting a swipe dictionary as argument returning true or false',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
         }),
     ],
     unnamedArgumentList: [
@@ -4234,15 +4250,31 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             <ul>
                 <li>
                     <pre><code class="language-stscript">/swipes-del |</code></pre>
+                    delete current swipe of last message
                 </li>
                 <li>
                     <pre><code class="language-stscript">/swipes-del 5 |</code></pre>
+                    delete swipe number 5 (0-based index) of last message
                 </li>
                 <li>
                     <pre><code class="language-stscript">/swipes-del message=20 |</code></pre>
+                    delete current swipe of message #20
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/swipes-del filter="swipe.index % 2" |</code></pre>
+                    delete all odd swipes (0-based index) of last message
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/swipes-del filter="swipe.index != 5" |</code></pre>
+                    delete all but swipe at idnex 5 (0-based index) of last message
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/swipes-del filter="'bad word' in swipe.mes" |</code></pre>
+                    delete all swipes with "bad word" in their message text of last message
                 </li>
                 <li>
                     <pre><code class="language-stscript">/swipes-del filter={: swipe=\n\t/var key=swipe index=mes |\n\t/test left={{pipe}} rule=in right="bad word" |\n:} |</code></pre>
+                    delete all swipes with "bad word" in their message text of last message
                 </li>
             </ul>
         </div>
