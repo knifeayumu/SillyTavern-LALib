@@ -1128,8 +1128,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                     if (commandResult.isBreak) break;
                 } else if (expression !== undefined) {
                     const parser = new BoolParser(args._scope, args);
-                    parser.scope.setMacro('item', item, true);
-                    parser.scope.setMacro('index', index, true);
+                    parser.scope.letVariable('item', item);
+                    parser.scope.letVariable('index', index);
                     const exp = parser.parse(expression);
                     commandResult = new SlashCommandClosureResult();
                     commandResult.pipe = exp().toString();
@@ -1189,7 +1189,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                     returns [3, 4, 5]
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/filter [1,2,3,4,5] ({item} > 2)</code></pre>
+                    <pre><code class="language-stscript">/filter [1,2,3,4,5] (item > 2)</code></pre>
                     returns [3, 4, 5]
                 </li>
             </ul>
@@ -1261,8 +1261,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     if (commandResult.isAborted) break;
                 } else if (expression !== undefined) {
                     const parser = new BoolParser(args._scope, args);
-                    parser.scope.setMacro('item', item, true);
-                    parser.scope.setMacro('index', index, true);
+                    parser.scope.letVariable('item', item);
+                    parser.scope.letVariable('index', index);
                     const exp = parser.parse(expression);
                     commandResult = new SlashCommandClosureResult();
                     commandResult.pipe = exp().toString();
@@ -1335,7 +1335,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                     returns 3
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/find [1,2,3,4,5] ({item} > 2) | /echo</code></pre>
+                    <pre><code class="language-stscript">/find [1,2,3,4,5] (item > 2) | /echo</code></pre>
                     returns 3
                 </li>
             </ul>
