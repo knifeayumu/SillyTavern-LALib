@@ -3424,6 +3424,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
+        if (!Array.isArray(value)) value = [value];
         /**@type {SlashCommandClosure} */
         let then;
         /**@type {SlashCommandClosure} */
@@ -3516,6 +3517,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
      * @param {(string|SlashCommandClosure)[]} value
      */
     callback: async (args, value) => {
+        if (!Array.isArray(value)) value = [value];
         /**@type {SlashCommandClosure} */
         let then;
         /**@type {SlashCommandClosure} */
