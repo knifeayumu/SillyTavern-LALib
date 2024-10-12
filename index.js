@@ -1642,27 +1642,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dict',
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'keys',
     callback: async (args, value) => {
-        let list = getListVar(args.var, args.globalvar, value);
+        let list;
+        if (args.var !== undefined || args.globalvar !== undefined) {
+            toastr.warning('Using var= or globalvar= in /keys is deprecated, please update your script to use unnamed arguments instead.', '/keys (LALib)', { preventDuplicates:true });
+            list = getListVar(args.var, args.globalvar, value) ?? getVar(args.var, args.globalvar, value);
+        } else {
+            list = getListVar(null, null, value) ?? value;
+        }
         return JSON.stringify(Object.keys(list));
     },
     namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'var',
-            description: 'name of the chat variable to get keys from',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
-        SlashCommandNamedArgument.fromProps({ name: 'globalvar',
-            description: 'name of the global variable to get keys from',
-            typeList: [ARGUMENT_TYPE.VARIABLE_NAME],
-        }),
     ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
-            description: 'the dictionary/object to get keys from',
+            description: 'the dictionary to get keys from',
             typeList: [ARGUMENT_TYPE.DICTIONARY],
         }),
     ],
-    returns: 'list of keys in the dictionary/object',
-    helpString: 'Return the list of keys of a dictionary / object.',
+    returns: 'list of keys in the dictionary',
+    helpString: 'Return the list of keys of a dictionary.',
 }));
 
 
