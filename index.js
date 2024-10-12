@@ -1196,7 +1196,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
     /**
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
-     *  index:string,
+     *  key:SlashCommandClosure,
      * }} args
      * @param {[string, string]} value
      */
@@ -1250,15 +1250,42 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
         if (!expression) {
             expression = 'a <=> b';
         }
+        const sortList = [];
+        let idx = 0;
+        for (const item of list) {
+            if (args.key && args.key instanceof SlashCommandClosure) {
+                let macroItem = item;
+                if (typeof item != 'string') {
+                    macroItem = JSON.stringify(item);
+                }
+                args.key.scope.setMacro('item', macroItem, true);
+                args.key.scope.setMacro('index', idx, true);
+                sortList.push({
+                    key: (await args.key.execute()).pipe,
+                    item,
+                });
+            } else {
+                sortList.push({
+                    key: item,
+                    item,
+                });
+            }
+            idx++;
+        }
         const parser = new BoolParser(args._scope, args);
         parser.scope.letVariable('a');
         parser.scope.letVariable('b');
         const exp = parser.parse(expression);
-        list.sort((a,b)=>{
+        sortList.sort((aa,bb)=>{
+            let a = aa.key;
+            let b = bb.key;
+            if (typeof a != 'string') a = JSON.stringify(a);
+            if (typeof b != 'string') b = JSON.stringify(b);
             parser.scope.setVariable('a', a);
             parser.scope.setVariable('b', b);
             return Number(exp());
         });
+        list = sortList.map(it=>it.item);
         const result = JSON.stringify(list);
         switch (varType) {
             case 'scoped': {
@@ -1278,6 +1305,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
         }
         return result;
     },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'key',
+            description: 'closure that returns the value to be used for sorting',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+        }),
+    ],
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the list to sort',
