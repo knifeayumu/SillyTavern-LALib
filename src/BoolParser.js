@@ -657,11 +657,11 @@ export class BoolParser {
 
 
     testComparison() {
-        return this.testSymbol(/==|!=|<=?|>=?|in |not in |starts with |ends with /);
+        return this.testSymbol(/==|!=|<(?:=>?)?|>=?|in |not in |starts with |ends with /);
     }
     parseComparison(a) {
         this.partIndex.push(BOOL_PART.Comparison);
-        const op = /^(==|!=|<=?|>=?|in |not in |starts with |ends with )/.exec(this.charAhead)[0];
+        const op = /^(==|!=|<(?:=>?)?|>=?|in |not in |starts with |ends with )/.exec(this.charAhead)[0];
         this.take(op.length);
         this.discardWhitespace();
         // comparison operation must be followed by:
@@ -736,6 +736,35 @@ export class BoolParser {
                     }
                     case '<=': {
                         v = ()=>aa <= bb;
+                        break;
+                    }
+                    case '<=>': {
+                        v = ()=>{
+                            let aParsed = aa;
+                            let bParsed = bb;
+                            if (typeof aa == 'string') {
+                                if (aa.length > 0) {
+                                    const num = Number(aa);
+                                    if (!Number.isNaN(num)) {
+                                        aParsed = num;
+                                    }
+                                }
+                            }
+                            if (typeof bb == 'string') {
+                                if (bb.length > 0) {
+                                    const num = Number(bb);
+                                    if (!Number.isNaN(num)) {
+                                        bParsed = num;
+                                    }
+                                }
+                            }
+                            if (typeof aParsed == 'string' && typeof bParsed == 'string') {
+                                return aParsed.toLowerCase().localeCompare(bParsed.toLowerCase());
+                            }
+                            if (aParsed > bParsed) return 1;
+                            if (aParsed < bParsed) return -1;
+                            return 0;
+                        };
                         break;
                     }
                     case '>': {

@@ -99,7 +99,7 @@ function makeBoolEnumProvider() {
         new SlashCommandEnumValue('logical operator', 'a and b  |  a xor b  |  a or b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('negation', '!a', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('pre / post increment / decrement', '++a  |  a++  |  --a  |  a--', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
-        new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
+        new SlashCommandEnumValue('comparison operator', 'a==b  |  a!=b  |  a&gt;b  |  a&gt;=b  |  a&lt;b  |  a&lt;=b  |  a in b  |  a not in b  | a <=> b', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('regex', '/pattern/flags ← escape pipes! \\|', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
         new SlashCommandEnumValue('type check', 'a is string  |  a is number  |  a is boolean  |  a is list  |  a is dictionary  |  a is closure', enumTypes.enum, enumIcons.boolean, (input)=>true, (input)=>input),
     ];
@@ -559,6 +559,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
         </div>
     `,
 }));
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
     /**
      *
@@ -626,6 +627,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
         </div>
     `,
 }));
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
     /**
      *
@@ -696,6 +698,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
         </div>
     `,
 }));
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'unshift',
     /**
      *
@@ -763,6 +766,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'unshift',
         </div>
     `,
 }));
+
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     /**
@@ -876,58 +880,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     `,
     returns: 'result of executing the command on the last item',
 }));
-
-SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
-    callback: async(args, value)=>{
-        /**@type {SlashCommandClosure} */
-        let runClosure;
-        /**@type {SlashCommandClosure} */
-        let closure;
-        /**@type {()=>boolean} */
-        let expression;
-        if (value) {
-            if (value[0] instanceof SlashCommandClosure) {
-                closure = value[0];
-            } else {
-                const text = value.slice(0, -1).join(' ');
-                const parser = new BoolParser(args._scope, args);
-                expression = parser.parse(text);
-            }
-            runClosure = value.at(-1);
-        }
-        const test = async()=>{
-            if (closure) return isTrueBoolean((await closure.execute()).pipe);
-            return expression();
-        };
-        runClosure.breakController = new SlashCommandBreakController();
-        let commandResult;
-        while (await test()) {
-            commandResult = await runClosure.execute();
-            if (commandResult.isAborted) break;
-            if (commandResult.isBreak) break;
-        }
-        if (commandResult) return commandResult.pipe;
-        return '';
-    },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
-            description: 'named arguments assigned to scoped variables to be used in the expression',
-            acceptsMultiple: true,
-            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
-        }),
-    ],
-    unnamedArgumentList: [
-        SlashCommandArgument.fromProps({
-            description: 'the expression or closure to evaluate',
-            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
-            isRequired: true,
-            acceptsMultiple: true,
-            enumProvider: makeIfWhileEnumProvider('while'),
-        }),
-    ],
-    // splitUnnamedArgument: true,
-}));
-
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
     /**
@@ -1063,6 +1015,348 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             </ul>
         </div>
     `,
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
+    callback: async(args, value)=>{
+        /**@type {SlashCommandClosure} */
+        let runClosure;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        /**@type {()=>boolean} */
+        let expression;
+        if (value) {
+            if (value[0] instanceof SlashCommandClosure) {
+                closure = value[0];
+            } else {
+                const text = value.slice(0, -1).join(' ');
+                const parser = new BoolParser(args._scope, args);
+                expression = parser.parse(text);
+            }
+            runClosure = value.at(-1);
+        }
+        const test = async()=>{
+            if (closure) return isTrueBoolean((await closure.execute()).pipe);
+            return expression();
+        };
+        runClosure.breakController = new SlashCommandBreakController();
+        let commandResult;
+        while (await test()) {
+            commandResult = await runClosure.execute();
+            if (commandResult.isAborted) break;
+            if (commandResult.isBreak) break;
+        }
+        if (commandResult) return commandResult.pipe;
+        return '';
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the expression or closure to evaluate',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: makeIfWhileEnumProvider('while'),
+        }),
+    ],
+    // splitUnnamedArgument: true,
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  initial:string?
+     * }} args
+     * @param {[string|SlashCommandClosure, SlashCommandClosure]} value
+     */
+    callback: async (args, value) => {
+        /**@type {Array} */
+        let list;
+        /**@type {SlashCommandClosure} */
+        let closure;
+        list = getListVar(null, null, value[0]);
+        if (!Array.isArray(list)) {
+            throw new Error('/reduce requires a list to operate on.');
+        }
+        closure = value[1];
+        if (closure.argumentList.length > 0) {
+            const ass = new SlashCommandNamedArgumentAssignment();
+            ass.name = closure.argumentList[0].name;
+            closure.providedArgumentList[0] = ass;
+        }
+        if (closure.argumentList.length > 1) {
+            const ass = new SlashCommandNamedArgumentAssignment();
+            ass.name = closure.argumentList[1].name;
+            closure.providedArgumentList[1] = ass;
+        }
+        if (closure.argumentList.length > 2) {
+            const ass = new SlashCommandNamedArgumentAssignment();
+            ass.name = closure.argumentList[2].name;
+            closure.providedArgumentList[2] = ass;
+        }
+        let func = async(accumulator, current, index)=>{
+            accumulator = await accumulator;
+            if (closure.argumentList.length > 0) {
+                closure.providedArgumentList[0].value = typeof accumulator == 'string' ? accumulator : JSON.stringify(accumulator);
+            }
+            if (closure.argumentList.length > 1) {
+                closure.providedArgumentList[1].value = typeof current == 'string' ? current : JSON.stringify(current);
+            }
+            if (closure.argumentList.length > 2) {
+                closure.providedArgumentList[2].value = index.toString();
+            }
+            return (await closure.execute()).pipe;
+        };
+        let result;
+        if (args.initial !== undefined) {
+            result = await list.reduce(func, Promise.resolve(args.initial));
+        } else {
+            result = await list.reduce(func);
+        }
+        return result;
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name:'initial',
+            description: 'initial value',
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to reduce',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the closure to execute for each item, takes up to three arguments (accumulator, current value, current index)',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
+    ],
+    splitUnnamedArgument: true,
+    helpString: `
+        <div>
+            Executes a "reducer" closure on each element of the list, in order, passing in
+            the return value from the calculation on the preceding element. The final result of running the reducer
+            across all elements of the list is a single value.
+        </div>
+        <div>
+            The first time that the closure is run there is no "return value of the previous calculation". If
+            supplied, an initial value may be used in its place. Otherwise the list element at index 0 is used as
+            the initial value and iteration starts from the next element (index 1 instead of index 0).
+        </div>
+        <div>
+            The reducer closure accepts up to three arguments:
+            <ul>
+                <li>
+                    <code>accumulator</code><br>
+                    The value resulting from the previous call to closure. On the first call, its value is
+                    <code>initial=</code> if that argument is provided; otherwise its value is the first list item.
+                </li>
+                <li>
+                    <code>currentValue</code><br>
+                    The value of the current element. On the first call, its value is the first list item if
+                    <code>initial=</code> is specified; otherwise its value is the second list item.
+                </li>
+                <li>
+                    <code>currentIndex</code><br>
+                    The index position of currentValue in the list. On the first call, its value is 0 if
+                    <code>initial=</code> is specified, otherwise 1.
+                </li>
+            </ul>
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/reduce [1,2,3] {: acc= cur= /= acc + cur :}</code></pre>
+                    returns 6 (1+2 = 3 -> 3 + 3 = 6)
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/reduce initial=10 [1,2,3] {: acc= cur= /= acc + cur :}</code></pre>
+                    returns 16 (10+1 = 11 -> 11+2 = 13 -> 13 + 3 = 16)
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [["a",1],["b",2],["c",3]] |\n/reduce initial={} {{var::x}} {: acc= cur=\n\t/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |\n\t/return {{var::acc}} |\n:} |</code></pre>
+                    returns <code>{"a":"1","b":"2","c":"3"}</code>
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'reduced value',
+}));
+
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
+    /**
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
+     *  index:string,
+     * }} args
+     * @param {[string, string]} value
+     */
+    callback: async (args, value) => {
+        /**@type {string} */
+        let varType;
+        /**@type {Array} */
+        let list;
+        /**@type {string} */
+        let expression;
+        if (args._scope.existsVariable(value[0])) {
+            list = JSON.parse(args._scope.getVariable(value[0]));
+            varType = 'scoped';
+        } else {
+            try {
+                list = JSON.parse(chat_metadata?.variables?.[value[0]]);
+                varType = 'chat';
+            } catch { /* empty */ }
+            if (!list) {
+                try {
+                    list = JSON.parse(extension_settings.variables?.global?.[value[0]]);
+                    varType = 'global';
+                } catch { /* empty */ }
+            }
+            if (!list) {
+                if (typeof value[0] == 'string') {
+                    try {
+                        const parsed = JSON.parse(value[0]);
+                        if (Array.isArray(parsed)) {
+                            list = parsed;
+                        }
+                    } catch { /* empty */ }
+                }
+            }
+        }
+        if (!Array.isArray(list)) {
+            throw new Error('/sorte requires a list to operate on.');
+        }
+        if (value.length > 1) {
+            expression = value.slice(1).join(' ');
+        }
+        list = list.map(it=>{
+            if (typeof it == 'string' && it.length > 0) {
+                const num = Number(it);
+                if (!Number.isNaN(num)) {
+                    return num;
+                }
+            }
+            return it;
+        });
+        if (!expression) {
+            expression = 'a <=> b';
+        }
+        const parser = new BoolParser(args._scope, args);
+        parser.scope.letVariable('a');
+        parser.scope.letVariable('b');
+        const exp = parser.parse(expression);
+        list.sort((a,b)=>{
+            parser.scope.setVariable('a', a);
+            parser.scope.setVariable('b', b);
+            return Number(exp());
+        });
+        const result = JSON.stringify(list);
+        switch (varType) {
+            case 'scoped': {
+                args._scope.setVariable(value[0], result);
+                break;
+            }
+            case 'chat': {
+                chat_metadata.variables[value[0]] = result;
+                saveMetadataDebounced();
+                break;
+            }
+            case 'global': {
+                extension_settings.variables.global[value[0]] = result;
+                saveSettingsDebounced();
+                break;
+            }
+        }
+        return result;
+    },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to sort',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+        SlashCommandArgument.fromProps({
+            description: 'the expression to compare two items <code>a</code> and <code>b</code>',
+            typeList: [ARGUMENT_TYPE.STRING],
+            defaultValue: '(a <=> b)',
+        }),
+    ],
+    splitUnnamedArgument: true,
+    helpString: `
+        <div>
+            Sorts a list.
+        </div>
+        <div>
+            If given a variable name, the variable will be modified.
+        </div>
+        <div>
+            <strong>Example:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] |</code></pre>
+                    returns [-99,-10,0,3,5]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [5,3,-10,-99,0] |\n/sorte x |\n/echo {{var::x}} |</code></pre>
+                    returns [-99,-10,0,3,5]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/let x [5,3,-10,-99,0] |\n/sorte {{var::x}} |\n/echo {{var::x}} |</code></pre>
+                    returns [5,3,-10,-99,0]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (a <=> b) |</code></pre>
+                    returns [-99,-10,0,3,5]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (b <=> a) |</code></pre>
+                    returns [5,3,0,-10,-99]
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'the sorted list',
+}));
+
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'flatten',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  depth:string
+     * }} args
+     * @param {string} value
+     * @returns
+     */
+    callback: (args, value) => {
+        let depth = parseInt(args.depth ?? '1');
+        if (depth == 0) depth = Infinity;
+        return JSON.stringify(JSON.parse(value).flat(depth));
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'depth',
+            description: 'The depth level specifying how deep a nested list structure should be flattened. Defaults to 1. Use 0 to flatten all levels.',
+            typeList: [ARGUMENT_TYPE.NUMBER],
+            defaultValue: '1',
+        }),
+    ],
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({
+            description: 'the list to flatten',
+            typeList: [ARGUMENT_TYPE.LIST],
+            isRequired: true,
+        }),
+    ],
+    helpString: 'Creates a new list with all sub-list elements concatenated into it recursively up to the specified depth.',
+    returns: 'the flattened list',
 }));
 
 
