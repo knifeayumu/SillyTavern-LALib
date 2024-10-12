@@ -1198,7 +1198,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
     returns: 'the filtered list or dictionary',
 }));
 
-
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
     /**
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
@@ -1507,6 +1506,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
         </div>
     `,
 }));
+
 
 const shuffleList = (value)=>{
     const list = getListVar(null, null, value);
