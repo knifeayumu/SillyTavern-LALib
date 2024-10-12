@@ -107,6 +107,64 @@ export class BoolParser {
         }
     }
 
+    setVariable(name, newValue, scope = null) {
+        const parts = name.split('.');
+        let part = parts.shift();
+        let basePart = part;
+        let value;
+        let isScoped = false;
+        let isChat = false;
+        let isGlobal = false;
+        if (scope?.existsVariable(part)) {
+            value = scope.getVariable(part);
+            isScoped = true;
+        } else if (chat_metadata.variables && chat_metadata.variables[part] !== undefined) {
+            value = resolveVariable(part);
+            isChat = true;
+        } else if (extension_settings.variables.global && extension_settings.variables.global[part] !== undefined) {
+            value = resolveVariable(part);
+            isGlobal = true;
+        }
+        if (parts.length) {
+            if (value === undefined) {
+                if (Number.isNaN(parseInt(parts[0]))) {
+                    value = '{}';
+                } else {
+                    value = '[]';
+                }
+            }
+            let parsed;
+            try { parsed = JSON.parse(value); } catch { /* empty */ }
+            const parsedValue = parsed;
+            part = parts.shift();
+            while (parsed !== undefined && parts.length > 0 && part) {
+                if (Array.isArray(parsed)) {
+                    parsed = parsed.at(part);
+                } else {
+                    parsed = (parsed ?? {})[part];
+                }
+                if (parsed === undefined) parsed = {};
+                part = parts.shift();
+            }
+            if (parsed !== undefined && part !== undefined) {
+                parsed[part] = newValue;
+            }
+            newValue = parsedValue;
+        }
+        if (typeof newValue != 'string') newValue = JSON.stringify(newValue);
+        if (isScoped) {
+            scope.setVariable(basePart, newValue);
+        } else if (isChat) {
+            chat_metadata.variables[basePart] = newValue;
+            saveMetadataDebounced();
+        } else if (isGlobal) {
+            extension_settings.variables.global[basePart] = newValue;
+            saveSettingsDebounced();
+        } else {
+            scope.letVariable(basePart, newValue);
+        }
+    }
+
 
 
 
@@ -396,17 +454,7 @@ export class BoolParser {
             }
             outcome = outcome.toString();
             const scope = this.scope.parent;
-            if (scope.existsVariable(a.varName)) {
-                scope.setVariable(a.varName, outcome);
-            } else if (chat_metadata.variables && chat_metadata.variables[a.varName] !== undefined) {
-                chat_metadata.variables[a.varName] = outcome;
-                saveMetadataDebounced();
-            } else if (extension_settings.variables.global && extension_settings.variables.global[a.varName] !== undefined) {
-                extension_settings.variables.global[a.varName] = outcome;
-                saveSettingsDebounced();
-            } else {
-                scope.letVariable(a.varName, outcome);
-            }
+            this.setVariable(a.varName, outcome, scope);
             return outcome;
         };
     }
