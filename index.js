@@ -1281,7 +1281,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the list to sort',
-            typeList: [ARGUMENT_TYPE.LIST],
+            typeList: [ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.VARIABLE_NAME],
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
