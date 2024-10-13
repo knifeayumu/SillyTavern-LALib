@@ -1,8 +1,8 @@
-import { callPopup, characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, saveSettingsDebounced, sendSystemMessage, showSwipeButtons, this_chid } from '../../../../script.js';
+import { characters, chat, chat_metadata, eventSource, event_types, extractMessageBias, getRequestHeaders, messageFormatting, reloadMarkdownProcessor, saveChatConditional, saveChatDebounced, saveSettingsDebounced, sendSystemMessage, showSwipeButtons, this_chid } from '../../../../script.js';
 import { getMessageTimeStamp } from '../../../RossAscends-mods.js';
 import { extension_settings, getContext, saveMetadataDebounced } from '../../../extensions.js';
 import { findGroupMemberId, groups, selected_group } from '../../../group-chats.js';
-import { callGenericPopup, Popup, POPUP_TYPE } from '../../../popup.js';
+import { Popup, POPUP_TYPE } from '../../../popup.js';
 import { executeSlashCommands, executeSlashCommandsWithOptions } from '../../../slash-commands.js';
 import { SlashCommand } from '../../../slash-commands/SlashCommand.js';
 import { SlashCommandAbortController } from '../../../slash-commands/SlashCommandAbortController.js';
