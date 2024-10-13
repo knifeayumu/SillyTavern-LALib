@@ -4729,7 +4729,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
             isRequired: true,
         }),
     ],
-    helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
+    helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-move',
