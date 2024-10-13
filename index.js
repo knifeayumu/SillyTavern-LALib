@@ -4677,20 +4677,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments&{
+     *  message:string,
+     *  append:string
+     * }} args
+     * @param {string} value
+     */
     callback: async(args, value) => {
-        /**@type {HTMLTextAreaElement}*/
-        const input = document.querySelector('#send_textarea');
-        const restoreFocus = document.activeElement == input;
         value = value.replace(/{{space}}/g, ' ');
-        document.querySelector(`#chat [mesid="${args.message ?? chat.length - 1}"] .mes_edit`).click();
-        if (isTrueBoolean(args.append)) {
-            document.querySelector('#curEditTextarea').value += value;
-        } else {
-            document.querySelector('#curEditTextarea').value = value;
+        let mesId = parseInt(args.message ?? '-1');
+        if (mesId < 0) mesId += chat.length;
+        const mes = chat.at(mesId);
+        if (isTrueFlag(args.append)) {
+            value = `${mes.mes}${value}`;
         }
-        document.querySelector(`#chat [mesid="${args.message ?? chat.length - 1}"] .mes_edit_done`).click();
-        if (restoreFocus) input.focus();
-        await delay(500);
+        mes.mes = value;
+        if (mes.swipes) {
+            mes.swipes[mes.swipe_id ?? 0] = value;
+        }
+        document.querySelector(`#chat [mesid="${mesId}"] .mes_text`).innerHTML = messageFormatting(
+            value,
+            mes.name,
+            mes.is_system,
+            mes.is_user,
+            mesId,
+        );
+        await eventSource.emit(event_types.MESSAGE_EDITED, mesId);
+        await eventSource.emit(event_types.MESSAGE_UPDATED, mesId);
         return '';
     },
     namedArgumentList: [
