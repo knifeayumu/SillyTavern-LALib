@@ -1198,13 +1198,15 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
      * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments & {
      *  key:SlashCommandClosure,
      * }} args
-     * @param {[string, string]} value
+     * @param {[string, string|SlashCommandClosure]} value
      */
     callback: async (args, value) => {
         /**@type {string} */
         let varType;
         /**@type {Array} */
         let list;
+        /**@type {SlashCommandClosure} */
+        let closure;
         /**@type {string} */
         let expression;
         if (args._scope.existsVariable(value[0])) {
@@ -1236,7 +1238,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
             throw new Error('/sorte requires a list to operate on.');
         }
         if (value.length > 1) {
-            expression = value.slice(1).join(' ');
+            if (value[1] instanceof SlashCommandClosure) {
+                closure = value[1];
+            } else {
+                expression = value.slice(1).join(' ');
+            }
         }
         list = list.map(it=>{
             if (typeof it == 'string' && it.length > 0) {
@@ -1247,11 +1253,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
             }
             return it;
         });
-        if (!expression) {
-            expression = 'a <=> b';
-        }
         const sortList = [];
-        let idx = 0;
+        let index = 0;
         for (const item of list) {
             if (args.key && args.key instanceof SlashCommandClosure) {
                 let macroItem = item;
@@ -1259,32 +1262,64 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
                     macroItem = JSON.stringify(item);
                 }
                 args.key.scope.setMacro('item', macroItem, true);
-                args.key.scope.setMacro('index', idx, true);
+                args.key.scope.setMacro('index', index, true);
                 sortList.push({
                     key: (await args.key.execute()).pipe,
                     item,
+                    index,
                 });
             } else {
                 sortList.push({
                     key: item,
                     item,
+                    index,
                 });
             }
-            idx++;
+            index++;
         }
-        const parser = new BoolParser(args._scope, args);
-        parser.scope.letVariable('a');
-        parser.scope.letVariable('b');
-        const exp = parser.parse(expression);
-        sortList.sort((aa,bb)=>{
-            let a = aa.key;
-            let b = bb.key;
-            if (typeof a != 'string') a = JSON.stringify(a);
-            if (typeof b != 'string') b = JSON.stringify(b);
-            parser.scope.setVariable('a', a);
-            parser.scope.setVariable('b', b);
-            return Number(exp());
-        });
+        if (closure) {
+            const start = performance.now();
+            const aAss = new SlashCommandNamedArgumentAssignment();
+            aAss.name = closure.argumentList[0].name;
+            closure.providedArgumentList[0] = aAss;
+            const bAss = new SlashCommandNamedArgumentAssignment();
+            bAss.name = closure.argumentList[1].name;
+            closure.providedArgumentList[1] = bAss;
+            const lookup = [];
+            for (let a = 0; a < sortList.length; a++) {
+                lookup[a] = [];
+                for (let b = 0; b < sortList.length; b++) {
+                    if (a == b) continue;
+                    let aa = sortList[a].key;
+                    let bb = sortList[b].key;
+                    if (typeof aa != 'string') aa = JSON.stringify(aa);
+                    if (typeof bb != 'string') bb = JSON.stringify(bb);
+                    aAss.value = aa;
+                    bAss.value = bb;
+                    lookup[a][b] = (await closure.execute()).pipe;
+                }
+            }
+            const end = performance.now();
+            console.log('[LALIB]', '[/sorte]', 'custom comparison closure cross join:', end - start);
+            sortList.sort((a,b)=>lookup[a.index][b.index]);
+        } else {
+            if (!expression) {
+                expression = 'a <=> b';
+            }
+            const parser = new BoolParser(args._scope, args);
+            parser.scope.letVariable('a');
+            parser.scope.letVariable('b');
+            const exp = parser.parse(expression);
+            sortList.sort((aa,bb)=>{
+                let a = aa.key;
+                let b = bb.key;
+                if (typeof a != 'string') a = JSON.stringify(a);
+                if (typeof b != 'string') b = JSON.stringify(b);
+                parser.scope.setVariable('a', a);
+                parser.scope.setVariable('b', b);
+                return Number(exp());
+            });
+        }
         list = sortList.map(it=>it.item);
         const result = JSON.stringify(list);
         switch (varType) {
@@ -1318,8 +1353,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the expression to compare two items <code>a</code> and <code>b</code>',
-            typeList: [ARGUMENT_TYPE.STRING],
+            description: 'the expression or closure used to compare two items <code>a</code> and <code>b</code>',
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             defaultValue: '(a <=> b)',
         }),
     ],
@@ -1327,6 +1362,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
     helpString: `
         <div>
             Sorts a list.
+        </div>
+        <div>
+            The comparison closure must accept two named arguments which will be equivalent to <code>a</code>
+            and <code>b</code> in the expression.<br>
+            Using a comparison closure can be very performance and time intensive on longer lists.
         </div>
         <div>
             If given a variable name, the variable will be modified.
@@ -1351,8 +1391,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
                     returns [-99,-10,0,3,5]
                 </li>
                 <li>
-                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (b <=> a) |</code></pre>
-                    returns [5,3,0,-10,-99]
+                <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (b <=> a) |</code></pre>
+                returns [5,3,0,-10,-99]
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] {: a= b= /sub a b :} |</code></pre>
+                    returns [-99,-10,0,3,5]
                 </li>
             </ul>
         </div>
