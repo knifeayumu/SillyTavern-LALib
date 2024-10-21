@@ -3,38 +3,41 @@
 Library of STScript commands.
 
 
-- Boolean Operations (test, and, or, not)
-- List Operations and Loops (foreach, map, filter, find, slice, splice, shuffle, pick, reverse, dict, keys)
-- Split & Join (split, join)
-- Text Operations (trim, diff, json-pretty, substitute, wordcount, sentencecount, segment)
-- Regular Expressions (re-escape, re-test, re-replace, re-exec)
-- Accessing & Manipulating Structured Data (getat, setat)
-- Exception Handling (try, catch)
-- Null Handling (ifempty, ifnullish)
-- Copy & Download (copy, download)
-- DOM Interaction (dom)
-- Characters (char-get)
-- Group Chats (memberpos, group-get)
-- Conditionals - switch (switch, case)
-- Conditionals - if (ife, elseif, else, then)
-- World Info (wi-list-books, wi-list-entries, wi-activate)
-- Costumes / Sprites (costumes)
-- Quick Replies (qr-edit, qr-add)
-- Chat Messages (swipes-get, swipes-list, swipes-count, swipes-index, swipes-add, swipes-del, swipes-go, swipes-swipe, message-edit, message-move, message-on, message-off, message-listeners, role-swap)
-- Time & Date (timestamp)
-- Async (fireandforget)
-- Logging (console-log, console-warn, console-error)
-- Audio (sfx)
-- Web Requests (fetch, $, $$)
 
+
+- [Help](#lalib-help-group-Help) ([lalib?](#lalib-help-cmd-lalib_))
+- [Boolean Operations](#lalib-help-group-Boolean_Operations) ([=](#lalib-help-cmd-_), [test](#lalib-help-cmd-test), [and](#lalib-help-cmd-and), [or](#lalib-help-cmd-or), [not](#lalib-help-cmd-not))
+- [List Operations and Loops](#lalib-help-group-List_Operations_and_Loops) ([pop](#lalib-help-cmd-pop), [push](#lalib-help-cmd-push), [shift](#lalib-help-cmd-shift), [unshift](#lalib-help-cmd-unshift), [foreach](#lalib-help-cmd-foreach), [map](#lalib-help-cmd-map), [whilee](#lalib-help-cmd-whilee), [reduce](#lalib-help-cmd-reduce), [sorte](#lalib-help-cmd-sorte), [flatten](#lalib-help-cmd-flatten), [filter](#lalib-help-cmd-filter), [find](#lalib-help-cmd-find), [slice](#lalib-help-cmd-slice), [splice](#lalib-help-cmd-splice), [shuffle](#lalib-help-cmd-shuffle), [pick](#lalib-help-cmd-pick), [reverse](#lalib-help-cmd-reverse), [dict](#lalib-help-cmd-dict), [keys](#lalib-help-cmd-keys))
+- [Split & Join](#lalib-help-group-Split_Join) ([split](#lalib-help-cmd-split), [join](#lalib-help-cmd-join))
+- [Text Operations](#lalib-help-group-Text_Operations) ([trim](#lalib-help-cmd-trim), [pad-start](#lalib-help-cmd-pad_start), [pad-end](#lalib-help-cmd-pad_end), [pad-both](#lalib-help-cmd-pad_both), [diff](#lalib-help-cmd-diff), [json-pretty](#lalib-help-cmd-json_pretty), [substitute](#lalib-help-cmd-substitute), [wordcount](#lalib-help-cmd-wordcount), [sentencecount](#lalib-help-cmd-sentencecount), [segment](#lalib-help-cmd-segment))
+- [Regular Expressions](#lalib-help-group-Regular_Expressions) ([re-escape](#lalib-help-cmd-re_escape), [re-test](#lalib-help-cmd-re_test), [re-replace](#lalib-help-cmd-re_replace), [re-exec](#lalib-help-cmd-re_exec))
+- [Accessing & Manipulating Structured Data](#lalib-help-group-Accessing_Manipulating_Structured_Data) ([getat](#lalib-help-cmd-getat), [setat](#lalib-help-cmd-setat))
+- [Exception Handling](#lalib-help-group-Exception_Handling) ([try](#lalib-help-cmd-try), [catch](#lalib-help-cmd-catch))
+- [Null Handling](#lalib-help-group-Null_Handling) ([ifempty](#lalib-help-cmd-ifempty), [ifnullish](#lalib-help-cmd-ifnullish))
+- [Copy & Download](#lalib-help-group-Copy_Download) ([copy](#lalib-help-cmd-copy), [download](#lalib-help-cmd-download))
+- [DOM Interaction](#lalib-help-group-DOM_Interaction) ([dom](#lalib-help-cmd-dom))
+- [Characters](#lalib-help-group-Characters) ([char-get](#lalib-help-cmd-char_get))
+- [Group Chats](#lalib-help-group-Group_Chats) ([memberpos](#lalib-help-cmd-memberpos), [group-get](#lalib-help-cmd-group_get))
+- [Conditionals - switch](#lalib-help-group-Conditionals_switch) ([switch](#lalib-help-cmd-switch), [case](#lalib-help-cmd-case))
+- [Conditionals - if](#lalib-help-group-Conditionals_if) ([ife](#lalib-help-cmd-ife), [elseif](#lalib-help-cmd-elseif), [else](#lalib-help-cmd-else), [then](#lalib-help-cmd-then))
+- [World Info](#lalib-help-group-World_Info) ([wi-list-books](#lalib-help-cmd-wi_list_books), [wi-list-entries](#lalib-help-cmd-wi_list_entries), [wi-activate](#lalib-help-cmd-wi_activate))
+- [Costumes / Sprites](#lalib-help-group-Costumes_Sprites) ([costumes](#lalib-help-cmd-costumes))
+- [Quick Replies](#lalib-help-group-Quick_Replies) ([qr-edit](#lalib-help-cmd-qr_edit), [qr-add](#lalib-help-cmd-qr_add))
+- [Chat Messages](#lalib-help-group-Chat_Messages) ([swipes-get](#lalib-help-cmd-swipes_get), [swipes-get](#lalib-help-cmd-swipes_get), [swipes-list](#lalib-help-cmd-swipes_list), [swipes-count](#lalib-help-cmd-swipes_count), [swipes-index](#lalib-help-cmd-swipes_index), [swipes-add](#lalib-help-cmd-swipes_add), [swipes-del](#lalib-help-cmd-swipes_del), [swipes-go](#lalib-help-cmd-swipes_go), [swipes-swipe](#lalib-help-cmd-swipes_swipe), [message-edit](#lalib-help-cmd-message_edit), [message-move](#lalib-help-cmd-message_move))
+- [Chat Management](#lalib-help-group-Chat_Management) ([chat-list](#lalib-help-cmd-chat_list), [chat-parent](#lalib-help-cmd-chat_parent), [message-on](#lalib-help-cmd-message_on), [message-off](#lalib-help-cmd-message_off), [message-listeners](#lalib-help-cmd-message_listeners), [role-swap](#lalib-help-cmd-role_swap))
+- [Time & Date](#lalib-help-group-Time_Date) ([timestamp](#lalib-help-cmd-timestamp))
+- [Async](#lalib-help-group-Async) ([fireandforget](#lalib-help-cmd-fireandforget))
+- [Logging](#lalib-help-group-Logging) ([console-log](#lalib-help-cmd-console_log), [console-warn](#lalib-help-cmd-console_warn), [console-error](#lalib-help-cmd-console_error))
+- [Audio](#lalib-help-group-Audio) ([sfx](#lalib-help-cmd-sfx))
+- [Miscellaneous](#lalib-help-group-Miscellaneous) ([fonts](#lalib-help-cmd-fonts))
+- [Web Requests](#lalib-help-group-Web_Requests) ([fetch](#lalib-help-cmd-fetch), [$](#lalib-help-cmd-_), [$$](#lalib-help-cmd-_))
 
 
 
 
 ## Requirements
 
-- [Costumes Plugin](https://github.com/LenAnderson/SillyTavern-Costumes.git) for `/costumes` command.
-
+- *(optional)* [Costumes Plugin](https://github.com/LenAnderson/SillyTavern-Costumes.git) for `/costumes` command.
 
 
 
@@ -44,780 +47,730 @@ Library of STScript commands.
 
 
 
+### <a id="lalib-help-group-Help"></a>Help
 
 
-
-
-### Help
-
-
-
-#### `/lalib?`
+#### <a id="lalib-help-cmd-lalib_"></a>`/lalib?`
 
 Lists LALib commands
 
+
+
+### <a id="lalib-help-group-Boolean_Operations"></a>Boolean Operations
+
+
+#### <a id="lalib-help-cmd-_"></a>`/=`
+- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+ *(optional)* named arguments assigned to scoped variables to be used in the expression
+
+<div>
+            Evaluates a boolean or arithmetic expression
+        </div>
+<div>
+            See <code>/lalib? expressions</code> for details.
+        </div>
+
 ##### Examples
+```stscript
+/= true or false
+```
 
 ```stscript
-/lalib?
+/= 1 < 2 and ('a' in x or 'b' not in y) and !z
+```
+
+```stscript
+/= 1 + 2 * 3 ** 4
+```
+
+```stscript
+/= (1 + 2) * 3 ** 4
 ```
 
 
-
-
-
-
-
-### Boolean Operations
-
-
-
-#### `/test`
-- `[left:variable_name|number|string]`  
+#### <a id="lalib-help-cmd-test"></a>`/test`
+- `[left:varname|number|string]`  
  the left operand value
 - `[rule=gt|gte|lt|lte|eq|neq|not|in|nin]`  
  the boolean operation rule
-- `[right:variable_name|number|string]`  
+- `[right:varname|number|string]`  
  the right operand value
 
 <div>
-Compares the value of the left operand <code>a</code> with the value of the right operand <code>b</code>,
-and returns the result of the comparison (true or false).
-</div>
+            Compares the value of the left operand <code>a</code> with the value of the right operand <code>b</code>,
+            and returns the result of the comparison (true or false).
+        </div>
 <div>
-Numeric values and string literals for left and right operands supported.
-</div>
+            Numeric values and string literals for left and right operands supported.
+        </div>
 <div>
-<strong>Available rules:</strong>
-<ul>
-<li>gt => a > b</li>
-<li>gte => a >= b</li>
-<li>lt => a < b</li>
-<li>lte => a <= b</li>
-<li>eq => a == b</li>
-<li>neq => a != b</li>
-<li>not => !a</li>
-<li>in (strings) => a includes b</li>
-<li>nin (strings) => a not includes b</li>
-</ul>
-</div>
-
-
-##### Examples
-
-```stscript
-/setvar key=x 1 |
-/setvar key=y 2 |
-/test left={{getvar::x}} rule=eq right={{getvar::y}} |
-/echo The result will be "false": {{pipe}}
-```
-
-```stscript
-/setvar key=x 1 |
-/setvar key=y 2 |
-/test left={{getvar::x}} rule=lt right={{getvar::y}} |
-/echo The result will be "true": {{pipe}}
-```
-
-
-
-
-
-#### `/and`
-- `[left:boolean]`  
- the left value to evaluate
-- `[right:boolean]`  
- the right value to evaluate
-
-Returns true if both left and right are true, otherwise false.
+            <strong>Available rules:</strong>
+            <ul>
+                <li>gt =&gt; a &gt; b</li>
+                <li>gte =&gt; a &gt;= b</li>
+                <li>lt =&gt; a &lt; b</li>
+                <li>lte =&gt; a &lt;= b</li>
+                <li>eq =&gt; a == b</li>
+                <li>neq =&gt; a != b</li>
+                <li>not =&gt; !a</li>
+                <li>in (strings) =&gt; a includes b</li>
+                <li>nin (strings) =&gt; a not includes b</li>
+            </ul>
+        </div>
 
 ##### Examples
-
 ```stscript
-/and left=true right=false |
-/echo The result will be "false": {{pipe}}
-```
-
-```stscript
-/and left=true right=true |
-/echo The result will be "true": {{pipe}}
+/setvar key=i 0 | /test left=i rule=let right=10 | /echo
 ```
 
 
+#### <a id="lalib-help-cmd-and"></a>`/and`
 
-
-
-#### `/or`
-- `[left:boolean]`  
- the left value to evaluate
-- `[right:boolean]`  
- the right value to evaluate
-
-Returns true if at least one of left and right are true, false if both are false.
+<div>
+            Returns true if all values are true, otherwise false.
+        </div>
 
 ##### Examples
-
 ```stscript
-/or left=true right=false |
-/echo The result will be "true": {{pipe}}
+/and true true true
+// Returns true. |
 ```
 
 ```stscript
-/or left=false right=false |
-/echo The result will be "false": {{pipe}}
+/and true false true
+// Returns false. |
 ```
 
 
+#### <a id="lalib-help-cmd-or"></a>`/or`
 
-
-
-#### `/not`
-- `(boolean)`  
- the value to negate
-
-Returns true if value is false, otherwise true.
+<div>
+            Returns true if at least one of the values is true, false if all are false.
+        </div>
 
 ##### Examples
-
 ```stscript
-/not true |
-/echo The result will be "false": {{pipe}}
+/or true true true
+// Returns true. |
 ```
 
 ```stscript
-/not false |
-/echo The result will be "true": {{pipe}}
+/or true false true
+// Returns true. |
+```
+
+```stscript
+/or false false false
+// Returns false. |
 ```
 
 
+#### <a id="lalib-help-cmd-not"></a>`/not`
 
-
-
-
-
-### List Operations and Loops
-
-
-
-#### `/foreach`
-- `[list:list|dictionary]?`  
- *optional* the list to iterate over
-- `[var:variable_name]?`  
- *optional* name of the chat variable to use as the list
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to use as the list
-- `(subcommand|closure)`  
- the command to execute for each item, with {{item}} and {{index}} placeholders
-
-Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
+<div>
+            Returns true if value is false, otherwise true.
+        </div>
 
 ##### Examples
+```stscript
+/not false
+// Returns true. |
+```
 
 ```stscript
-/setvar key=x ["A", "B", "C"] |
-/foreach var=x {:
-    /echo Item {{index}} is {{item}} |
-    /delay 400
+/not true
+// Returns false. |
+```
+
+
+
+### <a id="lalib-help-group-List_Operations_and_Loops"></a>List Operations and Loops
+
+
+#### <a id="lalib-help-cmd-pop"></a>`/pop`
+
+<div>
+            Removes the last element from a list and returns it.
+        </div>
+
+##### Examples
+```stscript
+/pop ["A", "B", "C"] |
+// returns C |
+```
+
+```stscript
+/let x [1, 2, 3, 4, 5] |
+/pop x |
+// returns 5 |
+```
+
+
+#### <a id="lalib-help-cmd-push"></a>`/push`
+
+<div>
+            Appends new elements to the end of a list, and returns the list.
+        </div>
+
+##### Examples
+```stscript
+/push ["A", "B", "C"] foo bar |
+// returns ["A", "B", "C", "foo", "bar"] |
+```
+
+```stscript
+/let x [1, 2, 3, 4, 5] |
+/push x 10 |
+// returns [1, 2, 3, 4, 5, 10] |
+```
+
+
+#### <a id="lalib-help-cmd-shift"></a>`/shift`
+
+<div>
+            Removes the first element from a list and returns it.
+        </div>
+
+##### Examples
+```stscript
+/shift ["A", "B", "C"] |
+// returns A |
+```
+
+```stscript
+/let x [1, 2, 3, 4, 5] |
+/shift x |
+// returns 1 |
+```
+
+
+#### <a id="lalib-help-cmd-unshift"></a>`/unshift`
+
+<div>
+            Inserts new elements at the start of a list, and returns the list.
+        </div>
+
+##### Examples
+```stscript
+/unshift ["A", "B", "C"] foo bar |
+// returns ["foo", "bar", "A", "B", "C"] |
+```
+
+```stscript
+/let x [1, 2, 3, 4, 5] |
+/unshift x 10 |
+// returns [10, 1, 2, 3, 4, 5] |
+```
+
+
+#### <a id="lalib-help-cmd-foreach"></a>`/foreach`
+
+<div>
+            Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
+        </div>
+<div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
+
+##### Examples
+```stscript
+/foreach ["A", "B", "C"] {:
+	/echo Item {{index}} is {{item}} |
+	/delay 400 |
 :}
 ```
 
 ```stscript
-/foreach list={"a":"foo","b":"bar"} {:
-    /echo Item {{index}} is {{item}} |
-    /delay 400
+/let x {"a":"foo","b":"bar"} |
+/foreach {{var::x}} {:
+	/echo Item {{index}} is {{item}} |
+	/delay 400 |
 :}
 ```
 
 
-
-
-
-#### `/map`
-- `[asList=true|false]? = false`  
- *optional* whether to return the results of a dictionary/object as a list
-- `[list:list]?`  
- *optional* the list to map over
-- `[var:variable_name]?`  
- *optional* name of the chat variable to use as the list
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to use as the list
-- `(subcommand|closure)`  
- the command to execute for each item, with {{item}} and {{index}} placeholders
+#### <a id="lalib-help-cmd-map"></a>`/map`
+- `[aslist=true|false]? = false`  
+ *(optional)* whether to return the results of a dictionary as a list
 
 <div>
-Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
-</div>
-
+            Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
+        </div>
+<div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x [1,2,3] |
-/map var=x {:
-    /mul {{item}} {{item}}
-:} |
-/echo Squares: {{pipe}}
+/map [1,2,3] {: /mul {{item}} {{item}} :}
+// Calculates the square of each number. |
 ```
 
 ```stscript
-/map list={"a":"foo","b":"bar"} {:
-    /return This is item {{index}} with value {{item}}
-:} |
-/echo
+/map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+// Calculates the square of each number. |
 ```
 
 ```stscript
-/map asList=True list={"a":"foo","b":"bar"} {:
-    /return This is item {{index}} with value {{item}}
-:} |
-/echo
+/map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+// Calculates the square of each number. |
 ```
 
 
+#### <a id="lalib-help-cmd-whilee"></a>`/whilee`
+- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+ *(optional)* named arguments assigned to scoped variables to be used in the expression
 
 
-
-#### `/filter`
-- `[list:list|dictionary]?`  
- *optional* the list or dictionary to filter
-- `[var:variable_name]?`  
- *optional* name of the chat variable containing the list or dictionary
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable containing the list or dictionary
-- `(subcommand|closure)`  
- the command to execute for each item, with {{item}} and {{index}} placeholders
+#### <a id="lalib-help-cmd-reduce"></a>`/reduce`
+- `[initial:bool|dictionary|list|number|string]?`  
+ *(optional)* initial value
 
 <div>
-Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
-</div>
-
+            Executes a "reducer" closure on each element of the list, in order, passing in
+            the return value from the calculation on the preceding element. The final result of running the reducer
+            across all elements of the list is a single value.
+        </div>
+<div>
+            The first time that the closure is run there is no "return value of the previous calculation". If
+            supplied, an initial value may be used in its place. Otherwise the list element at index 0 is used as
+            the initial value and iteration starts from the next element (index 1 instead of index 0).
+        </div>
+<div>
+            The reducer closure accepts up to three arguments:
+            <ul>
+                <li>
+                    <code>accumulator</code><br>
+                    The value resulting from the previous call to closure. On the first call, its value is
+                    <code>initial=</code> if that argument is provided; otherwise its value is the first list item.
+                </li>
+                <li>
+                    <code>currentValue</code><br>
+                    The value of the current element. On the first call, its value is the first list item if
+                    <code>initial=</code> is specified; otherwise its value is the second list item.
+                </li>
+                <li>
+                    <code>currentIndex</code><br>
+                    The index position of currentValue in the list. On the first call, its value is 0 if
+                    <code>initial=</code> is specified, otherwise 1.
+                </li>
+            </ul>
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x [1,2,3,4,5,6,7,8,9,10] |
-/filter var=x {:
-    /mod {{item}} 2 |
-    /test left={{pipe}} rule=eq right=0
-:} |
-/echo Only even numbers: {{pipe}}
+/reduce [1,2,3] {: acc= cur= /= acc + cur :}
+// returns 6 (1+2 = 3 -> 3 + 3 = 6) |
 ```
 
 ```stscript
-/filter list={"a":"foo","b":"bar"} {:
-    /test left={{item}} rule=in right=a
+/reduce initial=10 [1,2,3] {: acc= cur= /= acc + cur :}
+// returns 16 (10+1 = 11 -> 11+2 = 13 -> 13 + 3 = 16) |
+```
+
+```stscript
+/let x [["a",1],["b",2],["c",3]] |
+/reduce initial={} {{var::x}} {: acc= cur=
+	/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
+	/return {{var::acc}} |
 :} |
-/echo Only items that include an "a": {{pipe}}
+// returns {"a":"1","b":"2","c":"3"} |
 ```
 
 
+#### <a id="lalib-help-cmd-sorte"></a>`/sorte`
+- `[key:closure]?`  
+ *(optional)* closure that returns the value to be used for sorting
+
+<div>
+            Sorts a list.
+        </div>
+<div>
+            The comparison closure must accept two named arguments which will be equivalent to <code>a</code>
+            and <code>b</code> in the expression.<br>
+            Using a comparison closure can be very performance and time intensive on longer lists.
+        </div>
+<div>
+            If given a variable name, the variable will be modified.
+        </div>
+
+##### Examples
+```stscript
+/sorte [5,3,-10,-99,0] |
+// returns [-99,-10,0,3,5] |
+```
+
+```stscript
+/let x [5,3,-10,-99,0] |
+/sorte x |
+/echo {{var::x}} |
+// returns [-99,-10,0,3,5] |
+```
+
+```stscript
+/let x [5,3,-10,-99,0] |
+/sorte {{var::x}} |
+/echo {{var::x}} |
+// returns [5,3,-10,-99,0] |
+```
+
+```stscript
+/sorte [5,3,-10,-99,0] (a <=> b) |
+// returns [-99,-10,0,3,5] |
+```
+
+```stscript
+/sorte [5,3,-10,-99,0] (b <=> a) |
+// returns [5,3,0,-10,-99] |
+```
+
+```stscript
+/sorte [5,3,-10,-99,0] {: a= b= /sub a b :} |
+// returns [-99,-10,0,3,5] |
+```
 
 
+#### <a id="lalib-help-cmd-flatten"></a>`/flatten`
+- `[depth:number]? = 1`  
+ *(optional)* The depth level specifying how deep a nested list structure should be flattened. Defaults to 1. Use 0 to flatten all levels.
 
-#### `/find`
-- `[list:list|dictionary]?`  
- *optional* the list or dictionary to search
-- `[var:variable_name]?`  
- *optional* name of the chat variable containing the list or dictionary
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable containing the list or dictionary
+Creates a new list with all sub-list elements concatenated into it recursively up to the specified depth.
+
+
+#### <a id="lalib-help-cmd-filter"></a>`/filter`
+
+<div>
+            Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
+        </div>
+
+##### Examples
+```stscript
+/filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}
+// returns [3, 4, 5] |
+```
+
+```stscript
+/filter [1,2,3,4,5] (item > 2)
+// returns [3, 4, 5] |
+```
+
+
+#### <a id="lalib-help-cmd-find"></a>`/find`
 - `[index=true|false]? = false`  
- *optional* return the matching item's index instead of the item
+ *(optional)* return the matching item's index instead of the item
 - `[last=true|false]? = false`  
- *optional* return the last instead of the first matching item
-- `(subcommand|closure)`  
- the command to execute for each item, using {{item}} and {{index}} as placeholders
+ *(optional)* return the last instead of the first matching item
 
 <div>
-Executes the provided command for each item of a list or dictionary and returns the first item where the command returned true.
-</div>
-
+            Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x [2,4,6,8,10] |
-/find var=x {:
-    /test left={{item}} rule=gt right=5
-:} |
-/echo The first item greater than 5: {{pipe}}
+/find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo
+// returns 3 |
 ```
 
 ```stscript
-/find list={"a":"foo","b":"bar","c":"foobar","d":"barfoo"} {:
-    /len {{item}} |
-    /test left={{pipe}} rule=gt right=3
-:} |
-/echo The first item longer than 3 characters: {{pipe}}
+/find [1,2,3,4,5] (item > 2) | /echo
+// returns 3 |
 ```
 
 
-
-
-
-#### `/slice`
+#### <a id="lalib-help-cmd-slice"></a>`/slice`
 - `[start:number]`  
  the starting index of the slice, negative numbers start from the back
 - `[end:number]?`  
- *optional* the ending index of the slice (non-inclusive)
+ *(optional)* the ending index of the slice (non-inclusive)
 - `[length:number]?`  
- *optional* the length of the slice
-- `[var:variable_name]?`  
- *optional* name of the chat variable to slice
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to slice
-- `(string|list)?`  
- *optional* the value to slice
+ *(optional)* the length of the slice
 
 <div>
-Retrieves a slice of a list or string.
-</div>
-
+            Retrieves a slice of a list or string.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x [1,2,3,4,5] |
-/slice var=x start=2 |
-/echo The result will be "[3,4,5]": {{pipe}}
+/slice start=2 length=3 [1,2,3,4,5,6] | /echo
+// returns [3,4,5] |
 ```
 
 ```stscript
-/slice start=-3 foo bar |
-/echo The result will be "bar": {{pipe}}
+/slice start=-8 The quick brown fox jumps over the lazy dog | /echo
+// returns lazy dog |
 ```
 
 
-
-
-
-#### `/splice`
+#### <a id="lalib-help-cmd-splice"></a>`/splice`
 - `[start:number]`  
- the starting index of the slice, negative numbers start from the back
+ the starting index of the splice, negative numbers start from the back
 - `[delete:number]?`  
- *optional* the number of elements to remove in the list from start
-- `[value:list]?`  
- *optional* the list to operate on
-- `[var:variable_name]?`  
- *optional* name of the chat variable to operate on
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to operate on
-- `(string|number|boolean|list|dictionary)?`  
- *optional* the elements to add, beginning from start
+ *(optional)* the number of elements to remove in the list from start (use delete= to remove everything)
+- `[insert:list|string]?`  
+ *(optional)* the elements to add at index start=
 
 <div>
-Creates a new list with some elements removed and / or replaced at a given index.
-</div>
-
+            Creates a new list with some elements removed and / or replaced at a given index.
+        </div>
 
 ##### Examples
-
 ```stscript
-/splice value=[0,1,2,3,4,5,6] start=3 delete=3 30 40 50 |
+/splice insert=[30, 40, 50] start=3 delete=3 [0,1,2,3,4,5,6] |
 /echo |
-// result will be: [0,1,2,30,40,50,6] |
+// returns [0,1,2,30,40,50,6] |
 ```
 
 ```stscript
-/splice value=[0,1,2,3,4,5,6] start=3 delete=3 |
+/splice start=3 delete=3 [0,1,2,3,4,5,6] |
 /echo |
-// result will be: [0,1,2,6] |
+// returns [0,1,2,6] |
 ```
 
 ```stscript
-/splice value=[0,1,2,3,4,5,6] start=3 100 |
+/splice insert=100 start=3 [0,1,2,3,4,5,6] |
 /echo |
-// result will be: [0,1,2,100,3,4,5,6] |
+// returns [0,1,2,100,3,4,5,6] |
 ```
 
 ```stscript
-/splice value=[0,1,2,3,4,5,6] start=-1 delete=1 |
+/splice start=-1 delete=1 [0,1,2,3,4,5,6] |
 /echo |
-// result will be: [0,1,2,3,4,5] |
+// returns [0,1,2,3,4,5] |
 ```
 
 
-
-
-
-#### `/shuffle`
-- `(list)`  
- the list to shuffle
+#### <a id="lalib-help-cmd-shuffle"></a>`/shuffle`
 
 Returns a shuffled list.
 
-##### Examples
 
-```stscript
-/shuffle [1,2,3,4,5] |
-/echo
-```
-
-
-
-
-
-#### `/pick`
+#### <a id="lalib-help-cmd-pick"></a>`/pick`
 - `[items:number]? = 1`  
- *optional* how many items to pick (if greater than one, will return a list)
+ *(optional)* how many items to pick (if greater than one, will return a list)
 - `[list=true|false]? = false`  
- *optional* whether to return a list, even if only one item is picked
-- `(list)`  
- the list to pick from
+ *(optional)* whether to return a list, even if only one item is picked
 
-Picks one random item or <code>items</code> number of random items from a list (no duplicates).
-
-##### Examples
-
-```stscript
-/pick [1,2,3,4] |
-/echo
-```
-
-```stscript
-/pick items=2 [1,2,3,4] |
-/echo
-```
-
-```stscript
-/pick list=true [1,2,3,4] |
-/echo
-```
+<code>items</code>
 
 
-
-
-
-#### `/reverse`
-- `(list)`  
- the list to reverse
+#### <a id="lalib-help-cmd-reverse"></a>`/reverse`
 
 Returns a reversed list.
 
-##### Examples
 
-```stscript
-/reverse [1,2,3] |
-/echo result will be [3,2,1]: {{pipe}}
-```
-
-
-
-
-
-#### `/dict`
-- `[var:variable_name]?`  
- *optional* name of the chat variable to use as input
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to use as input
-- `(list)`  
- a list of lists, where each inner list has at least two elements
+#### <a id="lalib-help-cmd-dict"></a>`/dict`
+- `[var:varname]?`  
+ *(optional)* name of the chat variable to use as input
+- `[globalvar:varname]?`  
+ *(optional)* name of the global variable to use as input
 
 <div>
-Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
-items first item as key and each items second item as value.
-</div>
-
+            Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
+            items first item as key and each items second item as value.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x [
+/let x [
     ["a", 1],
     ["b", 2],
     ["c", 3]
 ] |
-/dict var=x |
+/dict {{var::x}} |
 /echo
+// returns {a:1, b:2, c:3} |
 ```
 
 
+#### <a id="lalib-help-cmd-keys"></a>`/keys`
+
+Return the list of keys of a dictionary.
 
 
 
-#### `/keys`
-- `[var:variable_name]?`  
- *optional* name of the chat variable to get keys from
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to get keys from
-- `(dictionary)?`  
- *optional* the dictionary/object to get keys from
-
-Return the list of keys of a dictionary / object.
-
-##### Examples
-
-```stscript
-/keys list={"a":"foo","b":"bar","c":"foobar","d":"barfoo"} |
-/echo
-```
+### <a id="lalib-help-group-Split_Join"></a>Split & Join
 
 
-
-
-
-
-
-### Split & Join
-
-
-
-#### `/split`
+#### <a id="lalib-help-cmd-split"></a>`/split`
 - `[find:string]? = ,`  
- *optional* the text to split at
+ *(optional)* the text to split at
 - `[trim=true|false]? = true`  
- *optional* whether to trim the resulting values
-- `[var:variable_name]?`  
- *optional* name of the chat variable to split
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to split
-- `(string)?`  
- *optional* the value to split
+ *(optional)* whether to trim the resulting values
 
 <div>
-Splits value into list at every occurrence of find. Supports regex <code>find="/\\s/"</code>
-</div>
-
+            Splits value into list at every occurrence of find. Supports regex <code>find="/\s/"</code>
+        </div>
 
 ##### Examples
-
 ```stscript
-/split foo, bar |
-/echo The result will be ["foo", "bar"]: {{pipe}}
-```
-
-```stscript
-/split find=/o.+?o/g The quick brown fox jumps over the lazy dog. |
-/echo The result will be ["The quick br", "x jumps", "g."]: {{pipe}}
+/split find="/\s/" The quick brown fox jumps over the lazy dog | /echo
 ```
 
 
-
-
-
-#### `/join`
+#### <a id="lalib-help-cmd-join"></a>`/join`
 - `[glue:string]? = , `  
- *optional* the string to join the list items with
-- `[var:variable_name]?`  
- *optional* name of the chat variable containing the list
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable containing the list
-- `(list)?`  
- *optional* the list to join
+ *(optional)* the string to join the list items with
 
 <div>
-Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
-</div>
-
+            Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x ["a","b","c"] |
-/join var=x |
-/echo The result will be "a, b, c": {{pipe}}
+/join ["apple", "banana", "cherry"]
+// returns "apple, banana, cherry" |
 ```
 
 ```stscript
-/join glue=::: ["foo", "bar"] |
-/echo The result will be "foo:::bar": {{pipe}}
+/join glue=" | " ["apple", "banana", "cherry"]
+// returns "apple | banana | cherry" |
 ```
 
 
 
+### <a id="lalib-help-group-Text_Operations"></a>Text Operations
 
 
-
-
-### Text Operations
-
-
-
-#### `/trim`
-- `(string)`  
- text to trim
+#### <a id="lalib-help-cmd-trim"></a>`/trim`
 
 Removes whitespace at the start and end of the text.
 
+
+#### <a id="lalib-help-cmd-pad_start"></a>`/pad-start`
+- `[fill:string]? =  `  
+ *(optional)* the character to use to pad the text
+
+<div>
+            Pad the provided text at the start if it is shorter then the target length.
+        </div>
+
 ##### Examples
+```stscript
+/pad-start 5 foo
+// returns foo |
+```
 
 ```stscript
-/return [" foo", "bar "] |
-/getat index=0 |
-/trim |
-/echo
+/pad-start fill=+ 5 foo
+// returns ++foo |
 ```
 
 
+#### <a id="lalib-help-cmd-pad_end"></a>`/pad-end`
+- `[fill:string]? =  `  
+ *(optional)* the character to use to pad the text
+
+<div>
+            Pad the provided text at the end if it is shorter then the target length.
+        </div>
+
+##### Examples
+```stscript
+/pad-end 5 foo
+// returns foo |
+```
+
+```stscript
+/pad-end fill=+ 5 foo
+// returns foo++ |
+```
 
 
+#### <a id="lalib-help-cmd-pad_both"></a>`/pad-both`
+- `[fill:string]? =  `  
+ *(optional)* the character to use to pad the text
 
-#### `/diff`
+<div>
+            Pad the provided text at both ends if it is shorter then the target length.
+        </div>
+<div>
+            If an odd number of characters needs to be added, the remaining character will be added
+            at the end of the text.
+        </div>
+
+##### Examples
+```stscript
+/pad-both 5 foo
+// returns foo |
+```
+
+```stscript
+/pad-both fill=+ 5 foo
+// returns +foo+ |
+```
+
+```stscript
+/pad-both fill=+ 6 foo
+// returns +foo++ |
+```
+
+
+#### <a id="lalib-help-cmd-diff"></a>`/diff`
 - `[all=true|false]? = true`  
- *optional* show new, old, and diff side by side
+ *(optional)* show new, old, and diff side by side
 - `[buttons=true|false]? = true`  
- *optional* add buttons to pick which text to return
+ *(optional)* add buttons to pick which text to return
 - `[stripcode=true|false]? = true`  
- *optional* remove all codeblocks before diffing
+ *(optional)* remove all codeblocks before diffing
 - `[notes:string]?`  
- *optional* show additional notes or comments above the comparison
+ *(optional)* show additional notes or comments above the comparison
 - `[old:string]`  
  the old text to compare
 - `[new:string]`  
  the new text to compare
 
-Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.
-
-##### Examples
-
-```stscript
-/echo comparing the last two messages |
-
-/sub {{lastMessageId}} 1 |
-/messages names=off |
-/split find=``` |
-/getat index=-1 |
-/let old {{pipe}} |
-/setvar key=old {{var::old}} |
-
-/messages names=off {{lastMessageId}} |
-/split find=``` |
-/getat index=-1 |
-/let new {{pipe}} |
-/setvar key=new {{var::new}} |
-
-/diff old={{var::old}} new={{var::new}}
-```
-
-```stscript
-/diff old="The quick brown fox jumps over the lazy dog." new="The fast spotted fox jumps across the sleeping dog." notes="Foxes and dogs." all=true
-```
+<code>all=true</code>
+<code>buttons=true</code>
+<code>stripcode=true</code>
+<code>notes="some text"</code>
 
 
-
-
-
-#### `/json-pretty`
-- `(string)`  
- JSON to pretty print
+#### <a id="lalib-help-cmd-json_pretty"></a>`/json-pretty`
 
 Pretty print JSON.
 
-##### Examples
 
-```stscript
-/json-pretty {"a":1, "b":[1,2,3]} |
-/send ```json{{newline}}{{pipe}}{{newline}}```
-```
-
-
-
-
-
-#### `/substitute`
-- `(string)`  
- text to substitute macros in
+#### <a id="lalib-help-cmd-substitute"></a>`/substitute`
 
 Substitute macros in text.
 
-##### Examples
 
-```stscript
-/setvar key=x char |
-/setvar key=y user |
-/substitute {{{{getvar::x}}}} |
-/echo x turns into the char name: {{pipe}} |
-/delay 500 |
-/substitute {{{{getvar::y}}}} |
-/echo and y turns into the persona name: {{pipe}} |
-```
-
-
-
-
-
-#### `/wordcount`
+#### <a id="lalib-help-cmd-wordcount"></a>`/wordcount`
 - `[language:string]? = en`  
- *optional* Two character language code according to IETF BCP 47
-- `(string)`  
- the text to count words in
+ *(optional)* Two character language code according to IETF BCP 47
 
 Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
-##### Examples
 
-```stscript
-/wordcount The quick brown fox jumps over the lazy dog. |
-/echo The result will be nine: {{pipe}}
-```
-
-
-
-
-
-#### `/sentencecount`
+#### <a id="lalib-help-cmd-sentencecount"></a>`/sentencecount`
 - `[language:string]? = en`  
- *optional* Two character language code according to IETF BCP 47
-- `(string)`  
- the text to count sentences in
+ *(optional)* Two character language code according to IETF BCP 47
 
 Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
-##### Examples
 
-```stscript
-/sentencecount The quick brown fox jumps over the lazy dog. Does the quick brown fox jump over the lazy dog? |
-/echo The result will be two: {{pipe}}
-```
-
-
-
-
-
-#### `/segment`
+#### <a id="lalib-help-cmd-segment"></a>`/segment`
 - `[granularity=grapheme|word|sentence]? = word`  
- *optional* The unit to segment the text into: grapheme, word or sentence
+ *(optional)* The unit to segment the text into: grapheme, word or sentence
 - `[language:string]? = en`  
- *optional* Two character language code according to IETF BCP 47
-- `(string)`  
- the text to segment
+ *(optional)* Two character language code according to IETF BCP 47
 
 Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
 
-##### Examples
-
-```stscript
-/segment granularity=sentence  The fox. The dog. |
-/echo The two sentences are: {{pipe}}
-```
-
-```stscript
-/segment granularity=word  The fox. The dog. |
-/echo The four word are: {{pipe}}
-```
 
 
+### <a id="lalib-help-group-Regular_Expressions"></a>Regular Expressions
 
 
-
-
-
-### Regular Expressions
-
-
-
-#### `/re-escape`
-- `(string)`  
- text to escape
+#### <a id="lalib-help-cmd-re_escape"></a>`/re-escape`
 
 <div>Escapes text to be used literally inside a regex.</div>
 
-
 ##### Examples
-
 ```stscript
 /re-escape foo/bar foo.bar |
 /echo
+// Will echo foo\/bar foo\.bar . |
 ```
 
 ```stscript
@@ -827,508 +780,207 @@ Return the graphemes (characters, basically), words or sentences found in the te
 ```
 
 
-
-
-
-#### `/re-test`
+#### <a id="lalib-help-cmd-re_test"></a>`/re-test`
 - `[find:string]`  
  the regular expression to test against
-- `[var:variable_name]?`  
- *optional* name of the chat variable to test
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to test
-- `(string)?`  
- *optional* the value to test
 
 Tests if the provided variable or value matches a regular expression.
 
-##### Examples
 
-```stscript
-/re-test find=/dog/i The quick brown fox jumps over the lazy dog. |
-/echo result will be true: {{pipe}}
-```
-
-```stscript
-// pipes in the regex must to be escaped |
-/re-test find=/dog\|cat/i The quick brown fox jumps over the lazy dog. |
-/echo result will be true: {{pipe}}
-```
-
-```stscript
-// if you want to find a literal pipe, you have to also escape the backslash escaping it |
-/re-test find=/dog\\\|cat/i The quick brown fox jumps over the lazy dog. |
-/echo result will be false: {{pipe}}
-```
-
-```stscript
-// or you can put quote around the regex and forget about escaping... |
-/re-test find="/dog|cat/i" The quick brown fox jumps over the lazy dog. |
-/echo result will be true ("dog" or "cat"): {{pipe}} |
-/delay 500 |
-/re-test find="/dog\|cat/i" The quick brown fox jumps over the lazy dog. |
-/echo result will be false (only matching "dog\|cat"): {{pipe}}
-```
-
-
-
-
-
-#### `/re-replace`
+#### <a id="lalib-help-cmd-re_replace"></a>`/re-replace`
 - `[find:string]`  
  the regular expression (/pattern/flags)
 - `[replace:string]?`  
- *optional* the replacement text
+ *(optional)* the replacement text
 - `[cmd:closure|subcommand]?`  
- *optional* a closure or slash command to execute for each match
-- `[var:variable_name]?`  
- *optional* name of the chat variable to perform the replacement on
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to perform the replacement on
-- `(string)?`  
- *optional* the value to perform the replacement on
+ *(optional)* a closure or slash command to execute for each match
 
 <div>
-Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
-</div>
-
+            Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
+        </div>
 
 ##### Examples
-
 ```stscript
-// simple find and replace |
-/re-replace find=/dog/i replace=cat The quick brown fox jumps over the lazy dog. |
-/echo result will be "[...] the lazy cat.": {{pipe}}
+/re-replace find=/\s+/ replace=" " The quick   brown  fox  jumps over the lazy dog | /echo
+// replaces multiple whitespace with a single space |
 ```
 
 ```stscript
-// Use $1, $2, ... to reference capturing groups. |
-/re-replace find="/\b(\w+)\b dog/i" replace="cat $1" The quick brown fox jumps over the lazy dog. |
-/echo result will be "[...] over the cat lazy.": {{pipe}}
-```
-
-```stscript
-// You can also use the return value of another command or closure as the replacement text. |
-// In closures use {{$1}}, {{$2}}, ... to reference capturing groups. |
-/re-replace
-    find=/(fox\|dog)/ig
-    cmd={:
-        /input replace {{$1}} with:
-    :}
-    The quick brown fox jumps over the lazy dog.
-|
-/echo who jumps over who now? {{pipe}}
+/re-replace find=/([a-z]+) ([a-z]+)/ cmd="/echo $2 $1" the quick brown fox | /echo
+// swaps words using a slash command on each match |
 ```
 
 
-
-
-
-#### `/re-exec`
+#### <a id="lalib-help-cmd-re_exec"></a>`/re-exec`
 - `[find:string]`  
  the regular expression (/pattern/flags)
-- `[first:boolean]? = false`  
- *optional* return only the first match instead of a list
-- `(string)?`  
- *optional* the value to execute the regex on
+- `[first=true|false]? = false`  
+ *(optional)* return only the first match instead of a list
 
 <div>
-Searches the provided value with the regular expression and returns a list of all matches.
-</div>
-
+            Searches the provided value with the regular expression and returns a list of all matches.
+        </div>
 
 ##### Examples
-
 ```stscript
-/re-exec find=/\b(?<word>\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
-/json-pretty |
-/comment ```{{newline}}{{pipe}}{{newline}}```
-```
-```stscript
-/re-exec first= find=/\b(?<word>\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
+/re-exec find=/\b(?\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
 /json-pretty |
 /comment ```{{newline}}{{pipe}}{{newline}}```
 ```
 
+```stscript
+/re-exec first= find=/\b(?\w+?(o+)\w+?)\b/g The quick brown fox jumps over the lazy fool dog. |
+/json-pretty |
+/comment ```{{newline}}{{pipe}}{{newline}}```
+```
 
 
 
+### <a id="lalib-help-group-Accessing_Manipulating_Structured_Data"></a>Accessing & Manipulating Structured Data
 
 
-
-### Accessing & Manipulating Structured Data
-
-
-
-#### `/getat`
+#### <a id="lalib-help-cmd-getat"></a>`/getat`
 - `[index:string|number|list]`  
  the index, field name, or list of indices/field names to retrieve
-- `[var:variable_name]?`  
- *optional* name of the chat variable to retrieve from
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to retrieve from
-- `(string)?`  
- *optional* the value to retrieve from (if not using a variable)
 
 Retrieves an item from a list or a property from a dictionary.
 
-##### Examples
 
-```stscript
-/setvar key=x {
-    "a": [
-        1,
-        2,
-        {
-            "b": "foo",
-            "c": "bar"
-        }
-    ],
-    "d": "D"
-} |
-/getat var=x index=d |
-/echo The result will be "D": {{pipe}}
-```
-
-```stscript
-/return {
-    "a": [
-        1,
-        2,
-        {
-            "b": "foo",
-            "c": "bar"
-        }
-    ],
-    "d": "D"
-} |
-/getat index=["a", 2, "b"] |
-/echo The result will be "foo": {{pipe}}
-```
-
-```stscript
-/return {
-    "a": [
-        1,
-        2,
-        {
-            "b": "foo",
-            "c": "bar"
-        }
-    ],
-    "d": "D"
-} |
-/getat index=a |
-/getat index=2 |
-/getat index=c |
-/echo The result will be "bar": {{pipe}}
-```
-
-
-
-
-
-#### `/setat`
+#### <a id="lalib-help-cmd-setat"></a>`/setat`
 - `[index:string|list]`  
  the index or key to set the value at
-- `[var:variable_name]?`  
- *optional* name of the chat variable to update
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to update
 - `[value:list|dictionary]?`  
- *optional* the value to update
-- `(string)`  
- the value to set
+ *(optional)* the value to update
 
 <div>
-Sets an item in a list or a property in a dictionary.
-</div>
-
+            Sets an item in a list or a property in a dictionary.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x {
-    "a": [
-        1,
-        2,
-        {
-            "b": "foo",
-            "c": "bar"
-        }
-    ],
-    "d": "D"
-} |
-/setat var=x index=d new value for D |
-/echo {{getvar::x}}
+/setat value=[1,2,3] index=1 X
+// returns [1,"X",3] |
 ```
 
 ```stscript
-/setvar key=x {
-    "a": [
-        1,
-        2,
-        {
-            "b": "foo",
-            "c": "bar"
-        }
-    ],
-    "d": "D"
-} |
-/setat var=x index=["a", 2, "c"] new value for bar |
-/echo {{getvar::x}}
-```
-
-```stscript
-/flushvar x |
-/setat var=x index=["a","b",2] creating new objects or list |
-/echo {{getvar::x}}
+/setat value={{var::myVariable}} index=[1,2,"someProperty"] foobar
+// sets the value of myVariable[1][2].someProperty to "foobar" (the variable will be updated and the resulting value of myVariable will be returned) |
 ```
 
 
 
+### <a id="lalib-help-group-Exception_Handling"></a>Exception Handling
 
 
-
-
-### Exception Handling
-
-
-
-#### `/try`
-- `(subcommand|closure)`  
- the command to try
+#### <a id="lalib-help-cmd-try"></a>`/try`
 
 <div>
-Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
-</div>
-
+            Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
+        </div>
 
 ##### Examples
-
 ```stscript
-/echo Try this first while being connected to an LLM, then without a connection. |
-/setvar key=myPrompt Say hello! |
-/try {:
-	/getvar myPrompt |
-	/gen {{pipe}}
-:} |
-/catch pipe={{pipe}} {:
-	/echo something went wrong: {{error}} |
-	/return "gen failed :("
-:} |
-/echo {{pipe}}
+/try {: /divide 10 0 :} |
+/catch {: /echo An error occurred: {{exception}} :}
 ```
 
 
-
-
-
-#### `/catch`
-- `(subcommand|closure)`  
- the command to execute if an exception occurred
+#### <a id="lalib-help-cmd-catch"></a>`/catch`
 
 <div>
-Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
-</div>
-
+            Used with the `/try` command to handle exceptions. Use `{{exception}}` or `{{error}}` to get the exception's message.
+        </div>
 
 ##### Examples
-
 ```stscript
-see /try
+/try {: /divide 10 0 :} |
+/catch {: /echo An error occurred: {{exception}} :}
 ```
 
 
 
+### <a id="lalib-help-group-Null_Handling"></a>Null Handling
 
 
-
-
-### Null Handling
-
-
-
-#### `/ifempty`
+#### <a id="lalib-help-cmd-ifempty"></a>`/ifempty`
 - `[value:string]`  
  the value to check
-- `(string)`  
- the fallback value
 
 Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
 
-##### Examples
 
-```stscript
-/ifempty value=[] [1,2,3] |
-/echo will be [1,2,3]: {{pipe}}
-```
-
-```stscript
-/setvar key=x |
-/setvar key=y bar |
-/ifempty value={{getvar::x}} foo |
-/echo will be foo: {{pipe}} |
-/ifempty value={{getvar::y}} foo |
-/echo will be bar: {{pipe}} |
-```
-
-
-
-
-
-#### `/ifnullish`
+#### <a id="lalib-help-cmd-ifnullish"></a>`/ifnullish`
 - `[value:string]`  
  the value to check
-- `(string)`  
- the fallback value
 
 Returns the fallback value if value is nullish (empty string).
 
-##### Examples
-
-```stscript
-/ifnullish value=[] [1,2,3] |
-/echo will be []: {{pipe}}
-```
-
-```stscript
-/setvar key=x |
-/setvar key=y bar |
-/ifnullish value={{getvar::x}} foo |
-/echo will be foo: {{pipe}} |
-/ifnullish value={{getvar::y}} foo |
-/echo will be bar: {{pipe}} |
-```
 
 
+### <a id="lalib-help-group-Copy_Download"></a>Copy & Download
 
 
-
-
-
-### Copy & Download
-
-
-
-#### `/copy`
-- `(string)`  
- the value to copy
+#### <a id="lalib-help-cmd-copy"></a>`/copy`
 
 Copies value into clipboard.
 
-##### Examples
 
-```stscript
-/copy this text is now in your clipboard
-```
-
-```stscript
-/copy {{lastMessage}}
-```
-
-
-
-
-
-#### `/download`
-- `[name:string]? = ...`  
- *optional* the filename for the downloaded file
+#### <a id="lalib-help-cmd-download"></a>`/download`
+- `[name:string]? = SillyTavern-2024-10-21T18:39:24.779Z`  
+ *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
- *optional* the file extension for the downloaded file
-- `(string)`  
- the value to download as a text file
+ *(optional)* the file extension for the downloaded file
 
 Downloads value as a text file.
 
-##### Examples
-
-```stscript
-/download Let's download this text.
-```
-
-```stscript
-/download name=TheLastMessage ext=md {{lastMessage}}
-```
 
 
+### <a id="lalib-help-group-DOM_Interaction"></a>DOM Interaction
 
 
-
-
-
-### DOM Interaction
-
-
-
-#### `/dom`
-- `[quiet:boolean]? = false`  
- *optional* true: don't show warnings
-- `[multi:boolean]? = false`  
- *optional* true: target all matching elements; false: target first matching element
+#### <a id="lalib-help-cmd-dom"></a>`/dom`
+- `[quiet=true|false]? = false`  
+ *(optional)* true: don't show warnings
+- `[multi=true|false]? = false`  
+ *(optional)* true: target all matching elements; false: target first matching element
 - `[target:number]?`  
- *optional* target the n-th matching element if multi=true (zero-based)
+ *(optional)* target the n-th matching element if multi=true (zero-based)
 - `[action=click|value|property|attribute|call]`  
  the action to perform
 - `[value:string]?`  
- *optional* new value to set (for action=value or action=property or action=attribute)
+ *(optional)* new value to set (for action=value or action=property or action=attribute)
 - `[property:string]?`  
- *optional* property name to get/set/call (for action=property or action=call)
+ *(optional)* property name to get/set/call (for action=property or action=call)
 - `[attribute:string]?`  
- *optional* attribute name to get/set (for action=attribute)
-- `(string)`  
- CSS selector to target an element
+ *(optional)* attribute name to get/set (for action=attribute)
 
 <div>
-Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
-</div>
-
+            Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
+        </div>
 
 ##### Examples
-
 ```stscript
-/dom action=click #fast_ui_mode |
-/echo Toggled "No Blur Effect" setting
+/dom action=click #expandMessageActions
 ```
 
 ```stscript
-/dom action=value value=0 #avatar_style |
-/echo Avatar style has been set to "Circle"
-```
-
-```stscript
-/dom action=property property=value #avatar_style |
-/echo Current avatar style: {{pipe}}
-```
-
-```stscript
-/dom action=attribute attribute=is_system #chat > .mes:last-child |
-/echo Is the last message a system message? {{pipe}}
+/dom action=value value=0 #avatar_style
 ```
 
 
 
+### <a id="lalib-help-group-Characters"></a>Characters
 
 
-
-
-### Characters
-
-
-
-#### `/char-get`
+#### <a id="lalib-help-cmd-char_get"></a>`/char-get`
 - `[index:string]?`  
- *optional* the field to retrieve
-- `(string)? = current character`  
- *optional* character avatar (filename) or name
+ *(optional)* the field to retrieve
 
 <div>
-Get a character object or one of its properties.
-</div>
-
+            Get a character object or one of its properties.
+        </div>
 
 ##### Examples
-
 ```stscript
 /char-get Seraphina |
 /getat index=description |
@@ -1342,48 +994,25 @@ Get a character object or one of its properties.
 
 
 
+### <a id="lalib-help-group-Group_Chats"></a>Group Chats
 
 
-
-
-### Group Chats
-
-
-
-#### `/memberpos`
-- `(string)`  
- name of the group member
-- `(number)`  
- new position index for the member
+#### <a id="lalib-help-cmd-memberpos"></a>`/memberpos`
 
 Move group member to position (index starts with 0).
 
-##### Examples
 
-```stscript
-/memberpos Alice 3 |
-/echo Alice has been moved to position 3
-```
-
-
-
-
-
-#### `/group-get`
+#### <a id="lalib-help-cmd-group_get"></a>`/group-get`
 - `[index:string]?`  
- *optional* the field to retrieve
+ *(optional)* the field to retrieve
 - `[chars=true|false]? = false`  
- *optional* resolve characters
-- `(string)? = current group`  
- *optional* group name
+ *(optional)* resolve characters
 
 <div>
-Get a group object or one of its properties.
-</div>
-
+            Get a group object or one of its properties.
+        </div>
 
 ##### Examples
-
 ```stscript
 /group-get MyGroup |
 /getat index=description |
@@ -1402,856 +1031,527 @@ Get a group object or one of its properties.
 
 
 
+### <a id="lalib-help-group-Conditionals_switch"></a>Conditionals - switch
 
 
-
-
-### Conditionals - switch
-
-
-
-#### `/switch`
-- `[var:variable_name]?`  
- *optional* name of the chat variable to use as the switch value
-- `[globalvar:variable_name]?`  
- *optional* name of the global variable to use as the switch value
-- `(string|number)?`  
- *optional* the value to use as the switch value
+#### <a id="lalib-help-cmd-switch"></a>`/switch`
 
 Use with /case to conditionally execute commands based on a value.
 
-##### Examples
 
-```stscript
-/setvar key=x foo |
-/switch var=x |
-    /case pipe={{pipe}} value=1 {: /echo value is one :} |
-    /case pipe={{pipe}} value=foo {: /echo value is foo :} |
-    /case pipe={{pipe}} value=bar {: /echo value is bar :} |
-/echo done
-```
-
-
-
-
-
-#### `/case`
-- `[value:string|number]`  
- the value to compare against the switch value
-- `(closure|subcommand)`  
- the command to execute if the value matches the switch value
+#### <a id="lalib-help-cmd-case"></a>`/case`
 
 Execute a command if the provided value matches the switch value from /switch.
 
-##### Examples
 
+
+### <a id="lalib-help-group-Conditionals_if"></a>Conditionals - if
+
+
+#### <a id="lalib-help-cmd-ife"></a>`/ife`
+- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+ *(optional)* named arguments assigned to scoped variables to be used in the expression
+
+<div>
+            Execute a closure if the expression or first closure returns <code>true</code>.
+        </div>
+<div>
+            Use with <code>/elseif</code> and <code>/else</code>.
+        </div>
+<div>
+            See <code>/=</code> for more details on expressions.
+        </div>
+
+##### Examples
 ```stscript
-see /switch
+/let a {{roll:1d6}} |
+/ife (a == 1) {:
+    /echo a is one |
+:} |
+/elseif (a == 2) {:
+    /echo a is two |
+:} |
+/else {:
+    /echo a is something else ({{var::a}})
+:} |
 ```
 
 
+#### <a id="lalib-help-cmd-elseif"></a>`/elseif`
+- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+ *(optional)* named arguments assigned to scoped variables to be used in the expression
 
-
-
-
-
-### Conditionals - if
-
-
-
-#### `/ife`
-- `(closure|subcommand)`  
- the command to evaluate
-
-<div>Use with /then, /elseif, and /else. The provided command must return true or false.</div>
+<div>
+            Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
+        </div>
+<div>
+            Use with <code>/ife</code> and <code>/else</code>.
+        </div>
+<div>
+            See <code>/=</code> for more details on expressions.
+        </div>
 
 ##### Examples
-
 ```stscript
-/setvar key=x foo |
-/ife {: /test left=x rule=eq right=1 :} |
-    /then {: /echo value is one :} |
-/elseif {: /test left=x rule=eq right=foo :} |
-    /then {: /echo value is foo :} |
-/elseif {: /test left=x rule=eq right=bar :} |
-    /then {: /echo value is bar :} |
-/else {: /echo value is something else :} |
+/let a {{roll:1d6}} |
+/ife (a == 1) {:
+    /echo a is one |
+:} |
+/elseif (a == 2) {:
+    /echo a is two |
+:} |
+/else {:
+    /echo a is something else ({{var::a}})
+:} |
 ```
 
 
+#### <a id="lalib-help-cmd-else"></a>`/else`
 
-
-
-#### `/elseif`
-- `(closure|subcommand)`  
- the command to evaluate
-
-<div>Use with /ife, /then, and /else. The provided command must return true or false.</div>
+<div>
+            Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed.
+        </div>
+<div>
+            Use with <code>/ife</code> and <code>/elseif</code>.
+        </div>
+<div>
+            See <code>/=</code> for more details on expressions.
+        </div>
 
 ##### Examples
-
 ```stscript
-see /ife
+/let a {{roll:1d6}} |
+/ife (a == 1) {:
+    /echo a is one |
+:} |
+/elseif (a == 2) {:
+    /echo a is two |
+:} |
+/else {:
+    /echo a is something else ({{var::a}})
+:} |
 ```
 
 
-
-
-
-#### `/else`
-- `(closure|subcommand)`  
- the command to execute
-
-<div>Use with /ife, /elseif, and /then. The provided command will be executed if the previous /if or /elseif was false.</div>
-
-##### Examples
-
-```stscript
-see /ife
-```
-
-
-
-
-
-#### `/then`
-- `(closure|subcommand)`  
- the command to execute
+#### <a id="lalib-help-cmd-then"></a>`/then`
 
 <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
 
-##### Examples
-
-```stscript
-see /ife
-```
 
 
+### <a id="lalib-help-group-World_Info"></a>World Info
 
 
-
-
-
-### World Info
-
-
-
-#### `/wi-list-books`
+#### <a id="lalib-help-cmd-wi_list_books"></a>`/wi-list-books`
 - `[source=true|false]? = false`  
- *optional* whether to include the activation source for each book
+ *(optional)* whether to include the activation source for each book
 
-Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.
-
-##### Examples
-
-```stscript
-/wi-list-books |
-/echo The currently active WI books are: {{pipe}}
-```
-
-```stscript
-/wi-list-books source=true |
-/json-pretty |
-/comment Currently active WI books:{{newline}}```json{{newline}}{{pipe}}{{newline}}```
-```
+<code>source=true</code>
 
 
-
-
-
-#### `/wi-list-entries`
+#### <a id="lalib-help-cmd-wi_list_entries"></a>`/wi-list-entries`
 - `[flat=true|false]? = false`  
- *optional* whether to list all entries in a flat list
-- `(string)?`  
- *optional* the name of the book to list entries from
+ *(optional)* whether to list all entries in a flat list
 
-Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.
-
-##### Examples
-
-```stscript
-/wi-list-entries |
-/map list={{pipe}} {:
-    /getat index=entries {{item}} |
-    /map list={{pipe}} {:
-        /getat index=comment {{item}}
-    :}
-:} |
-/echo Overview of WI entries in currently active books: {{pipe}}
-```
+<code>flat=true</code>
 
 
-
-
-
-#### `/wi-activate`
+#### <a id="lalib-help-cmd-wi_activate"></a>`/wi-activate`
 
 Activate World Info entries based on the current chat and trigger their Automation IDs.
 
-##### Examples
-
-```stscript
-/wi-activate
-```
 
 
+### <a id="lalib-help-group-Costumes_Sprites"></a>Costumes / Sprites
 
 
-
-
-
-### Costumes / Sprites
-
-
-
-#### `/costumes`
+#### <a id="lalib-help-cmd-costumes"></a>`/costumes`
 - `[recurse=true|false]? = true`  
- *optional* whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)
-- `(string)?`  
- *optional* the folder to list costumes from
+ *(optional)* whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)
 
 Get a list of costume / sprite folders, recursive by default.
 
-##### Examples
-
-```stscript
-/costumes Alice |
-/echo Alice's costumes: {{pipe}}
-```
-
-```stscript
-/costumes Alice/Winter | /echo Alice's winter costumes: {{pipe}}
-```
-
-```stscript
-/costumes recurse=false Alice | /echo Alice's top-level costumes only: {{pipe}}
-```
 
 
+### <a id="lalib-help-group-Quick_Replies"></a>Quick Replies
 
 
-
-
-
-### Quick Replies
-
-
-
-#### `/qr-edit`
+#### <a id="lalib-help-cmd-qr_edit"></a>`/qr-edit`
 - `[set:string]?`  
- *optional* the name of the quick reply set
+ *(optional)* the name of the quick reply set
 - `[label:string]?`  
- *optional* the label of the quick reply
-- `(string)?`  
- *optional* the label of the quick reply
+ *(optional)* the label of the quick reply
 
 Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
-##### Examples
 
-```stscript
-/qr-edit My QR From An Active Set
-```
-
-```stscript
-/qr-edit set=MyQrSet label=MyQr
-```
-
-
-
-
-
-#### `/qr-add`
+#### <a id="lalib-help-cmd-qr_add"></a>`/qr-add`
 - `[set:string]?`  
- *optional* the name of the quick reply set
+ *(optional)* the name of the quick reply set
 - `[label:string]?`  
- *optional* the label of the quick reply
-- `(string)?`  
- *optional* the label of the quick reply
+ *(optional)* the label of the quick reply
 
 Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
-##### Examples
-
-```stscript
-/qr-add New QR In Active Set
-```
-
-```stscript
-/qr-add set=MyQrSet label=MyNewQr
-```
 
 
+### <a id="lalib-help-group-Chat_Messages"></a>Chat Messages
 
 
-
-
-
-### Chat Messages
-
-
-
-#### `/swipes-get`
+#### <a id="lalib-help-cmd-swipes_get"></a>`/swipes-get`
 - `[message:number]?`  
- *optional* the message ID to get swipes from
-- `(number)`  
- the index of the swipe to get
+ *(optional)* the message ID to get swipes from
 
 Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
 
-##### Examples
 
-```stscript
-/swipes-get 5 |
-/echo Swipe number five: {{pipe}}
-```
-
-```stscript
-/sub {{lastMessageId}} 2 |
-/swipes-countget message={{pipe}} 5 |
-/echo swipe number five: {{pipe}}
-```
-
-
-
-
-
-#### `/swipes-list`
+#### <a id="lalib-help-cmd-swipes_get"></a>`/swipes-get`
 - `[message:number]?`  
- *optional* the message ID to get swipes from
+ *(optional)* the message ID to get swipes from
+
+Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
+
+
+#### <a id="lalib-help-cmd-swipes_list"></a>`/swipes-list`
+- `[message:number]?`  
+ *(optional)* the message ID to get swipes from
 
 Get a list of all swipes from the last message or the message with the given message ID.
 
-##### Examples
 
-```stscript
-/swipes-list |
-/echo
-```
-
-```stscript
-/sub {{lastMessageId}} 2 |
-/swipes-list message={{pipe}} |
-/echo
-```
-
-
-
-
-
-#### `/swipes-count`
+#### <a id="lalib-help-cmd-swipes_count"></a>`/swipes-count`
 - `[message:number]?`  
- *optional* the message ID to get swipes from
+ *(optional)* the message ID to get swipes from
 
 Get the number of all swipes from the last message or the message with the given message ID.
 
-##### Examples
 
-```stscript
-/swipes-count |
-/echo
-```
-
-```stscript
-/sub {{lastMessageId}} 2 |
-/swipes-count message={{pipe}} |
-/echo
-```
-
-
-
-
-
-#### `/swipes-index`
+#### <a id="lalib-help-cmd-swipes_index"></a>`/swipes-index`
 - `[message:number]?`  
- *optional* the message ID to get the swipe index from
+ *(optional)* the message ID to get the swipe index from
 
 Get the current swipe index from the last message or the message with the given message ID.
 
-##### Examples
 
-```stscript
-/swipes-index |
-/echo
-```
-
-```stscript
-/sub {{lastMessageId}} 2 |
-/swipes-index message={{pipe}} |
-/echo
-```
-
-
-
-
-
-#### `/swipes-add`
+#### <a id="lalib-help-cmd-swipes_add"></a>`/swipes-add`
 - `[message:number]?`  
- *optional* the ID of the message to add the swipe to
-- `(string)`  
- the text to add as a new swipe
+ *(optional)* the ID of the message to add the swipe to
 
 Add a new swipe to the last message or the message with the provided messageId.
 
-##### Examples
 
-```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/swipes-add bar
-```
-
-
-
-
-
-#### `/swipes-del`
+#### <a id="lalib-help-cmd-swipes_del"></a>`/swipes-del`
 - `[message:number]?`  
- *optional* the id of the message to delete the swipe from
-- `[filter:closure]?`  
- *optional* closure accepting a swipe dictionary as argument returning true or false
-- `(number)?`  
- *optional* the index of the swipe to delete (0-based)
+ *(optional)* the id of the message to delete the swipe from
+- `[filter:string|closure]?`  
+ *(optional)* expression or closure accepting a swipe dictionary as argument returning true or false
 
 <div>
-Delete the current swipe or the swipe at the specified index (0-based).
-</div>
+            Delete the current swipe or the swipe at the specified index (0-based).
+        </div>
 <div>
-Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
-</div>
-
+            Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
+        </div>
 
 ##### Examples
-
 ```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/swipes-add bar |
-/delay 1000 |
-/swipes-del
+/swipes-del |
+// delete current swipe of last message |
 ```
 
 ```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/swipes-add bar |
-/delay 1000 |
-/swipes-add foobar |
-/delay 1000 |
-/swipes-del 0
+/swipes-del 5 |
+// delete swipe number 5 (0-based index) of last message |
+```
+
+```stscript
+/swipes-del message=20 |
+// delete current swipe of message #20 |
+```
+
+```stscript
+/swipes-del filter="swipe.index % 2" |
+// delete all odd swipes (0-based index) of last message |
+```
+
+```stscript
+/swipes-del filter="swipe.index != 5" |
+// delete all but swipe at idnex 5 (0-based index) of last message |
+```
+
+```stscript
+/swipes-del filter="'bad word' in swipe.mes" |
+// delete all swipes with "bad word" in their message text of last message |
+```
+
+```stscript
+/swipes-del filter={: swipe=
+	/var key=swipe index=mes |
+	/test left={{pipe}} rule=in right="bad word" |
+:} |
+// delete all swipes with "bad word" in their message text of last message |
 ```
 
 
-
-
-
-#### `/swipes-go`
+#### <a id="lalib-help-cmd-swipes_go"></a>`/swipes-go`
 - `[message:number]?`  
- *optional* the message ID to go to the swipe for
-- `(number)`  
- the index of the swipe to go to
+ *(optional)* the message ID to go to the swipe for
 
 Go to the swipe. 0-based index.
 
-##### Examples
 
-```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/swipes-add bar |
-/delay 1000 |
-/swipes-add foobar |
-/delay 1000 |
-/swipes-go 0
-```
-
-
-
-
-
-#### `/swipes-swipe`
+#### <a id="lalib-help-cmd-swipes_swipe"></a>`/swipes-swipe`
 
 Trigger a new swipe on the last message.
 
-##### Examples
 
-```stscript
-/swipes-swipe |
-/echo swiping has finished
-```
-
-
-
-
-
-#### `/message-edit`
+#### <a id="lalib-help-cmd-message_edit"></a>`/message-edit`
 - `[message:number]?`  
- *optional* the message ID to edit
+ *(optional)* the message ID to edit
 - `[append=true|false]? = false`  
- *optional* whether to append the new text to the end of the message
-- `(string)`  
- the new text for the message
+ *(optional)* whether to append the new text to the end of the message
 
-Edit the current message or the message at the provided message ID. Use <code>append=true</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.
-
-##### Examples
-
-```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/message-edit bar
-```
-
-```stscript
-/sendas name=Alice foo |
-/delay 1000 |
-/message-edit append=true bar
-```
+<code>append=</code>
+<code>{{space}}</code>
 
 
-
-
-
-#### `/message-move`
+#### <a id="lalib-help-cmd-message_move"></a>`/message-move`
 - `[from:number]`  
  the message ID to move
 - `[to:number]?`  
- *optional* where to move the message
+ *(optional)* where to move the message
 - `[up:number]?`  
- *optional* number of slots to move the message up (decrease message ID)
+ *(optional)* number of slots to move the message up (decrease message ID)
 - `[down:number]?`  
- *optional* number of slots to move the message down (increase message ID)
+ *(optional)* number of slots to move the message down (increase message ID)
 
 <div>
-Move a message up or down in the chat.
-</div>
-
+            Move a message up or down in the chat.
+        </div>
 
 ##### Examples
-
 ```stscript
-/message-move from={{lastMessageId}} to=10 |
-```
-
-```stscript
-/message-move from={{lastMessageId}} up=2 |
-```
-
-```stscript
-/message-move from=3 down=10 |
+/message-move from={{lastMessageId}} to=10 |/message-move from={{lastMessageId}} up=2 |/message-move from=3 down=10 |
 ```
 
 
 
+### <a id="lalib-help-group-Chat_Management"></a>Chat Management
 
 
-#### `/message-on`
+#### <a id="lalib-help-cmd-chat_list"></a>`/chat-list`
+- `[char:string]? = current char`  
+ *(optional)* avatar name of the char
+
+<div>
+            Get a list of all chats of the current or provided character.
+        </div>
+
+##### Examples
+```stscript
+/chat-list |/chat-list char=default_Seraphina.png |
+```
+
+
+#### <a id="lalib-help-cmd-chat_parent"></a>`/chat-parent`
+
+returns the name of the parent chat
+
+
+#### <a id="lalib-help-cmd-message_on"></a>`/message-on`
 - `[event:string]`  
  event type to listen for
 - `[callback:closure]`  
  closure to run when triggered
-- `[quiet:boolean]? = true`  
- *optional* whether to show toast messages when event listeners are attached
-- `(string)`  
- CSS selector to target an element in the last message
+- `[quiet=true|false]? = true`  
+ *(optional)* whether to show toast messages when event listeners are attached
 
 <div>
-Add event listeners to the last chat message.
-</div>
+            Add event listeners to the last chat message.
+        </div>
 <div>
-Stops listening when changing to another chat.
-</div>
-
+            Stops listening when changing to another chat.
+        </div>
 
 ##### Examples
-
 ```stscript
 /message-on event=click quiet=false callback={:
-	/$ take=textContent {{target}} |
-	/let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |
-	/inputhistory-add {{var::prompt}} |
-	/send {{var::prompt}} |
-	/trigger |
+    /$ take=textContent {{target}} |
+    /let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |
+    /inputhistory-add {{var::prompt}} |
+    /send {{var::prompt}} |
+    /trigger
 :} .custom-suggestion |
 /setvar key=listenerId |
 ```
 
 
-
-
-
-#### `/message-off`
+#### <a id="lalib-help-cmd-message_off"></a>`/message-off`
 - `[id:string]?`  
- *optional* listener ID
+ *(optional)* listener ID
 - `[event:string]?`  
- *optional* event type to listen for
+ *(optional)* event type to listen for
 - `[query:string]?`  
- *optional* CSS selector to target an element in the last message
-- `[quiet:boolean]? = true`  
- *optional* whether to show toast messages when event listeners are attached
+ *(optional)* CSS selector to target an element in the last message
+- `[quiet=true|false]? = true`  
+ *(optional)* whether to show toast messages when event listeners are attached
 
 <div>
-Remove an event listener added with /message-on.
-</div>
-
+            Remove an event listener added with /message-on.
+        </div>
 
 ##### Examples
-
 ```stscript
 /message-off id={{getvar::listenerId}}
+// All messages: |
 ```
 
 
-
-
-
-#### `/message-listeners`
+#### <a id="lalib-help-cmd-message_listeners"></a>`/message-listeners`
 
 Lists all currently active listeners.
 
-##### Examples
 
-```stscript
-/message-on event=click callback={: /echo {{target}} :} .custom-suggestion |
-/message-listeners |
-/echo |
-```
-
-
-
-
-
-#### `/role-swap`
-- `(number|range)?`  
- *optional* message id or range to swap
+#### <a id="lalib-help-cmd-role_swap"></a>`/role-swap`
 
 <div>
-Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
-</div>
-
+        Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
+        </div>
 
 ##### Examples
-
 ```stscript
-// All messages: |
 /role-swap
+// All messages: |
 ```
 
 ```stscript
-// Last message: |
 /role-swap {{lastMessageId}}
-```
-
-```stscript
 // Last message: |
+```
+
+```stscript
 /role-swap -1
+// Last message: |
 ```
 
 ```stscript
-// Second to last message: |
 /role-swap -2
+// Second to last message: |
 ```
 
 ```stscript
-// First 10 messages: |
 /role-swap 0-10
+// First 10 messages: |
 ```
 
 ```stscript
-// Last 10 messages: |
 /role-swap -10-
+// Last 10 messages: |
 ```
 
 ```stscript
-// All messages except last 10: |
 /role-swap 0--10
+// All messages except last 10: |
 ```
 
 
 
+### <a id="lalib-help-group-Time_Date"></a>Time & Date
 
 
-
-
-### Time & Date
-
-
-
-#### `/timestamp`
+#### <a id="lalib-help-cmd-timestamp"></a>`/timestamp`
 
 Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.
 
-##### Examples
-
-```stscript
-/timestamp |
-/echo
-```
 
 
+### <a id="lalib-help-group-Async"></a>Async
 
 
-
-
-
-### Async
-
-
-
-#### `/fireandforget`
-- `(closure|subcommand)`  
- the closure or command to execute
+#### <a id="lalib-help-cmd-fireandforget"></a>`/fireandforget`
 
 Execute a closure or command without waiting for it to finish.
 
-##### Examples
-
-```stscript
-/fireandforget {:
-    /delay 1000 |
-    /echo firing |
-    /delay 1000 |
-    /echo still firing
-:} |
-/echo outside
-```
 
 
+### <a id="lalib-help-group-Logging"></a>Logging
 
 
-
-
-
-### Logging
-
-
-
-#### `/console-log`
-- `(string)`  
- the value to log
+#### <a id="lalib-help-cmd-console_log"></a>`/console-log`
 
 logs a value to the browser console
 
-##### Examples
 
-```stscript
-/console-log Hello, World!
-```
-
-
-
-
-
-#### `/console-warn`
-- `(string)`  
- the value to log
+#### <a id="lalib-help-cmd-console_warn"></a>`/console-warn`
 
 logs a value to the browser console as a warning
 
-##### Examples
 
-```stscript
-/console-warn This is a warning!
-```
-
-
-
-
-
-#### `/console-error`
-- `(string)`  
- the value to log
+#### <a id="lalib-help-cmd-console_error"></a>`/console-error`
 
 logs a value to the browser console as an error
 
-##### Examples
-
-```stscript
-/console-error OOPS!
-```
 
 
+### <a id="lalib-help-group-Audio"></a>Audio
 
 
-
-
-
-### Audio
-
-
-
-#### `/sfx`
+#### <a id="lalib-help-cmd-sfx"></a>`/sfx`
 - `[volume:number]? = 1.0`  
- *optional* playback volume
-- `[await:boolean]? = false`  
- *optional* whether to wait for the sound to finish playing before continuing
-- `(string)`  
- url to audio file
+ *(optional)* playback volume
+- `[await=true|false]? = false`  
+ *(optional)* whether to wait for the sound to finish playing before continuing
 
 <div>
-Plays an audio file.
-</div>
-
+            Plays an audio file.
+        </div>
 
 ##### Examples
-
 ```stscript
-/sfx /user/audio/mySound.wav
-```
-
-```stscript
-/sfx volume=1.25 await=true /user/audio/mySound.wav |
-/echo finished playing sound
+/sfx volume=1.5 await=true /user/audio/mySound.wav | /echo finished playing sound
 ```
 
 
 
+### <a id="lalib-help-group-Miscellaneous"></a>Miscellaneous
+
+
+#### <a id="lalib-help-cmd-fonts"></a>`/fonts`
+
+returns a list of all system fonts available to you
 
 
 
-
-### Web Requests
-
+### <a id="lalib-help-group-Web_Requests"></a>Web Requests
 
 
-#### `/fetch`
-- `(string)`  
- the url to fetch
+#### <a id="lalib-help-cmd-fetch"></a>`/fetch`
 
 <div>
-Fetch the contents of the provided URL.
-</div>
-
+            Fetch the contents of the provided URL.
+        </div>
 
 ##### Examples
-
 ```stscript
 /fetch http://example.com |
 /echo
 ```
 
 
-
-
-
-#### `/$`
+#### <a id="lalib-help-cmd-_"></a>`/$`
 - `[query:string]?`  
- *optional* css selector to query the provided html
+ *(optional)* css selector to query the provided html
 - `[take:string]? = outerHTML`  
- *optional* property to take from the resulting element
+ *(optional)* property to take from the resulting element
 - `[call:string]?`  
- *optional* method to call on the resulting element
-- `(string)`  
- the html to operate on
+ *(optional)* method to call on the resulting element
 
 <div>
-Retrieve the first matching element from the provided HTML or call a method on the first
-matching element and return the resulting HTML.
-</div>
-
+            Retrieve the first matching element from the provided HTML or call a method on the first
+            matching element and return the resulting HTML.
+        </div>
 
 ##### Examples
-
 ```stscript
 /fetch http://example.com |
 /$ query=h1 take=textContent |
@@ -2259,30 +1559,22 @@ matching element and return the resulting HTML.
 ```
 
 
-
-
-
-#### `/$$`
+#### <a id="lalib-help-cmd-_"></a>`/$$`
 - `[query:string]?`  
- *optional* css selector to query the provided html
+ *(optional)* css selector to query the provided html
 - `[take:string]? = outerHTML`  
- *optional* property to take from the resulting elements
+ *(optional)* property to take from the resulting elements
 - `[call:string]?`  
- *optional* method to call on the resulting elements
-- `(string)`  
- the html to operate on
+ *(optional)* method to call on the resulting elements
 
 <div>
-Retrieve all matching elements from the provided HTML or call a method on all
-matching elements and return the resulting HTML.
-</div>
-
+            Retrieve all matching elements from the provided HTML or call a method on all
+            matching elements and return the resulting HTML.
+        </div>
 
 ##### Examples
-
 ```stscript
 /fetch http://example.com |
-/$$ query=p call=remove |
+/$$ query=h1 take=textContent |
 /echo
 ```
-
