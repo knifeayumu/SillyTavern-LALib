@@ -218,8 +218,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
         }
         const readme = await (await fetch(`/scripts/extensions/third-party/SillyTavern-LALib/README${file}.md`)).text();
         const html = converter.makeHtml(readme).replace(/<br\s*\/?>/g, '<br style="display:block;">');
-        console.log('LALIB', html);
         sendSystemMessage('generic', html);
+        [...document.querySelectorAll('#chat .mes.last_mes [target="_blank"]')].forEach(it=>it.target='');
         return '';
     },
     unnamedArgumentList: [
