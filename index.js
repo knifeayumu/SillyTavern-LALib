@@ -203,14 +203,35 @@ function makeIfWhileEnumProvider(type) {
 
 // GROUP: Help
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
-    callback: async () => {
+    callback: async(args, value)=>{
         const converter = reloadMarkdownProcessor();
-        const readme = await (await fetch('/scripts/extensions/third-party/SillyTavern-LALib/README.md')).text();
+        let file;
+        switch (value) {
+            case 'expressions': {
+                file = '/expressions';
+                break;
+            }
+            default: {
+                file = '';
+                break;
+            }
+        }
+        const readme = await (await fetch(`/scripts/extensions/third-party/SillyTavern-LALib/README${file}.md`)).text();
         const html = converter.makeHtml(readme).replace(/<br\s*\/?>/g, '<br style="display:block;">');
         console.log('LALIB', html);
         sendSystemMessage('generic', html);
         return '';
     },
+    unnamedArgumentList: [
+        SlashCommandArgument.fromProps({ description: 'help topic',
+            typeList: [ARGUMENT_TYPE.STRING],
+            enumList: [
+                new SlashCommandEnumValue('slash', '(default) documentation of all slash commands'),
+                new SlashCommandEnumValue('expressions', 'boolean / arithmetic expressions'),
+            ],
+            defaultValue: 'slash',
+        }),
+    ],
     helpString: 'Lists LALib commands',
 }));
 
