@@ -238,6 +238,61 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
 
 
 // GROUP: Boolean Operations
+SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
+    /**
+     *
+     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
+     * @param {string} value
+     * @returns {string}
+     */
+    callback: (args, value)=>{
+        const parser = new BoolParser(args._scope, args);
+        const result = parser.parse(value);
+        const resultValue = result();
+        if (typeof resultValue == 'string') return resultValue;
+        if (resultValue === undefined || resultValue === null) return '';
+        return JSON.stringify(resultValue);
+    },
+    namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
+            description: 'named arguments assigned to scoped variables to be used in the expression',
+            acceptsMultiple: true,
+            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
+        }),
+    ],
+    unnamedArgumentList: [
+        makeBoolArgument(),
+    ],
+    // splitUnnamedArgument: true,
+    returns: 'result of the expression',
+    helpString: `
+        <div>
+            Evaluates a boolean or arithmetic expression
+        </div>
+        <div>
+            See <code>/lalib? expressions</code> for details.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/= true or false</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= 1 &lt; 2 and ('a' in x or 'b' not in y) and !z</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= 1 + 2 * 3 ** 4</code></pre>
+                </li>
+                <li>
+                    <pre><code class="language-stscript">/= (1 + 2) * 3 ** 4</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+}));
+
+
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
     callback: (args) => {
         const { a, b, rule } = parseBooleanOperands(args);
@@ -303,57 +358,6 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
         </div>
     `,
     returns: 'true or false',
-}));
-
-SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
-    /**
-     *
-     * @param {import('../../../slash-commands/SlashCommand.js').NamedArguments} args
-     * @param {string} value
-     * @returns {string}
-     */
-    callback: (args, value)=>{
-        const parser = new BoolParser(args._scope, args);
-        const result = parser.parse(value);
-        const resultValue = result();
-        if (typeof resultValue == 'string') return resultValue;
-        if (resultValue === undefined || resultValue === null) return '';
-        return JSON.stringify(resultValue);
-    },
-    namedArgumentList: [
-        SlashCommandNamedArgument.fromProps({ name: 'expression variables',
-            description: 'named arguments assigned to scoped variables to be used in the expression',
-            acceptsMultiple: true,
-            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
-        }),
-    ],
-    unnamedArgumentList: [
-        makeBoolArgument(),
-    ],
-    // splitUnnamedArgument: true,
-    returns: 'result of the expression',
-    helpString: `
-        <div>
-            Evaluates a boolean or arithmetic expression
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/= true or false</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= 1 &lt; 2 and ('a' in x or 'b' not in y) and !z</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= 1 + 2 * 3 ** 4</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= (1 + 2) * 3 ** 4</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
 }));
 
 
@@ -5305,7 +5309,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
 
 
 
-// GROUP: Miscallaneous
+// GROUP: Miscellaneous
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fonts',
     callback: async(args, value)=>{
         if (!window.queryLocalFonts) {
