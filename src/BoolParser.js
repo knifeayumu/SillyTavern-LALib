@@ -73,7 +73,7 @@ export class BoolParser {
     }
 
     resolveVariable(name, scope = null) {
-        const parts = name.split('.');
+        const parts = name.split(/(\*?\.)/);
         let part = parts.shift();
         let value;
 
@@ -87,16 +87,33 @@ export class BoolParser {
             return '';
         }
 
-        if (parts.length) {
+        if (parts.length > 1) {
+            let op;
             let parsed;
             try { parsed = JSON.parse(value); } catch { /* empty */ }
+            op = parts.shift();
             part = parts.shift();
-            while (parsed !== undefined && part) {
+            while (parsed !== undefined && op && part) {
                 if (Array.isArray(parsed)) {
-                    parsed = parsed.at(part);
+                    if (op == '*.') {
+                        parsed = parsed.map(it=>{
+                            if (!Array.isArray(it) || Number.isNaN(parseInt(part))) {
+                                return it[part] ?? '';
+                            } else {
+                                return it.at(part) ?? '';
+                            }
+                        });
+                    } else {
+                        if (Number.isNaN(parseInt(part))) {
+                            parsed = parsed[part];
+                        } else {
+                            parsed = parsed.at(part);
+                        }
+                    }
                 } else {
                     parsed = (parsed ?? {})[part];
                 }
+                op = parts.shift();
                 part = parts.shift();
             }
             if (typeof parsed == 'string') return parsed;
@@ -412,10 +429,10 @@ export class BoolParser {
     }
 
     testAssignment() {
-        return this.testSymbol(/[+\-*/]?=(?!=)/);
+        return this.testSymbol(/(\+|-|\*{1,2}|\/{1,2}|%)?=(?!=)/);
     }
     parseAssignment(a) {
-        const op = /[+\-*/]?=/.exec(this.charAhead)[0];
+        const op = /(\+|-|\*{1,2}|\/{1,2}|%)?=/.exec(this.charAhead)[0];
         this.take(op.length);
         this.discardWhitespace();
         // must be followed by expression, reset depth
@@ -449,6 +466,18 @@ export class BoolParser {
                 }
                 case '/=': {
                     outcome /= value;
+                    break;
+                }
+                case '//=': {
+                    outcome = ~~(outcome / value);
+                    break;
+                }
+                case '%=': {
+                    outcome %= value;
+                    break;
+                }
+                case '**=': {
+                    outcome **= value;
                     break;
                 }
             }
@@ -531,7 +560,7 @@ export class BoolParser {
     }
     parseVar(openPost = true) {
         this.partIndex.push(BOOL_PART.Var);
-        const name = /^[a-z_][a-z_0-9]*(\.(-?\d+|[a-z_][a-z_0-9]*))*/i.exec(this.charAhead)[0];
+        const name = /^[a-z_][a-z_0-9]*(\*?\.(-?\d+|[a-z_][a-z_0-9]*))*/i.exec(this.charAhead)[0];
         this.take(name.length);
         const func = ()=>{
             const val = this.resolveVariable(name, this.scope);
@@ -847,10 +876,10 @@ export class BoolParser {
     }
 
     testMath() {
-        return this.testSymbol(/\+|-|\*{1,2}|\/|%/);
+        return this.testSymbol(/^(\+|-|\*{1,2}|\/{1,2}|%)/);
     }
     parseMathPair() {
-        const op = /^(\+|-|\*{1,2}|\/|%)/.exec(this.charAhead)[0];
+        const op = /^(\+|-|\*{1,2}|\/{1,2}|%)/.exec(this.charAhead)[0];
         this.take(op.length);
         this.discardWhitespace();
         // math operator must be followed by:
@@ -881,11 +910,12 @@ export class BoolParser {
             '-': (a, b)=>a() - b(),
             '*': (a, b)=>a() * b(),
             '/': (a, b)=>a() / b(),
+            '//': (a, b)=>~~(a() / b()),
             '%': (a, b)=>a() % b(),
             '**': (a, b)=>a() ** b(),
         };
         // make sub-expressions
-        const ooo = ['**', '*', '/', '-', '+', '%'];
+        const ooo = ['**', '*', '/', '//', '-', '+', '%'];
         for (const o of ooo) {
             for (let i = 0; i < ops.length; i++) {
                 if (ops[i] == o) {
