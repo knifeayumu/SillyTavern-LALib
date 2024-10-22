@@ -191,6 +191,19 @@ for (const [key, cmds] of Object.entries(grouped)) {
 				arg.description,
 			].join('');
 		}
+		for (const arg of cmd.unnamedArgumentList) {
+			md += [
+				'\n',
+				'- `(',
+				arg.enumList?.length ? arg.enumList.map(it=>it.value).join('|') : arg.typeList.join('|'),
+				')',
+				arg.isRequired ? '' : '?',
+				arg.defaultValue ? ` = ${arg.defaultValue}` : '',
+				'`  \n ',
+				arg.isRequired ? '' : '*(optional)* ',
+				arg.description,
+			].join('');
+		}
 		let help = '';
 		const $ = cheerio.load(cmd.helpString ?? '');
 		if ($.root().find('body > *').length) {
