@@ -1,6 +1,6 @@
 # Expressions
 
-LALib version 3 introduces expressions that can either be used standalone in the `/=` command, or in any command that uses boolean operations (e.g., `/ife`, `/filter`, `/whilee`, `/sorte`).  
+Expressions can either be used standalone in the `/=` command, or in any command that uses boolean operations (e.g., `/ife`, `/filter`, `/whilee`, `/sorte`).  
 Expressions provide a shorter and simpler way to build complex boolean evaluations. Additionally they allow basic arithmetic operations, as well as some shortcuts to get and set variable values.
 
 

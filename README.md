@@ -51,6 +51,8 @@ Library of STScript commands.
 
 
 #### <a id="lalib-help-cmd-lalib_"></a>`/lalib?`
+- `(slash|expressions)? = slash`  
+ *(optional)* help topic
 
 Lists LALib commands
 
@@ -62,12 +64,14 @@ Lists LALib commands
 #### <a id="lalib-help-cmd-_"></a>`/=`
 - `[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
+- `(string)`  
+ boolean / arithmetic expression
 
 <div>
             Evaluates a boolean or arithmetic expression
         </div>
 <div>
-            See <code>/lalib? expressions</code> for details.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -125,6 +129,8 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-and"></a>`/and`
+- `(true|false)`  
+ the values to evaluate
 
 <div>
             Returns true if all values are true, otherwise false.
@@ -143,6 +149,8 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-or"></a>`/or`
+- `(true|false)`  
+ the values to evaluate
 
 <div>
             Returns true if at least one of the values is true, false if all are false.
@@ -166,6 +174,8 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-not"></a>`/not`
+- `(true|false)`  
+ the value to negate
 
 <div>
             Returns true if value is false, otherwise true.
@@ -188,6 +198,10 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-pop"></a>`/pop`
+- `(varname|list)`  
+ target list
+- `(bool|closure|dictionary|list|number|string)`  
+ items to add
 
 <div>
             Removes the last element from a list and returns it.
@@ -207,6 +221,10 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-push"></a>`/push`
+- `(varname|list)`  
+ target list
+- `(bool|closure|dictionary|list|number|string)`  
+ items to add
 
 <div>
             Appends new elements to the end of a list, and returns the list.
@@ -226,6 +244,10 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-shift"></a>`/shift`
+- `(varname|list)`  
+ target list
+- `(bool|closure|dictionary|list|number|string)`  
+ items to add
 
 <div>
             Removes the first element from a list and returns it.
@@ -245,6 +267,10 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-unshift"></a>`/unshift`
+- `(varname|list)`  
+ target list
+- `(bool|closure|dictionary|list|number|string)`  
+ items to add
 
 <div>
             Inserts new elements at the start of a list, and returns the list.
@@ -264,6 +290,10 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-foreach"></a>`/foreach`
+- `(list|dictionary)`  
+ the list or dictionary to iterate over
+- `(closure|subcommand)`  
+ the command to execute for each item, with {{item}} and {{index}} placeholders
 
 <div>
             Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
@@ -292,6 +322,10 @@ Lists LALib commands
 #### <a id="lalib-help-cmd-map"></a>`/map`
 - `[aslist=true|false]? = false`  
  *(optional)* whether to return the results of a dictionary as a list
+- `(list|dictionary)`  
+ the list or dictionary to iterate over
+- `(closure|subcommand)`  
+ the command to execute for each item, with {{item}} and {{index}} placeholders
 
 <div>
             Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
@@ -320,11 +354,37 @@ Lists LALib commands
 #### <a id="lalib-help-cmd-whilee"></a>`/whilee`
 - `[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
+- `(string|closure)`  
+ the expression or closure to evaluate
+- `(closure)`  
+ the closure to execute
+
+<div>
+            Creates a loop that executes a specified closure as long as the test condition (expression or closure) evaluates to true. The condition is evaluated before executing the closure.
+        </div>
+<div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
+<div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
+        </div>
+
+##### Examples
+```stscript
+/whilee (i++ < 3) {:
+	/echo i: {{var::i}} |
+	/delay 400 |
+:}
+```
 
 
 #### <a id="lalib-help-cmd-reduce"></a>`/reduce`
 - `[initial:bool|dictionary|list|number|string]?`  
  *(optional)* initial value
+- `(list)`  
+ the list to reduce
+- `(closure)`  
+ the closure to execute for each item, takes up to three arguments (accumulator, current value, current index)
 
 <div>
             Executes a "reducer" closure on each element of the list, in order, passing in
@@ -381,6 +441,10 @@ Lists LALib commands
 #### <a id="lalib-help-cmd-sorte"></a>`/sorte`
 - `[key:closure]?`  
  *(optional)* closure that returns the value to be used for sorting
+- `(list|varname)`  
+ the list to sort
+- `(string|closure)? = (a <=> b)`  
+ *(optional)* the expression or closure used to compare two items <code>a</code> and <code>b</code>
 
 <div>
             Sorts a list.
@@ -392,6 +456,9 @@ Lists LALib commands
         </div>
 <div>
             If given a variable name, the variable will be modified.
+        </div>
+<div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -433,14 +500,23 @@ Lists LALib commands
 #### <a id="lalib-help-cmd-flatten"></a>`/flatten`
 - `[depth:number]? = 1`  
  *(optional)* The depth level specifying how deep a nested list structure should be flattened. Defaults to 1. Use 0 to flatten all levels.
+- `(list)`  
+ the list to flatten
 
 Creates a new list with all sub-list elements concatenated into it recursively up to the specified depth.
 
 
 #### <a id="lalib-help-cmd-filter"></a>`/filter`
+- `(list|dictionary)`  
+ the list or dictionary to iterate over
+- `(closure|string)`  
+ the closure or expression to execute for each item, with {{item}} and {{index}} placeholders
 
 <div>
             Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
+        </div>
+<div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -460,9 +536,16 @@ Creates a new list with all sub-list elements concatenated into it recursively u
  *(optional)* return the matching item's index instead of the item
 - `[last=true|false]? = false`  
  *(optional)* return the last instead of the first matching item
+- `(list|dictionary)`  
+ the list or dictionary to iterate over
+- `(closure|subcommand)`  
+ the command to execute for each item, using {{item}} and {{index}} as placeholders
 
 <div>
             Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
+        </div>
+<div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -484,6 +567,8 @@ Creates a new list with all sub-list elements concatenated into it recursively u
  *(optional)* the ending index of the slice (non-inclusive)
 - `[length:number]?`  
  *(optional)* the length of the slice
+- `(string|list)?`  
+ *(optional)* the value to slice
 
 <div>
             Retrieves a slice of a list or string.
@@ -508,6 +593,8 @@ Creates a new list with all sub-list elements concatenated into it recursively u
  *(optional)* the number of elements to remove in the list from start (use delete= to remove everything)
 - `[insert:list|string]?`  
  *(optional)* the elements to add at index start=
+- `(string|number|bool|list|dictionary)?`  
+ *(optional)* the list or string to operate on
 
 <div>
             Creates a new list with some elements removed and / or replaced at a given index.
@@ -540,6 +627,8 @@ Creates a new list with all sub-list elements concatenated into it recursively u
 
 
 #### <a id="lalib-help-cmd-shuffle"></a>`/shuffle`
+- `(list)`  
+ the list to shuffle
 
 Returns a shuffled list.
 
@@ -549,11 +638,15 @@ Returns a shuffled list.
  *(optional)* how many items to pick (if greater than one, will return a list)
 - `[list=true|false]? = false`  
  *(optional)* whether to return a list, even if only one item is picked
+- `(list)`  
+ the list to pick from
 
-<code>items</code>
+Picks one random item or <code>items</code> number of random items from a list (no duplicates).
 
 
 #### <a id="lalib-help-cmd-reverse"></a>`/reverse`
+- `(list)`  
+ the list to reverse
 
 Returns a reversed list.
 
@@ -563,6 +656,8 @@ Returns a reversed list.
  *(optional)* name of the chat variable to use as input
 - `[globalvar:varname]?`  
  *(optional)* name of the global variable to use as input
+- `(list)`  
+ a list of lists, where each inner list has at least two elements
 
 <div>
             Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
@@ -583,6 +678,8 @@ Returns a reversed list.
 
 
 #### <a id="lalib-help-cmd-keys"></a>`/keys`
+- `(dictionary)?`  
+ *(optional)* the dictionary to get keys from
 
 Return the list of keys of a dictionary.
 
@@ -596,6 +693,8 @@ Return the list of keys of a dictionary.
  *(optional)* the text to split at
 - `[trim=true|false]? = true`  
  *(optional)* whether to trim the resulting values
+- `(string)?`  
+ *(optional)* the value to split
 
 <div>
             Splits value into list at every occurrence of find. Supports regex <code>find="/\s/"</code>
@@ -610,6 +709,8 @@ Return the list of keys of a dictionary.
 #### <a id="lalib-help-cmd-join"></a>`/join`
 - `[glue:string]? = , `  
  *(optional)* the string to join the list items with
+- `(list)?`  
+ *(optional)* the list to join
 
 <div>
             Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
@@ -632,6 +733,8 @@ Return the list of keys of a dictionary.
 
 
 #### <a id="lalib-help-cmd-trim"></a>`/trim`
+- `(string)`  
+ text to trim
 
 Removes whitespace at the start and end of the text.
 
@@ -639,6 +742,10 @@ Removes whitespace at the start and end of the text.
 #### <a id="lalib-help-cmd-pad_start"></a>`/pad-start`
 - `[fill:string]? =  `  
  *(optional)* the character to use to pad the text
+- `(number)`  
+ target length
+- `(string)`  
+ the text to pad
 
 <div>
             Pad the provided text at the start if it is shorter then the target length.
@@ -659,6 +766,10 @@ Removes whitespace at the start and end of the text.
 #### <a id="lalib-help-cmd-pad_end"></a>`/pad-end`
 - `[fill:string]? =  `  
  *(optional)* the character to use to pad the text
+- `(number)`  
+ target length
+- `(string)`  
+ the text to pad
 
 <div>
             Pad the provided text at the end if it is shorter then the target length.
@@ -679,6 +790,10 @@ Removes whitespace at the start and end of the text.
 #### <a id="lalib-help-cmd-pad_both"></a>`/pad-both`
 - `[fill:string]? =  `  
  *(optional)* the character to use to pad the text
+- `(number)`  
+ target length
+- `(string)`  
+ the text to pad
 
 <div>
             Pad the provided text at both ends if it is shorter then the target length.
@@ -719,18 +834,19 @@ Removes whitespace at the start and end of the text.
 - `[new:string]`  
  the new text to compare
 
-<code>all=true</code>
-<code>buttons=true</code>
-<code>stripcode=true</code>
-<code>notes="some text"</code>
+Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.
 
 
 #### <a id="lalib-help-cmd-json_pretty"></a>`/json-pretty`
+- `(string)`  
+ JSON to pretty print
 
 Pretty print JSON.
 
 
 #### <a id="lalib-help-cmd-substitute"></a>`/substitute`
+- `(string)`  
+ text to substitute macros in
 
 Substitute macros in text.
 
@@ -738,6 +854,8 @@ Substitute macros in text.
 #### <a id="lalib-help-cmd-wordcount"></a>`/wordcount`
 - `[language:string]? = en`  
  *(optional)* Two character language code according to IETF BCP 47
+- `(string)`  
+ the text to count words in
 
 Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -745,6 +863,8 @@ Count the number of words in text. Language defaults to "en". Supply a two chara
 #### <a id="lalib-help-cmd-sentencecount"></a>`/sentencecount`
 - `[language:string]? = en`  
  *(optional)* Two character language code according to IETF BCP 47
+- `(string)`  
+ the text to count sentences in
 
 Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -754,6 +874,8 @@ Count the number of sentences in text. Language defaults to "en". Supply a two c
  *(optional)* The unit to segment the text into: grapheme, word or sentence
 - `[language:string]? = en`  
  *(optional)* Two character language code according to IETF BCP 47
+- `(string)`  
+ the text to segment
 
 Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
 
@@ -763,6 +885,8 @@ Return the graphemes (characters, basically), words or sentences found in the te
 
 
 #### <a id="lalib-help-cmd-re_escape"></a>`/re-escape`
+- `(string)`  
+ text to escape
 
 <div>Escapes text to be used literally inside a regex.</div>
 
@@ -783,6 +907,8 @@ Return the graphemes (characters, basically), words or sentences found in the te
 #### <a id="lalib-help-cmd-re_test"></a>`/re-test`
 - `[find:string]`  
  the regular expression to test against
+- `(string)?`  
+ *(optional)* the value to test
 
 Tests if the provided variable or value matches a regular expression.
 
@@ -794,6 +920,8 @@ Tests if the provided variable or value matches a regular expression.
  *(optional)* the replacement text
 - `[cmd:closure|subcommand]?`  
  *(optional)* a closure or slash command to execute for each match
+- `(string)?`  
+ *(optional)* the value to perform the replacement on
 
 <div>
             Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
@@ -816,6 +944,8 @@ Tests if the provided variable or value matches a regular expression.
  the regular expression (/pattern/flags)
 - `[first=true|false]? = false`  
  *(optional)* return only the first match instead of a list
+- `(string)?`  
+ *(optional)* the value to execute the regex on
 
 <div>
             Searches the provided value with the regular expression and returns a list of all matches.
@@ -842,6 +972,8 @@ Tests if the provided variable or value matches a regular expression.
 #### <a id="lalib-help-cmd-getat"></a>`/getat`
 - `[index:string|number|list]`  
  the index, field name, or list of indices/field names to retrieve
+- `(string)?`  
+ *(optional)* the value to retrieve from (if not using a variable)
 
 Retrieves an item from a list or a property from a dictionary.
 
@@ -851,6 +983,8 @@ Retrieves an item from a list or a property from a dictionary.
  the index or key to set the value at
 - `[value:list|dictionary]?`  
  *(optional)* the value to update
+- `(string)`  
+ the value to set
 
 <div>
             Sets an item in a list or a property in a dictionary.
@@ -873,6 +1007,8 @@ Retrieves an item from a list or a property from a dictionary.
 
 
 #### <a id="lalib-help-cmd-try"></a>`/try`
+- `(closure|subcommand)`  
+ the command to try
 
 <div>
             Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
@@ -886,6 +1022,8 @@ Retrieves an item from a list or a property from a dictionary.
 
 
 #### <a id="lalib-help-cmd-catch"></a>`/catch`
+- `(closure|subcommand)`  
+ the command to execute if an exception occurred
 
 <div>
             Used with the `/try` command to handle exceptions. Use `{{exception}}` or `{{error}}` to get the exception's message.
@@ -905,6 +1043,8 @@ Retrieves an item from a list or a property from a dictionary.
 #### <a id="lalib-help-cmd-ifempty"></a>`/ifempty`
 - `[value:string]`  
  the value to check
+- `(string)`  
+ the fallback value
 
 Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
 
@@ -912,6 +1052,8 @@ Returns the fallback value if value is empty (empty string, empty list, empty di
 #### <a id="lalib-help-cmd-ifnullish"></a>`/ifnullish`
 - `[value:string]`  
  the value to check
+- `(string)`  
+ the fallback value
 
 Returns the fallback value if value is nullish (empty string).
 
@@ -921,15 +1063,19 @@ Returns the fallback value if value is nullish (empty string).
 
 
 #### <a id="lalib-help-cmd-copy"></a>`/copy`
+- `(string)`  
+ the value to copy
 
 Copies value into clipboard.
 
 
 #### <a id="lalib-help-cmd-download"></a>`/download`
-- `[name:string]? = SillyTavern-2024-10-21T18:39:24.779Z`  
+- `[name:string]? = SillyTavern-2024-10-22T19:12:57.758Z`  
  *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *(optional)* the file extension for the downloaded file
+- `(string)`  
+ the value to download as a text file
 
 Downloads value as a text file.
 
@@ -953,6 +1099,8 @@ Downloads value as a text file.
  *(optional)* property name to get/set/call (for action=property or action=call)
 - `[attribute:string]?`  
  *(optional)* attribute name to get/set (for action=attribute)
+- `(string)`  
+ CSS selector to target an element
 
 <div>
             Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
@@ -975,6 +1123,8 @@ Downloads value as a text file.
 #### <a id="lalib-help-cmd-char_get"></a>`/char-get`
 - `[index:string]?`  
  *(optional)* the field to retrieve
+- `(string)? = current character`  
+ *(optional)* character avatar (filename) or name
 
 <div>
             Get a character object or one of its properties.
@@ -998,6 +1148,10 @@ Downloads value as a text file.
 
 
 #### <a id="lalib-help-cmd-memberpos"></a>`/memberpos`
+- `(string)`  
+ name of the group member
+- `(number)`  
+ new position index for the member
 
 Move group member to position (index starts with 0).
 
@@ -1007,6 +1161,8 @@ Move group member to position (index starts with 0).
  *(optional)* the field to retrieve
 - `[chars=true|false]? = false`  
  *(optional)* resolve characters
+- `(string)? = current group`  
+ *(optional)* group name
 
 <div>
             Get a group object or one of its properties.
@@ -1035,11 +1191,17 @@ Move group member to position (index starts with 0).
 
 
 #### <a id="lalib-help-cmd-switch"></a>`/switch`
+- `(string|number)`  
+ the value to use as the switch value
 
 Use with /case to conditionally execute commands based on a value.
 
 
 #### <a id="lalib-help-cmd-case"></a>`/case`
+- `(string|number)`  
+ the value to compare against the switch value
+- `(closure|subcommand)`  
+ the command to execute if the value matches the switch value
 
 Execute a command if the provided value matches the switch value from /switch.
 
@@ -1051,6 +1213,8 @@ Execute a command if the provided value matches the switch value from /switch.
 #### <a id="lalib-help-cmd-ife"></a>`/ife`
 - `[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
+- `(string|closure)`  
+ the expression or closure to evaluate, followed by the closure to execute if true
 
 <div>
             Execute a closure if the expression or first closure returns <code>true</code>.
@@ -1059,7 +1223,7 @@ Execute a command if the provided value matches the switch value from /switch.
             Use with <code>/elseif</code> and <code>/else</code>.
         </div>
 <div>
-            See <code>/=</code> for more details on expressions.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -1080,6 +1244,8 @@ Execute a command if the provided value matches the switch value from /switch.
 #### <a id="lalib-help-cmd-elseif"></a>`/elseif`
 - `[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
+- `(string|closure)`  
+ the expression or closure to evaluate, followed by the closure to execute if true
 
 <div>
             Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
@@ -1088,7 +1254,7 @@ Execute a command if the provided value matches the switch value from /switch.
             Use with <code>/ife</code> and <code>/else</code>.
         </div>
 <div>
-            See <code>/=</code> for more details on expressions.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -1107,6 +1273,8 @@ Execute a command if the provided value matches the switch value from /switch.
 
 
 #### <a id="lalib-help-cmd-else"></a>`/else`
+- `(closure|subcommand)`  
+ the command to execute
 
 <div>
             Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed.
@@ -1115,7 +1283,7 @@ Execute a command if the provided value matches the switch value from /switch.
             Use with <code>/ife</code> and <code>/elseif</code>.
         </div>
 <div>
-            See <code>/=</code> for more details on expressions.
+            See <a href="javascript:;" data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -1134,6 +1302,8 @@ Execute a command if the provided value matches the switch value from /switch.
 
 
 #### <a id="lalib-help-cmd-then"></a>`/then`
+- `(closure|subcommand)`  
+ the command to execute
 
 <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
 
@@ -1146,14 +1316,16 @@ Execute a command if the provided value matches the switch value from /switch.
 - `[source=true|false]? = false`  
  *(optional)* whether to include the activation source for each book
 
-<code>source=true</code>
+Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.
 
 
 #### <a id="lalib-help-cmd-wi_list_entries"></a>`/wi-list-entries`
 - `[flat=true|false]? = false`  
  *(optional)* whether to list all entries in a flat list
+- `(string)?`  
+ *(optional)* the name of the book to list entries from
 
-<code>flat=true</code>
+Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.
 
 
 #### <a id="lalib-help-cmd-wi_activate"></a>`/wi-activate`
@@ -1168,6 +1340,8 @@ Activate World Info entries based on the current chat and trigger their Automati
 #### <a id="lalib-help-cmd-costumes"></a>`/costumes`
 - `[recurse=true|false]? = true`  
  *(optional)* whether to recurse into subfolders (SillyTavern can only load expressions from the first subfolder level)
+- `(string)?`  
+ *(optional)* the folder to list costumes from
 
 Get a list of costume / sprite folders, recursive by default.
 
@@ -1181,6 +1355,8 @@ Get a list of costume / sprite folders, recursive by default.
  *(optional)* the name of the quick reply set
 - `[label:string]?`  
  *(optional)* the label of the quick reply
+- `(string)?`  
+ *(optional)* the label of the quick reply
 
 Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.
 
@@ -1189,6 +1365,8 @@ Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one
 - `[set:string]?`  
  *(optional)* the name of the quick reply set
 - `[label:string]?`  
+ *(optional)* the label of the quick reply
+- `(string)?`  
  *(optional)* the label of the quick reply
 
 Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.
@@ -1201,6 +1379,8 @@ Create a new Quick Reply and open its editor. If no QR set is provided, tries to
 #### <a id="lalib-help-cmd-swipes_get"></a>`/swipes-get`
 - `[message:number]?`  
  *(optional)* the message ID to get swipes from
+- `(number)`  
+ the index of the swipe to get
 
 Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
 
@@ -1208,6 +1388,8 @@ Get the n-th swipe (zero-based index) from the last message or the message with 
 #### <a id="lalib-help-cmd-swipes_get"></a>`/swipes-get`
 - `[message:number]?`  
  *(optional)* the message ID to get swipes from
+- `(number)`  
+ the index of the swipe to get
 
 Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
 
@@ -1236,6 +1418,8 @@ Get the current swipe index from the last message or the message with the given 
 #### <a id="lalib-help-cmd-swipes_add"></a>`/swipes-add`
 - `[message:number]?`  
  *(optional)* the ID of the message to add the swipe to
+- `(string)`  
+ the text to add as a new swipe
 
 Add a new swipe to the last message or the message with the provided messageId.
 
@@ -1245,12 +1429,17 @@ Add a new swipe to the last message or the message with the provided messageId.
  *(optional)* the id of the message to delete the swipe from
 - `[filter:string|closure]?`  
  *(optional)* expression or closure accepting a swipe dictionary as argument returning true or false
+- `(number)?`  
+ *(optional)* the index of the swipe to delete (0-based)
 
 <div>
             Delete the current swipe or the swipe at the specified index (0-based).
         </div>
 <div>
             Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
+        </div>
+<div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
 
 ##### Examples
@@ -1296,6 +1485,8 @@ Add a new swipe to the last message or the message with the provided messageId.
 #### <a id="lalib-help-cmd-swipes_go"></a>`/swipes-go`
 - `[message:number]?`  
  *(optional)* the message ID to go to the swipe for
+- `(number)`  
+ the index of the swipe to go to
 
 Go to the swipe. 0-based index.
 
@@ -1310,9 +1501,10 @@ Trigger a new swipe on the last message.
  *(optional)* the message ID to edit
 - `[append=true|false]? = false`  
  *(optional)* whether to append the new text to the end of the message
+- `(string)`  
+ the new text for the message
 
-<code>append=</code>
-<code>{{space}}</code>
+Edit the current message or the message at the provided message ID. Use <code>append=</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.
 
 
 #### <a id="lalib-help-cmd-message_move"></a>`/message-move`
@@ -1365,6 +1557,8 @@ returns the name of the parent chat
  closure to run when triggered
 - `[quiet=true|false]? = true`  
  *(optional)* whether to show toast messages when event listeners are attached
+- `(string)`  
+ CSS selector to target an element in the last message
 
 <div>
             Add event listeners to the last chat message.
@@ -1413,6 +1607,8 @@ Lists all currently active listeners.
 
 
 #### <a id="lalib-help-cmd-role_swap"></a>`/role-swap`
+- `(number|range)?`  
+ *(optional)* message id or range to swap
 
 <div>
         Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
@@ -1469,6 +1665,8 @@ Returns the number of milliseconds midnight at the beginning of January 1, 1970,
 
 
 #### <a id="lalib-help-cmd-fireandforget"></a>`/fireandforget`
+- `(closure|subcommand)`  
+ the closure or command to execute
 
 Execute a closure or command without waiting for it to finish.
 
@@ -1478,16 +1676,22 @@ Execute a closure or command without waiting for it to finish.
 
 
 #### <a id="lalib-help-cmd-console_log"></a>`/console-log`
+- `(string)`  
+ the value to log
 
 logs a value to the browser console
 
 
 #### <a id="lalib-help-cmd-console_warn"></a>`/console-warn`
+- `(string)`  
+ the value to log
 
 logs a value to the browser console as a warning
 
 
 #### <a id="lalib-help-cmd-console_error"></a>`/console-error`
+- `(string)`  
+ the value to log
 
 logs a value to the browser console as an error
 
@@ -1501,6 +1705,8 @@ logs a value to the browser console as an error
  *(optional)* playback volume
 - `[await=true|false]? = false`  
  *(optional)* whether to wait for the sound to finish playing before continuing
+- `(string)`  
+ url to audio file
 
 <div>
             Plays an audio file.
@@ -1526,6 +1732,8 @@ returns a list of all system fonts available to you
 
 
 #### <a id="lalib-help-cmd-fetch"></a>`/fetch`
+- `(string)`  
+ the url to fetch
 
 <div>
             Fetch the contents of the provided URL.
@@ -1545,6 +1753,8 @@ returns a list of all system fonts available to you
  *(optional)* property to take from the resulting element
 - `[call:string]?`  
  *(optional)* method to call on the resulting element
+- `(string)`  
+ the html to operate on
 
 <div>
             Retrieve the first matching element from the provided HTML or call a method on the first
@@ -1566,6 +1776,8 @@ returns a list of all system fonts available to you
  *(optional)* property to take from the resulting elements
 - `[call:string]?`  
  *(optional)* method to call on the resulting elements
+- `(string)`  
+ the html to operate on
 
 <div>
             Retrieve all matching elements from the provided HTML or call a method on all
