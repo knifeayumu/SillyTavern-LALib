@@ -198,6 +198,13 @@ function makeIfWhileEnumProvider(type) {
     };
 }
 
+document.body.addEventListener('click', (evt)=>{
+    const exec = /**@type {HTMLElement}*/(evt.target).closest?.('[data-lalib-exec]')?.getAttribute('data-lalib-exec');
+    if (exec) {
+        executeSlashCommandsWithOptions(exec);
+    }
+});
+
 
 
 
@@ -270,7 +277,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
             Evaluates a boolean or arithmetic expression
         </div>
         <div>
-            See <code>/lalib? expressions</code> for details.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Examples:</strong>
@@ -1056,7 +1063,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
             } else {
                 const text = value.slice(0, -1).join(' ');
                 const parser = new BoolParser(args._scope, args);
-                expression = parser.parse(text);
+                expression = /**@type {()=>boolean]*/(parser.parse(text));
             }
             runClosure = value.at(-1);
         }
@@ -1084,13 +1091,37 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
     unnamedArgumentList: [
         SlashCommandArgument.fromProps({
             description: 'the expression or closure to evaluate',
-            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
+            typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             isRequired: true,
             acceptsMultiple: true,
             enumProvider: makeIfWhileEnumProvider('while'),
         }),
+        SlashCommandArgument.fromProps({
+            description: 'the closure to execute',
+            typeList: [ARGUMENT_TYPE.CLOSURE],
+            isRequired: true,
+        }),
     ],
-    // splitUnnamedArgument: true,
+    helpString: `
+        <div>
+            Creates a loop that executes a specified closure as long as the test condition (expression or closure) evaluates to true. The condition is evaluated before executing the closure.
+        </div>
+        <div>
+            Use <code>/break</code> to break out of the loop early.
+        </div>
+        <div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
+        </div>
+        <div>
+            <strong>Examples:</strong>
+            <ul>
+                <li>
+                    <pre><code class="language-stscript">/whilee (i++ < 3) {:\n\t/echo i: {{var::i}} |\n\t/delay 400 |\n:}</code></pre>
+                </li>
+            </ul>
+        </div>
+    `,
+    returns: 'result of executing the last iteration of the closure',
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
@@ -1397,6 +1428,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
             If given a variable name, the variable will be modified.
         </div>
         <div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
+        </div>
+        <div>
             <strong>Example:</strong>
             <ul>
                 <li>
@@ -1578,6 +1612,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
         </div>
         <div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
+        </div>
+        <div>
             <strong>Example:</strong>
             <ul>
                 <li>
@@ -1721,6 +1758,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
     helpString: `
         <div>
             Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
+        </div>
+        <div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Example:</strong>
@@ -3894,7 +3934,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
             Use with <code>/elseif</code> and <code>/else</code>.
         </div>
         <div>
-            See <code>/=</code> for more details on expressions.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Examples:</strong>
@@ -3998,7 +4038,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
             Use with <code>/ife</code> and <code>/else</code>.
         </div>
         <div>
-            See <code>/=</code> for more details on expressions.
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Examples:</strong>
@@ -4069,7 +4109,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
             Use with <code>/ife</code> and <code>/elseif</code>.
         </div>
         <div>
-            See <code>/=</code> for more details on expressions.
+            See <a href="javascript:;" data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Examples:</strong>
@@ -4640,6 +4680,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
         </div>
         <div>
             Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
+        </div>
+        <div>
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
         </div>
         <div>
             <strong>Examples:</strong>
