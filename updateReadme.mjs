@@ -206,7 +206,7 @@ for (const [key, cmds] of Object.entries(grouped)) {
 		}
 		let help = '';
 		const $ = cheerio.load(cmd.helpString ?? '');
-		if ($.root().find('body > *').length) {
+		if ($.root().find('body > div').length) {
 			$.root().find('body > *').each((i,el)=>{
 				const eel = cheerio.load(el);
 				let txt = eel.text();
