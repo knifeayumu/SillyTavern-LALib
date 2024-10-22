@@ -112,6 +112,7 @@ const allTxt = [
 	`
 		const eventSource = {on:()=>null};
 		const event_types = {};
+		const document = {body:{addEventListener:()=>null}};
 	`,
 	`
 		const aco = SlashCommandParser.addCommandObject;
