@@ -72,9 +72,9 @@ Lists LALib commands
 
 
 #### <a id="lalib-help-cmd-_"></a>`/=`
-- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+- `...[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
-- `(string)`  
+- `...(string)`  
  boolean / arithmetic expression
 
 
@@ -134,7 +134,7 @@ Numeric values and string literals for left and right operands supported.
 
 
 #### <a id="lalib-help-cmd-and"></a>`/and`
-- `(true|false)`  
+- `...(true|false)`  
  the values to evaluate
 
 
@@ -154,7 +154,7 @@ Returns true if all values are true, otherwise false.
 
 
 #### <a id="lalib-help-cmd-or"></a>`/or`
-- `(true|false)`  
+- `...(true|false)`  
  the values to evaluate
 
 
@@ -205,7 +205,7 @@ Returns true if value is false, otherwise true.
 #### <a id="lalib-help-cmd-pop"></a>`/pop`
 - `(varname|list)`  
  target list
-- `(bool|closure|dictionary|list|number|string)`  
+- `...(bool|closure|dictionary|list|number|string)`  
  items to add
 
 
@@ -228,7 +228,7 @@ Removes the last element from a list and returns it.
 #### <a id="lalib-help-cmd-push"></a>`/push`
 - `(varname|list)`  
  target list
-- `(bool|closure|dictionary|list|number|string)`  
+- `...(bool|closure|dictionary|list|number|string)`  
  items to add
 
 
@@ -251,7 +251,7 @@ Appends new elements to the end of a list, and returns the list.
 #### <a id="lalib-help-cmd-shift"></a>`/shift`
 - `(varname|list)`  
  target list
-- `(bool|closure|dictionary|list|number|string)`  
+- `...(bool|closure|dictionary|list|number|string)`  
  items to add
 
 
@@ -274,7 +274,7 @@ Removes the first element from a list and returns it.
 #### <a id="lalib-help-cmd-unshift"></a>`/unshift`
 - `(varname|list)`  
  target list
-- `(bool|closure|dictionary|list|number|string)`  
+- `...(bool|closure|dictionary|list|number|string)`  
  items to add
 
 
@@ -372,9 +372,9 @@ Use <code>/break</code> to break out of the loop early.
 
 
 #### <a id="lalib-help-cmd-whilee"></a>`/whilee`
-- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+- `...[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
-- `(string|closure)`  
+- `...(string|closure)`  
  the expression or closure to evaluate
 - `(closure)`  
  the closure to execute
@@ -1361,7 +1361,7 @@ Copies value into clipboard.
 
 
 #### <a id="lalib-help-cmd-download"></a>`/download`
-- `[name:string]? = SillyTavern-2024-10-23T18:37:19.001Z`  
+- `[name:string]? = SillyTavern-2024-10-23T18:52:37.510Z`  
  *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *(optional)* the file extension for the downloaded file
@@ -1543,9 +1543,9 @@ Execute a command if the provided value matches the switch value from /switch.
 
 
 #### <a id="lalib-help-cmd-ife"></a>`/ife`
-- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+- `...[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
-- `(string|closure)`  
+- `...(string|closure)`  
  the expression or closure to evaluate, followed by the closure to execute if true
 
 
@@ -1575,9 +1575,9 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 
 
 #### <a id="lalib-help-cmd-elseif"></a>`/elseif`
-- `[expression variables:bool|closure|dictionary|list|number|string]?`  
+- `...[expression variables:bool|closure|dictionary|list|number|string]?`  
  *(optional)* named arguments assigned to scoped variables to be used in the expression
-- `(string|closure)`  
+- `...(string|closure)`  
  the expression or closure to evaluate, followed by the closure to execute if true
 
 

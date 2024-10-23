@@ -199,7 +199,9 @@ for (const [key, cmds] of Object.entries(grouped)) {
 		for (const arg of cmd.namedArgumentList) {
 			md += [
 				'\n',
-				'- `[',
+				'- `',
+				arg.acceptsMultiple ? '...' : '',
+				'[',
 				arg.name,
 				arg.enumList?.length ? '=' : ':',
 				arg.enumList?.length ? arg.enumList.map(it=>it.value).join('|') : arg.typeList.join('|'),
@@ -214,7 +216,9 @@ for (const [key, cmds] of Object.entries(grouped)) {
 		for (const arg of cmd.unnamedArgumentList) {
 			md += [
 				'\n',
-				'- `(',
+				'- `',
+				arg.acceptsMultiple ? '...' : '',
+				'(',
 				arg.enumList?.length ? arg.enumList.map(it=>it.value).join('|') : arg.typeList.join('|'),
 				')',
 				arg.isRequired ? '' : '?',
