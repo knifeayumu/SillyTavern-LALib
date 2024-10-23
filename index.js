@@ -202,7 +202,7 @@ function makeIfWhileEnumProvider(type) {
 
 const trim = (txt)=>{
     if (txt.split('\n').length < 2) return txt;
-    const indent = /^([ \t]*)\S/m.exec(txt)?.[1] ?? '';
+    const indent = /^([     ]*)\S/m.exec(txt)?.[1] ?? '';
     const re = new RegExp(`^${indent}`, 'mg');
     return txt.replace(re, '').replace(/\s*$/s, '');
 };
@@ -910,13 +910,39 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
+            if (closure.argumentList.length == 0) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'item';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length == 1) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'index';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length > 0) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[0].name;
+                closure.providedArgumentList[0] = ass;
+            }
+            if (closure.argumentList.length > 1) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[1].name;
+                closure.providedArgumentList[1] = ass;
+            }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
                 }
                 if (closure) {
-                    closure.scope.setMacro('item', item);
-                    closure.scope.setMacro('index', index);
+                    closure.scope.setMacro('item', item, true);
+                    closure.scope.setMacro('index', index, true);
+                    if (closure.argumentList.length > 0) {
+                        closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
+                    }
+                    if (closure.argumentList.length > 1) {
+                        closure.providedArgumentList[1].value = index.toString();
+                    }
                     closure.breakController = new SlashCommandBreakController();
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
@@ -949,7 +975,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
+            description: 'the command to execute for each item, with {{var::item}} and {{var::index}} placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
@@ -957,7 +983,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     splitUnnamedArgument: true,
     helpString: help(
         `
-            Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
+            Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} with the current item and index.
 
             Use <code>/break</code> to break out of the loop early.
         `,
@@ -965,8 +991,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             [
                 `
                     /foreach ["A", "B", "C"] {:
-                    \t/echo Item {{index}} is {{item}} |
-                    \t/delay 400 |
+                        /echo Item {{var::index}} is {{var::item}} |
+                        /delay 400 |
                     :}
                 `,
                 '',
@@ -975,11 +1001,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
                 `
                     /let x {"a":"foo","b":"bar"} |
                     /foreach {{var::x}} {:
-                    \t/echo Item {{index}} is {{item}} |
-                    \t/delay 400 |
+                        /echo Item {{var::index}} is {{var::item}} |
+                        /delay 400 |
                     :}
                 `,
                 '',
+            ],
+            [
+                `
+                    /foreach ["A", "B", "C"] {: it= i=
+                        /echo Item {{var::it}} is {{var::i}} |
+                        /delay 400 |
+                    :}
+                `,
+                'uses custom closure arguments <code>it</code> and <code>i</code> instead of the default <code>item</code> and <code>index</code>.',
             ],
         ],
     ),
@@ -1034,6 +1069,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
+            if (closure.argumentList.length == 0) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'item';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length == 1) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'index';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length > 0) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[0].name;
+                closure.providedArgumentList[0] = ass;
+            }
+            if (closure.argumentList.length > 1) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[1].name;
+                closure.providedArgumentList[1] = ass;
+            }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
@@ -1041,6 +1096,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
                 if (closure) {
                     closure.scope.setMacro('item', item);
                     closure.scope.setMacro('index', index);
+                    if (closure.argumentList.length > 0) {
+                        closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
+                    }
+                    if (closure.argumentList.length > 1) {
+                        closure.providedArgumentList[1].value = index.toString();
+                    }
                     closure.breakController = new SlashCommandBreakController();
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
@@ -1088,7 +1149,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, with {{item}} and {{index}} placeholders',
+            description: 'the command to execute for each item, with {{var::item}} and {{var::index}} placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
@@ -1104,19 +1165,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         [
             [
                 `
-                    /map [1,2,3] {: /mul {{item}} {{item}} :}
+                    /map [1,2,3] {:
+                        /mul {{var::item}} {{var::item}}
+                    :}
                 `,
                 'Calculates the square of each number.',
             ],
             [
                 `
-                    /map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+                    /map [1,2,3] {: it= i=
+                        /mul {{var::it}} {{var::it}}
+                    :}
                 `,
                 'Calculates the square of each number.',
             ],
             [
                 `
-                    /map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+                    /map {"a":1,"b":2,"c":3} {: /mul {{var::item}} {{var::item}} :}
+                `,
+                'Calculates the square of each number.',
+            ],
+            [
+                `
+                    /map aslist= {"a":1,"b":2,"c":3} {: /mul {{var::item}} {{var::item}} :}
                 `,
                 'Calculates the square of each number.',
             ],
@@ -1189,8 +1260,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
             [
                 `
                     /whilee (i++ < 3) {:
-                    \t/echo i: {{var::i}} |
-                    \t/delay 400 |
+                        /echo i: {{var::i}} |
+                        /delay 400 |
                     :}
                 `,
                 '',
@@ -1318,8 +1389,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
                 `
                     /let x [["a",1],["b",2],["c",3]] |
                     /reduce initial={} {{var::x}} {: acc= cur=
-                    \t/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
-                    \t/return {{var::acc}} |
+                        /var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
+                        /return {{var::acc}} |
                     :} |
                 `,
                 'returns <code>{"a":"1","b":"2","c":"3"}</code>',
@@ -1653,6 +1724,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
+            if (closure.argumentList.length == 0) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'item';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length == 1) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'index';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length > 0) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[0].name;
+                closure.providedArgumentList[0] = ass;
+            }
+            if (closure.argumentList.length > 1) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[1].name;
+                closure.providedArgumentList[1] = ass;
+            }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
                     item = JSON.stringify(item);
@@ -1661,6 +1752,12 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                 if (closure) {
                     closure.scope.setMacro('item', item);
                     closure.scope.setMacro('index', index);
+                    if (closure.argumentList.length > 0) {
+                        closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
+                    }
+                    if (closure.argumentList.length > 1) {
+                        closure.providedArgumentList[1].value = index.toString();
+                    }
                     closure.breakController = new SlashCommandBreakController();
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
@@ -1710,7 +1807,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the closure or expression to execute for each item, with {{item}} and {{index}} placeholders',
+            description: 'the closure or expression to execute for each item, with {{var::item}} and {{var::index}} placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.STRING],
             isRequired: true,
         }),
@@ -1725,7 +1822,17 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         [
             [
                 `
-                    /filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}
+                    /filter [1,2,3,4,5] {:
+                        /test left={{var::item}} rule=gt right=2
+                    :}
+                `,
+                'returns [3, 4, 5]',
+            ],
+            [
+                `
+                    /filter [1,2,3,4,5] {: it=
+                        /test left={{var::it}} rule=gt right=2
+                    :}
                 `,
                 'returns [3, 4, 5]',
             ],
@@ -1787,6 +1894,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
+            if (closure.argumentList.length == 0) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'item';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length == 1) {
+                const arg = new SlashCommandNamedArgumentAssignment();
+                arg.name = 'index';
+                closure.argumentList.push(arg);
+            }
+            if (closure.argumentList.length > 0) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[0].name;
+                closure.providedArgumentList[0] = ass;
+            }
+            if (closure.argumentList.length > 1) {
+                const ass = new SlashCommandNamedArgumentAssignment();
+                ass.name = closure.argumentList[1].name;
+                closure.providedArgumentList[1] = ass;
+            }
             if (isTrueFlag(args.last)) {
                 list.reverse();
             }
@@ -1798,6 +1925,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 if (closure) {
                     closure.scope.setMacro('item', item);
                     closure.scope.setMacro('index', index);
+                    if (closure.argumentList.length == 0) {
+                        const arg = new SlashCommandNamedArgumentAssignment();
+                        arg.name = 'item';
+                        closure.argumentList.push(arg);
+                    }
+                    if (closure.argumentList.length == 1) {
+                        const arg = new SlashCommandNamedArgumentAssignment();
+                        arg.name = 'index';
+                        closure.argumentList.push(arg);
+                    }
+                    if (closure.argumentList.length > 0) {
+                        const ass = new SlashCommandNamedArgumentAssignment();
+                        ass.name = closure.argumentList[0].name;
+                        closure.providedArgumentList[0] = ass;
+                    }
+                    if (closure.argumentList.length > 1) {
+                        const ass = new SlashCommandNamedArgumentAssignment();
+                        ass.name = closure.argumentList[1].name;
+                        closure.providedArgumentList[1] = ass;
+                    }
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
                 } else if (expression !== undefined) {
@@ -1858,7 +2005,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, using {{item}} and {{index}} as placeholders',
+            description: 'the command to execute for each item, using {{var::item}} and {{var::index}} as placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
@@ -1873,7 +2020,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         [
             [
                 `
-                    /find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo
+                    /find [1,2,3,4,5] {:
+                        /test left={{var::item}} rule=gt right=2
+                    :} |
+                    /echo |
+                `,
+                'returns 3',
+            ],
+            [
+                `
+                    /find [1,2,3,4,5] {: it=
+                        /test left={{var::it}} rule=gt right=2
+                    :} |
+                    /echo |
                 `,
                 'returns 3',
             ],
@@ -4930,9 +5089,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
                 `
                     /wi-list-entries |
                     /map {{pipe}} {:
-                        /getat index=entries {{item}} |
+                        /getat index=entries {{var::item}} |
                         /map {{pipe}} {:
-                            /getat index=comment {{item}}
+                            /getat index=comment {{var::item}}
                         :}
                     :} |
                     /echo Overview of WI entries in currently active books: {{pipe}}
@@ -5529,8 +5688,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             [
                 `
                     /swipes-del filter={: swipe=
-                    \t/var key=swipe index=mes |
-                    \t/test left={{pipe}} rule=in right="bad word" |
+                        /var key=swipe index=mes |
+                        /test left={{pipe}} rule=in right="bad word" |
                     :} |
                 `,
                 'delete all swipes with "bad word" in their message text of last message',

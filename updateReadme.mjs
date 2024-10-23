@@ -61,7 +61,7 @@ classTxt = classTxtList.map(it=>it.txt).join('\n');
 const libTxt = [];
 const cmdList = [];
 {
-	const txt = fs.readFileSync('./public/scripts/extensions/third-party/SillyTavern-LALib/index_new.js', 'utf-8');
+	const txt = fs.readFileSync('./public/scripts/extensions/third-party/SillyTavern-LALib/index.js', 'utf-8');
 	const lines = txt.split('\n');
 	let inCmd = false;
 	// put cmd registration in an anonymous function to avoid reference-before-declaration exceptions

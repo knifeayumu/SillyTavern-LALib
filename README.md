@@ -298,10 +298,10 @@ Inserts new elements at the start of a list, and returns the list.
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|subcommand)`  
- the command to execute for each item, with {{item}} and {{index}} placeholders
+ the command to execute for each item, with {{var::item}} and {{var::index}} placeholders
 
 
-Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
+Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} with the current item and index.
 
 Use <code>/break</code> to break out of the loop early.
 
@@ -309,17 +309,25 @@ Use <code>/break</code> to break out of the loop early.
 ```stscript
 
 /foreach ["A", "B", "C"] {:
-	/echo Item {{index}} is {{item}} |
-	/delay 400 |
+    /echo Item {{var::index}} is {{var::item}} |
+    /delay 400 |
 :} |
 ```
 ```stscript
 
 /let x {"a":"foo","b":"bar"} |
 /foreach {{var::x}} {:
-	/echo Item {{index}} is {{item}} |
-	/delay 400 |
+    /echo Item {{var::index}} is {{var::item}} |
+    /delay 400 |
 :} |
+```
+```stscript
+
+/foreach ["A", "B", "C"] {: it= i=
+    /echo Item {{var::it}} is {{var::i}} |
+    /delay 400 |
+:} |
+// uses custom closure arguments it and i instead of the default item and index. |
 ```
 
 
@@ -329,7 +337,7 @@ Use <code>/break</code> to break out of the loop early.
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|subcommand)`  
- the command to execute for each item, with {{item}} and {{index}} placeholders
+ the command to execute for each item, with {{var::item}} and {{var::index}} placeholders
 
 
 Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
@@ -339,17 +347,26 @@ Use <code>/break</code> to break out of the loop early.
 ##### **Examples**
 ```stscript
 
-/map [1,2,3] {: /mul {{item}} {{item}} :} |
+/map [1,2,3] {:
+    /mul {{var::item}} {{var::item}}
+:} |
 // Calculates the square of each number. |
 ```
 ```stscript
 
-/map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :} |
+/map [1,2,3] {: it= i=
+    /mul {{var::it}} {{var::it}}
+:} |
 // Calculates the square of each number. |
 ```
 ```stscript
 
-/map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :} |
+/map {"a":1,"b":2,"c":3} {: /mul {{var::item}} {{var::item}} :} |
+// Calculates the square of each number. |
+```
+```stscript
+
+/map aslist= {"a":1,"b":2,"c":3} {: /mul {{var::item}} {{var::item}} :} |
 // Calculates the square of each number. |
 ```
 
@@ -373,8 +390,8 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 ```stscript
 
 /whilee (i++ < 3) {:
-	/echo i: {{var::i}} |
-	/delay 400 |
+    /echo i: {{var::i}} |
+    /delay 400 |
 :} |
 ```
 
@@ -430,8 +447,8 @@ The reducer closure accepts up to three arguments:
 
 /let x [["a",1],["b",2],["c",3]] |
 /reduce initial={} {{var::x}} {: acc= cur=
-	/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
-	/return {{var::acc}} |
+    /var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
+    /return {{var::acc}} |
 :} |
 // returns {"a":"1","b":"2","c":"3"} |
 ```
@@ -519,7 +536,7 @@ Creates a new list with all sub-list elements concatenated into it recursively u
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|string)`  
- the closure or expression to execute for each item, with {{item}} and {{index}} placeholders
+ the closure or expression to execute for each item, with {{var::item}} and {{var::index}} placeholders
 
 
 Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
@@ -529,7 +546,16 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 ##### **Examples**
 ```stscript
 
-/filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} |
+/filter [1,2,3,4,5] {:
+    /test left={{var::item}} rule=gt right=2
+:} |
+// returns [3, 4, 5] |
+```
+```stscript
+
+/filter [1,2,3,4,5] {: it=
+    /test left={{var::it}} rule=gt right=2
+:} |
 // returns [3, 4, 5] |
 ```
 ```stscript
@@ -547,7 +573,7 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|subcommand)`  
- the command to execute for each item, using {{item}} and {{index}} as placeholders
+ the command to execute for each item, using {{var::item}} and {{var::index}} as placeholders
 
 
 Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
@@ -557,7 +583,18 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 ##### **Examples**
 ```stscript
 
-/find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo |
+/find [1,2,3,4,5] {:
+    /test left={{var::item}} rule=gt right=2
+:} |
+/echo |
+// returns 3 |
+```
+```stscript
+
+/find [1,2,3,4,5] {: it=
+    /test left={{var::it}} rule=gt right=2
+:} |
+/echo |
 // returns 3 |
 ```
 ```stscript
@@ -1324,7 +1361,7 @@ Copies value into clipboard.
 
 
 #### <a id="lalib-help-cmd-download"></a>`/download`
-- `[name:string]? = SillyTavern-2024-10-23T18:02:28.794Z`  
+- `[name:string]? = SillyTavern-2024-10-23T18:37:19.001Z`  
  *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *(optional)* the file extension for the downloaded file
@@ -1519,7 +1556,22 @@ Use with <code>/elseif</code> and <code>/else</code>.
 See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
 
 ##### **Examples**
-# EXAMPLES MISSING
+```stscript
+
+/setvar key=x foo |
+/ife (x == 1) {:
+    /echo value is one
+:} |
+/elseif (x == 'foo') {:
+    /echo value is foo
+:} |
+/elseif (x == 'bar') {:
+    /echo value is bar
+:} |
+/else {:
+    /echo value is something else
+:} |
+```
 
 
 #### <a id="lalib-help-cmd-elseif"></a>`/elseif`
@@ -1536,7 +1588,22 @@ Use with <code>/ife</code> and <code>/else</code>.
 See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
 
 ##### **Examples**
-# EXAMPLES MISSING
+```stscript
+
+/setvar key=x foo |
+/ife (x == 1) {:
+    /echo value is one
+:} |
+/elseif (x == 'foo') {:
+    /echo value is foo
+:} |
+/elseif (x == 'bar') {:
+    /echo value is bar
+:} |
+/else {:
+    /echo value is something else
+:} |
+```
 
 
 #### <a id="lalib-help-cmd-else"></a>`/else`
@@ -1551,7 +1618,22 @@ Use with <code>/ife</code> and <code>/elseif</code>.
 See <a href="javascript:;" data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
 
 ##### **Examples**
-# EXAMPLES MISSING
+```stscript
+
+/setvar key=x foo |
+/ife (x == 1) {:
+    /echo value is one
+:} |
+/elseif (x == 'foo') {:
+    /echo value is foo
+:} |
+/elseif (x == 'bar') {:
+    /echo value is bar
+:} |
+/else {:
+    /echo value is something else
+:} |
+```
 
 
 #### <a id="lalib-help-cmd-then"></a>`/then`
@@ -1608,9 +1690,9 @@ Get a list of World Info entries from currently active books or from the book wi
 
 /wi-list-entries |
 /map {{pipe}} {:
-    /getat index=entries {{item}} |
+    /getat index=entries {{var::item}} |
     /map {{pipe}} {:
-        /getat index=comment {{item}}
+        /getat index=comment {{var::item}}
     :}
 :} |
 /echo Overview of WI entries in currently active books: {{pipe}} |
@@ -1879,8 +1961,8 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 ```stscript
 
 /swipes-del filter={: swipe=
-	/var key=swipe index=mes |
-	/test left={{pipe}} rule=in right="bad word" |
+    /var key=swipe index=mes |
+    /test left={{pipe}} rule=in right="bad word" |
 :} |
 // delete all swipes with "bad word" in their message text of last message |
 ```
