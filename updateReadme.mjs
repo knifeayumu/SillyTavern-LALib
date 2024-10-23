@@ -61,7 +61,7 @@ classTxt = classTxtList.map(it=>it.txt).join('\n');
 const libTxt = [];
 const cmdList = [];
 {
-	const txt = fs.readFileSync('./public/scripts/extensions/third-party/SillyTavern-LALib/index.js', 'utf-8');
+	const txt = fs.readFileSync('./public/scripts/extensions/third-party/SillyTavern-LALib/index_new.js', 'utf-8');
 	const lines = txt.split('\n');
 	let inCmd = false;
 	// put cmd registration in an anonymous function to avoid reference-before-declaration exceptions
@@ -115,13 +115,30 @@ const allTxt = [
 		const document = {body:{addEventListener:()=>null}};
 	`,
 	`
+		let helpText;
+		let exList;
 		const aco = SlashCommandParser.addCommandObject;
 		SlashCommandParser.addCommandObject = function(cmd) {
 			cmd.group = grp;
+			cmd.help = helpText;
+			cmd.examples = exList ? [...exList] : [];
+			helpText = null;
+			exList = null;
 			aco.bind(this)(cmd);
 		};
 	`,
 	libTxt.join('\n'),
+	`
+		help = (text, ex)=>{
+			helpText = text;
+			exList = ex;
+			return '';
+		};
+		examples = (list)=>{
+			exList = [...list];
+			return '';
+		};
+	`,
 	cmdList.map(it=>it.slice(4)).join('\n'),
 ].join('\n');
 // save the complete "script" text for review
@@ -132,10 +149,12 @@ new Script(allTxt).runInThisContext();
 const grouped = Object.groupBy(Object.values(SlashCommandParser.commands), (it)=>it.group);
 
 const trim = (txt)=>{
+	if (txt.split('\n').length < 2) return txt;
 	const indent = /^([ \t]*)\S/m.exec(txt)?.[1] ?? '';
 	const re = new RegExp(`^${indent}`, 'mg');
 	return txt.replace(re, '').replace(/\s*$/s, '');
 };
+
 const clean = (txt)=>txt.replace(/[^a-z]+/ig, '_');
 let md = `# LALib
 
@@ -205,58 +224,26 @@ for (const [key, cmds] of Object.entries(grouped)) {
 				arg.description,
 			].join('');
 		}
-		let help = '';
-		const $ = cheerio.load(cmd.helpString ?? '');
-		if ($.root().find('body > div').length) {
-			$.root().find('body > *').each((i,el)=>{
-				const eel = cheerio.load(el);
-				let txt = eel.text();
-				if (/Examples?/.test(txt)) {
-					help += trim(`
-						##### Examples
-
-					`);
-					$(el).find('ul > li').each((ii,ex)=>{
-						const nodes = $(ex).contents().filter(()=>true);
-						let comment = '';
-						let code = '';
-						for (const n of nodes) {
-							switch (n.type) {
-								case 'text': {
-									comment += ' ' + $(n).text().trim();
-									break;
-								}
-								case 'tag': {
-									switch (n.tagName) {
-										case 'pre': {
-											code += $(n).find('code').text();
-											break;
-										}
-										default: {
-											comment += ' ' + $(n).text().trim();
-										}
-									}
-									break;
-								}
-							}
-						}
-						help += `\n\`\`\`stscript\n${trim(code)}`;
-						if (trim(comment)) {
-							help += `\n// ${trim(comment)} |`;
-						}
-						help += `\n\`\`\`\n`;
-					})
-				} else {
-					help += `${trim(eel.html())}\n`;
+		let help = cmd.help ? trim(cmd.help) : '# HELP MISSING';
+		let ex = '# EXAMPLES MISSING';
+		if (cmd.examples && cmd.examples.length) {
+			ex = cmd.examples.map(([code, txt])=>{
+				let out = `\`\`\`stscript\n${trim(code)}`;
+				if (!(out.endsWith('|') || out.endsWith(' |'))) out += ' |';
+				if (txt) {
+					out += `\n// ${cheerio.load(txt).text()} |`;
 				}
-			})
-		} else {
-			help = trim(cmd.helpString ?? '');
+				out += `\n\`\`\``;
+				return out;
+			}).join('\n');
 		}
-		md += trim(`
-
-			${help}`
-		);
+		md += '\n';
+		md += '\n';
+		md += help;
+		md += '\n';
+		md += '\n';
+		md += '##### **Examples**\n';
+		md += ex;
 	}
 }
 

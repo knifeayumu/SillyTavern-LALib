@@ -198,6 +198,64 @@ function makeIfWhileEnumProvider(type) {
     };
 }
 
+
+
+const trim = (txt)=>{
+    if (txt.split('\n').length < 2) return txt;
+    const indent = /^([ \t]*)\S/m.exec(txt)?.[1] ?? '';
+    const re = new RegExp(`^${indent}`, 'mg');
+    return txt.replace(re, '').replace(/\s*$/s, '');
+};
+let help = (text, ex)=>{
+    const converter = new showdown.Converter({
+        emoji: true,
+        literalMidWordUnderscores: true,
+        parseImgDimensions: true,
+        tables: true,
+        underline: true,
+        simpleLineBreaks: true,
+        strikethrough: true,
+        disableForced4SpacesIndentedSublists: true,
+    });
+    return [
+        text ? converter.makeHtml(trim(text)) : '# HELP MISSING',
+        ex ? examples(ex) : '# EXAMPLES MISSING',
+    ].filter(it=>it).join('\n\n');
+};
+/**
+ *
+ * @param {[code:string, comment:string][]} list
+ */
+let examples = (list)=>{
+    const dom = document.createElement('div'); {
+        const title = document.createElement('strong'); {
+            title.textContent = 'Examples:';
+            dom.append(title);
+        }
+        const ul = document.createElement('ul'); {
+            for (const [code, comment] of list) {
+                const li = document.createElement('li'); {
+                    const pre = document.createElement('pre'); {
+                        const c = document.createElement('code'); {
+                            c.classList.add('language-stscript');
+                            c.textContent = trim(code).trim();
+                            pre.append(c);
+                        }
+                        li.append(pre);
+                    }
+                    const comm = document.createElement('span'); {
+                        comm.innerHTML = comment;
+                        li.append(comm);
+                    }
+                    ul.append(li);
+                }
+            }
+            dom.append(ul);
+        }
+    }
+    return dom.outerHTML;
+};
+
 document.body.addEventListener('click', (evt)=>{
     const exec = /**@type {HTMLElement}*/(evt.target).closest?.('[data-lalib-exec]')?.getAttribute('data-lalib-exec');
     if (exec) {
@@ -239,7 +297,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'lalib?',
             defaultValue: 'slash',
         }),
     ],
-    helpString: 'Lists LALib commands',
+    helpString: help(
+        'Lists LALib commands',
+        [
+            ['/lalib?', 'command documentation'],
+            ['/lalib? expressions', 'expressions documentation'],
+        ],
+    ),
 }));
 
 
@@ -272,31 +336,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
     ],
     // splitUnnamedArgument: true,
     returns: 'result of the expression',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Evaluates a boolean or arithmetic expression
-        </div>
-        <div>
-            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/= true or false</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= 1 &lt; 2 and ('a' in x or 'b' not in y) and !z</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= 1 + 2 * 3 ** 4</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/= (1 + 2) * 3 ** 4</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+
+            See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details
+            on expressions.
+        `,
+        [
+            ['/= true or false', ''],
+            ['/= 1 < 2 and (\'a\' in x or \'b\' not in y) and !z', ''],
+            ['/= 1 + 2 * 3 ** 4', ''],
+            ['/= (1 + 2) * 3 ** 4', ''],
+        ],
+    ),
 }));
 
 
@@ -333,37 +386,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Compares the value of the left operand <code>a</code> with the value of the right operand <code>b</code>,
             and returns the result of the comparison (true or false).
-        </div>
-        <div>
+
             Numeric values and string literals for left and right operands supported.
-        </div>
-        <div>
+
             <strong>Available rules:</strong>
             <ul>
-                <li>gt => a > b</li>
-                <li>gte => a >= b</li>
-                <li>lt => a < b</li>
-                <li>lte => a <= b</li>
-                <li>eq => a == b</li>
-                <li>neq => a != b</li>
-                <li>not => !a</li>
-                <li>in (strings) => a includes b</li>
-                <li>nin (strings) => a not includes b</li>
+                <li>gt =&gt; a &gt; b</li>
+                <li>gte =&gt; a &gt;= b</li>
+                <li>lt =&gt; a &lt; b</li>
+                <li>lte =&gt; a &lt;= b</li>
+                <li>eq =&gt; a == b</li>
+                <li>neq =&gt; a != b</li>
+                <li>not =&gt; !a</li>
+                <li>in (strings) =&gt; a includes b</li>
+                <li>nin (strings) =&gt; a not includes b</li>
             </ul>
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/setvar key=i 0 | /test left=i rule=let right=10 | /echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /setvar key=i 0 | /test left=i rule=let right=10 | /echo
+                `,
+                'returns <code>true</code>',
+            ],
+        ],
+    ),
     returns: 'true or false',
 }));
 
@@ -404,24 +455,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'and',
     ],
     splitUnnamedArgument: true,
     returns: 'true or false',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Returns true if all values are true, otherwise false.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/and true true true</code></pre>
-                    Returns true.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/and true false true</code></pre>
-                    Returns false.
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /and true true true
+                `,
+                'Returns true.',
+            ],
+            [
+                `
+                    /and true false true
+                `,
+                'Returns false.',
+            ],
+        ],
+    ),
 }));
 
 
@@ -461,28 +513,31 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'or',
     ],
     splitUnnamedArgument: true,
     returns: 'true or false',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Returns true if at least one of the values is true, false if all are false.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/or true true true</code></pre>
-                    Returns true.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/or true false true</code></pre>
-                    Returns true.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/or false false false</code></pre>
-                    Returns false.
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /or true true true
+                `,
+                'Returns true.',
+            ],
+            [
+                `
+                    /or true false true
+                `,
+                'Returns true.',
+            ],
+            [
+                `
+                    /or false false false
+                `,
+                'Returns false.',
+            ],
+        ],
+    ),
 }));
 
 
@@ -497,24 +552,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'not',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Returns true if value is false, otherwise true.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/not false</code></pre>
-                    Returns true.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/not true</code></pre>
-                    Returns false.
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /not false
+                `,
+                'Returns true.',
+            ],
+            [
+                `
+                    /not true
+                `,
+                'Returns false.',
+            ],
+        ],
+    ),
     returns: 'true or false',
 }));
 
@@ -572,24 +628,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
     ],
     splitUnnamedArgument: true,
     returns: 'The removed element',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Removes the last element from a list and returns it.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/pop ["A", "B", "C"] |</code></pre>
-                    returns <code>C</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/pop x |</code></pre>
-                    returns <code>5</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /pop ["A", "B", "C"] |
+                `,
+                'returns <code>C</code>',
+            ],
+            [
+                `
+                    /let x [1, 2, 3, 4, 5] |
+                    /pop x |
+                `,
+                'returns <code>5</code>',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
@@ -640,24 +698,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'push',
     ],
     splitUnnamedArgument: true,
     returns: 'The updated list',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Appends new elements to the end of a list, and returns the list.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/push ["A", "B", "C"] foo bar |</code></pre>
-                    returns <code>["A", "B", "C", "foo", "bar"]</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/push x 10 |</code></pre>
-                    returns <code>[1, 2, 3, 4, 5, 10]</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /push ["A", "B", "C"] foo bar |
+                `,
+                'returns <code>["A", "B", "C", "foo", "bar"]</code>',
+            ],
+            [
+                `
+                    /let x [1, 2, 3, 4, 5] |
+                    /push x 10 |
+                `,
+                'returns <code>[1, 2, 3, 4, 5, 10]</code>',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
@@ -711,24 +771,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
     ],
     splitUnnamedArgument: true,
     returns: 'The removed element',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Removes the first element from a list and returns it.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/shift ["A", "B", "C"] |</code></pre>
-                    returns <code>A</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/shift x |</code></pre>
-                    returns <code>1</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /shift ["A", "B", "C"] |
+                `,
+                'returns <code>A</code>',
+            ],
+            [
+                `
+                    /let x [1, 2, 3, 4, 5] |
+                    /shift x |
+                `,
+                'returns <code>1</code>',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'unshift',
@@ -779,24 +841,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'unshift',
     ],
     splitUnnamedArgument: true,
     returns: 'The updated list',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Inserts new elements at the start of a list, and returns the list.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/unshift ["A", "B", "C"] foo bar |</code></pre>
-                    returns <code>["foo", "bar", "A", "B", "C"]</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [1, 2, 3, 4, 5] |\n/unshift x 10 |</code></pre>
-                    returns <code>[10, 1, 2, 3, 4, 5]</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /unshift ["A", "B", "C"] foo bar |
+                `,
+                'returns <code>["foo", "bar", "A", "B", "C"]</code>',
+            ],
+            [
+                `
+                    /let x [1, 2, 3, 4, 5] |
+                    /unshift x 10 |
+                `,
+                'returns <code>[10, 1, 2, 3, 4, 5]</code>',
+            ],
+        ],
+    ),
 }));
 
 
@@ -891,25 +955,34 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Executes the provided command for each item of a list or dictionary, replacing {{item}} and {{index}} with the current item and index.
-        </div>
-        <div>
+
             Use <code>/break</code> to break out of the loop early.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/foreach ["A", "B", "C"] {:\n\t/echo Item {{index}} is {{item}} |\n\t/delay 400 |\n:}</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x {"a":"foo","b":"bar"} |\n/foreach {{var::x}} {:\n\t/echo Item {{index}} is {{item}} |\n\t/delay 400 |\n:}</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /foreach ["A", "B", "C"] {:
+                    \t/echo Item {{index}} is {{item}} |
+                    \t/delay 400 |
+                    :}
+                `,
+                '',
+            ],
+            [
+                `
+                    /let x {"a":"foo","b":"bar"} |
+                    /foreach {{var::x}} {:
+                    \t/echo Item {{index}} is {{item}} |
+                    \t/delay 400 |
+                    :}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'result of executing the command on the last item',
 }));
 
@@ -1022,31 +1095,33 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
     ],
     splitUnnamedArgument: true,
     returns: 'list or dictionary of the command results',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
-        </div>
-        <div>
+
             Use <code>/break</code> to break out of the loop early.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/map [1,2,3] {: /mul {{item}} {{item}} :}</code></pre>
-                    Calculates the square of each number.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}</code></pre>
-                    Calculates the square of each number.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}</code></pre>
-                    Calculates the square of each number.
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /map [1,2,3] {: /mul {{item}} {{item}} :}
+                `,
+                'Calculates the square of each number.',
+            ],
+            [
+                `
+                    /map {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+                `,
+                'Calculates the square of each number.',
+            ],
+            [
+                `
+                    /map aslist= {"a":1,"b":2,"c":3} {: /mul {{item}} {{item}} :}
+                `,
+                'Calculates the square of each number.',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
@@ -1102,25 +1177,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'whilee',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Creates a loop that executes a specified closure as long as the test condition (expression or closure) evaluates to true. The condition is evaluated before executing the closure.
-        </div>
-        <div>
+
             Use <code>/break</code> to break out of the loop early.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/whilee (i++ < 3) {:\n\t/echo i: {{var::i}} |\n\t/delay 400 |\n:}</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /whilee (i++ < 3) {:
+                    \t/echo i: {{var::i}} |
+                    \t/delay 400 |
+                    :}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'result of executing the last iteration of the closure',
 }));
 
@@ -1196,18 +1272,16 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Executes a "reducer" closure on each element of the list, in order, passing in
             the return value from the calculation on the preceding element. The final result of running the reducer
             across all elements of the list is a single value.
-        </div>
-        <div>
+
             The first time that the closure is run there is no "return value of the previous calculation". If
             supplied, an initial value may be used in its place. Otherwise the list element at index 0 is used as
             the initial value and iteration starts from the next element (index 1 instead of index 0).
-        </div>
-        <div>
+
             The reducer closure accepts up to three arguments:
             <ul>
                 <li>
@@ -1226,25 +1300,32 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reduce',
                     <code>initial=</code> is specified, otherwise 1.
                 </li>
             </ul>
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/reduce [1,2,3] {: acc= cur= /= acc + cur :}</code></pre>
-                    returns 6 (1+2 = 3 -> 3 + 3 = 6)
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/reduce initial=10 [1,2,3] {: acc= cur= /= acc + cur :}</code></pre>
-                    returns 16 (10+1 = 11 -> 11+2 = 13 -> 13 + 3 = 16)
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [["a",1],["b",2],["c",3]] |\n/reduce initial={} {{var::x}} {: acc= cur=\n\t/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |\n\t/return {{var::acc}} |\n:} |</code></pre>
-                    returns <code>{"a":"1","b":"2","c":"3"}</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /reduce [1,2,3] {: acc= cur= /= acc + cur :}
+                `,
+                'returns 6 (1+2 = 3 -&gt; 3 + 3 = 6)',
+            ],
+            [
+                `
+                    /reduce initial=10 [1,2,3] {: acc= cur= /= acc + cur :}
+                `,
+                'returns 16 (10+1 = 11 -&gt; 11+2 = 13 -&gt; 13 + 3 = 16)',
+            ],
+            [
+                `
+                    /let x [["a",1],["b",2],["c",3]] |
+                    /reduce initial={} {{var::x}} {: acc= cur=
+                    \t/var key=acc index={: /= cur.0 :}() {: /= cur.1 :}() |
+                    \t/return {{var::acc}} |
+                    :} |
+                `,
+                'returns <code>{"a":"1","b":"2","c":"3"}</code>',
+            ],
+        ],
+    ),
     returns: 'reduced value',
 }));
 
@@ -1415,51 +1496,61 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Sorts a list.
-        </div>
-        <div>
+
             The comparison closure must accept two named arguments which will be equivalent to <code>a</code>
             and <code>b</code> in the expression.<br>
             Using a comparison closure can be very performance and time intensive on longer lists.
-        </div>
-        <div>
+
             If given a variable name, the variable will be modified.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] |</code></pre>
-                    returns [-99,-10,0,3,5]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [5,3,-10,-99,0] |\n/sorte x |\n/echo {{var::x}} |</code></pre>
-                    returns [-99,-10,0,3,5]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/let x [5,3,-10,-99,0] |\n/sorte {{var::x}} |\n/echo {{var::x}} |</code></pre>
-                    returns [5,3,-10,-99,0]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (a <=> b) |</code></pre>
-                    returns [-99,-10,0,3,5]
-                </li>
-                <li>
-                <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] (b <=> a) |</code></pre>
-                returns [5,3,0,-10,-99]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/sorte [5,3,-10,-99,0] {: a= b= /sub a b :} |</code></pre>
-                    returns [-99,-10,0,3,5]
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /sorte [5,3,-10,-99,0] |
+                `,
+                'returns [-99,-10,0,3,5]',
+            ],
+            [
+                `
+                    /let x [5,3,-10,-99,0] |
+                    /sorte x |
+                    /echo {{var::x}} |
+                `,
+                'returns [-99,-10,0,3,5]',
+            ],
+            [
+                `
+                    /let x [5,3,-10,-99,0] |
+                    /sorte {{var::x}} |
+                    /echo {{var::x}} |
+                `,
+                'returns [5,3,-10,-99,0]',
+            ],
+            [
+                `
+                    /sorte [5,3,-10,-99,0] (a <=> b) |
+                `,
+                'returns [-99,-10,0,3,5]',
+            ],
+            [
+                `
+                    /sorte [5,3,-10,-99,0] (b <=> a) |
+                `,
+                'returns [5,3,0,-10,-99]',
+            ],
+            [
+                `
+                    /sorte [5,3,-10,-99,0] {: a= b= /sub a b :} |
+                `,
+                'returns [-99,-10,0,3,5]',
+            ],
+        ],
+    ),
     returns: 'the sorted list',
 }));
 
@@ -1491,7 +1582,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'flatten',
             isRequired: true,
         }),
     ],
-    helpString: 'Creates a new list with all sub-list elements concatenated into it recursively up to the specified depth.',
+    helpString: help(
+        `
+            Creates a new list with all sub-list elements concatenated into it recursively up to the specified depth.
+        `,
+        [
+            [
+                `
+                    /flatten [1, 2, 3, [4, 5, 6, [7, 8, 9]]] |
+                `,
+                'returns [1, 2, 3, 4, 5, 6, [7, 8, 9]]',
+            ],
+            [
+                `
+                    /flatten depth=0 [1, 2, 3, [4, 5, 6, [7, 8, 9]]] |
+                `,
+                'returns [1, 2, 3, 4, 5, 6, 7, 8, 9]',
+            ],
+        ],
+    ),
     returns: 'the flattened list',
 }));
 
@@ -1607,27 +1716,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Executes command for each item of a list or dictionary and returns the list or dictionary of only those items where the command returned true.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}</code></pre>
-                    returns [3, 4, 5]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/filter [1,2,3,4,5] (item > 2)</code></pre>
-                    returns [3, 4, 5]
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /filter [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :}
+                `,
+                'returns [3, 4, 5]',
+            ],
+            [
+                `
+                    /filter [1,2,3,4,5] (item > 2)
+                `,
+                'returns [3, 4, 5]',
+            ],
+        ],
+    ),
     returns: 'the filtered list or dictionary',
 }));
 
@@ -1755,27 +1864,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Executes the provided closure or expression for each item of a list or dictionary and returns the first item where the command returned true.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo</code></pre>
-                    returns 3
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/find [1,2,3,4,5] (item > 2) | /echo</code></pre>
-                    returns 3
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /find [1,2,3,4,5] {: /test left={{item}} rule=gt right=2 :} | /echo
+                `,
+                'returns 3',
+            ],
+            [
+                `
+                    /find [1,2,3,4,5] (item > 2) | /echo
+                `,
+                'returns 3',
+            ],
+        ],
+    ),
     returns: 'the first item where the command returned true',
 }));
 
@@ -1831,24 +1940,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'slice',
         }),
     ],
     returns: 'the sliced list or string',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Retrieves a slice of a list or string.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/slice start=2 length=3 [1,2,3,4,5,6] | /echo</code></pre>
-                    returns [3,4,5]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/slice start=-8 The quick brown fox jumps over the lazy dog | /echo</code></pre>
-                    returns lazy dog
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /slice start=2 length=3 [1,2,3,4,5,6] | /echo
+                `,
+                'returns [3,4,5]',
+            ],
+            [
+                `
+                    /slice start=-8 The quick brown fox jumps over the lazy dog | /echo
+                `,
+                'returns lazy dog',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
@@ -1915,32 +2025,41 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'splice',
         }),
     ],
     returns: 'the new list',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Creates a new list with some elements removed and / or replaced at a given index.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/splice insert=[30, 40, 50] start=3 delete=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
-                    returns [0,1,2,30,40,50,6]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/splice start=3 delete=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
-                    returns [0,1,2,6]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/splice insert=100 start=3 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
-                    returns [0,1,2,100,3,4,5,6]
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/splice start=-1 delete=1 [0,1,2,3,4,5,6] |\n/echo |</code></pre>
-                    returns [0,1,2,3,4,5]
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /splice insert=[30, 40, 50] start=3 delete=3 [0,1,2,3,4,5,6] |
+                    /echo |
+                `,
+                'returns [0,1,2,30,40,50,6]',
+            ],
+            [
+                `
+                    /splice start=3 delete=3 [0,1,2,3,4,5,6] |
+                    /echo |
+                `,
+                'returns [0,1,2,6]',
+            ],
+            [
+                `
+                    /splice insert=100 start=3 [0,1,2,3,4,5,6] |
+                    /echo |
+                `,
+                'returns [0,1,2,100,3,4,5,6]',
+            ],
+            [
+                `
+                    /splice start=-1 delete=1 [0,1,2,3,4,5,6] |
+                    /echo |
+                `,
+                'returns [0,1,2,3,4,5]',
+            ],
+        ],
+    ),
 }));
 
 
@@ -1963,7 +2082,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shuffle',
             isRequired: true,
         }),
     ],
-    helpString: 'Returns a shuffled list.',
+    helpString: help(
+        `
+            Returns a shuffled list.
+        `,
+        [
+            [
+                `
+                    /shuffle [1, 2, 3, 4] |
+                `,
+                'could be [2, 4, 3, 1]',
+            ],
+        ],
+    ),
     returns: 'the shuffled list',
 }));
 
@@ -1971,7 +2102,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pick',
     callback: (args, value) => {
         const list = shuffleList(value);
         const items = Number(args.items ?? '1');
-        const asList = args.list ?? false;
+        const asList = isTrueFlag(args.list);
         const picks = list.slice(0, items);
         if (items > 1 || asList) {
             return JSON.stringify(picks);
@@ -2002,7 +2133,31 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pick',
             isRequired: true,
         }),
     ],
-    helpString: 'Picks one random item or <code>items</code> number of random items from a list (no duplicates).',
+    helpString: help(
+        `
+            Picks one random item or <code>items</code> number of random items from a list (no duplicates).
+        `,
+        [
+            [
+                `
+                    /pick [1, 2, 3, 4] |
+                `,
+                'could be 3',
+            ],
+            [
+                `
+                    /pick list= [1, 2, 3, 4] |
+                `,
+                'could be [3]',
+            ],
+            [
+                `
+                    /pick items=2 [1, 2, 3, 4] |
+                `,
+                'could be [1, 4]',
+            ],
+        ],
+    ),
     returns: 'the picked item or list of picked items',
 }));
 
@@ -2019,7 +2174,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'reverse',
             isRequired: true,
         }),
     ],
-    helpString: 'Returns a reversed list.',
+    helpString: help(
+        `
+            Returns a reversed list.
+        `,
+        [
+            [
+                `
+                    /reverse [1, 2, 3, 4] |
+                `,
+                'returns [4, 3, 2, 1]',
+            ],
+        ],
+    ),
     returns: 'the reversed list',
 }));
 
@@ -2051,28 +2218,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dict',
         }),
     ],
     returns: 'dictionary created from the input list of lists',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Takes a list of lists (each item must be a list of at least two items) and creates a dictionary by using each
             items first item as key and each items second item as value.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/let x [
-    ["a", 1],
-    ["b", 2],
-    ["c", 3]
-] |
-/dict {{var::x}} |
-/echo
-</code></pre>
-                    returns {a:1, b:2, c:3}
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /let x [
+                        ["a", 1],
+                        ["b", 2],
+                        ["c", 3]
+                    ] |
+                    /dict {{var::x}} |
+                    /echo
+                `,
+                'returns {a:1, b:2, c:3}',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2096,7 +2261,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'keys',
         }),
     ],
     returns: 'list of keys in the dictionary',
-    helpString: 'Return the list of keys of a dictionary.',
+    helpString: help(
+        `
+            Return the list of keys of a dictionary.
+        `,
+        [
+            [
+                `
+                    /let x {"a":1, "b":2, "c":3} |
+                    /keys {{var::x}} |
+                `,
+                'returns ["a", "b", "c"]',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2144,19 +2322,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'split',
         }),
     ],
     returns: 'list of the split values',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Splits value into list at every occurrence of find. Supports regex <code>find="/\\s/"</code>
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code>/split find="/\\s/" The quick brown fox jumps over the lazy dog | /echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /split find="/\\s/" The quick brown fox jumps over the lazy dog | /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
@@ -2194,24 +2372,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'join',
         }),
     ],
     returns: 'a single string containing the joined list items',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Joins the items of a list with glue into a single string. Use <code>glue={{space}}</code> to join with a space.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/join ["apple", "banana", "cherry"]</code></pre>
-                    returns "apple, banana, cherry"
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/join glue=" | " ["apple", "banana", "cherry"]</code></pre>
-                    returns "apple | banana | cherry"
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /join ["apple", "banana", "cherry"]
+                `,
+                'returns "apple, banana, cherry"',
+            ],
+            [
+                `
+                    /join glue=" | " ["apple", "banana", "cherry"]
+                `,
+                'returns "apple | banana | cherry"',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2229,7 +2408,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'trim',
             isRequired: true,
         }),
     ],
-    helpString: 'Removes whitespace at the start and end of the text.',
+    helpString: help(
+        `
+            Removes whitespace at the start and end of the text.
+        `,
+        [
+            [
+                `
+                    /let x "  foo " |
+                    /trim {{var::x}}
+                `,
+                'return "foo"',
+            ],
+        ],
+    ),
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-start',
     /**
@@ -2263,24 +2455,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-start',
     ],
     splitUnnamedArgument: true,
     splitUnnamedArgumentCount: 1,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Pad the provided text at the start if it is shorter then the target length.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/pad-start 5 foo</code></pre>
-                    returns <code>  foo</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/pad-start fill=+ 5 foo</code></pre>
-                    returns <code>++foo</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /pad-start 5 foo
+                `,
+                'returns <code>  foo</code>',
+            ],
+            [
+                `
+                    /pad-start fill=+ 5 foo
+                `,
+                'returns <code>++foo</code>',
+            ],
+        ],
+    ),
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-end',
     /**
@@ -2314,24 +2507,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-end',
     ],
     splitUnnamedArgument: true,
     splitUnnamedArgumentCount: 1,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Pad the provided text at the end if it is shorter then the target length.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/pad-end 5 foo</code></pre>
-                    returns <code>foo  </code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/pad-end fill=+ 5 foo</code></pre>
-                    returns <code>foo++</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /pad-end 5 foo
+                `,
+                'returns <code>foo  </code>',
+            ],
+            [
+                `
+                    /pad-end fill=+ 5 foo
+                `,
+                'returns <code>foo++</code>',
+            ],
+        ],
+    ),
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-both',
     /**
@@ -2367,32 +2561,34 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pad-both',
     ],
     splitUnnamedArgument: true,
     splitUnnamedArgumentCount: 1,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Pad the provided text at both ends if it is shorter then the target length.
-        </div>
-        <div>
+
             If an odd number of characters needs to be added, the remaining character will be added
             at the end of the text.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/pad-both 5 foo</code></pre>
-                    returns <code> foo </code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/pad-both fill=+ 5 foo</code></pre>
-                    returns <code>+foo+</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/pad-both fill=+ 6 foo</code></pre>
-                    returns <code>+foo++</code>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /pad-both 5 foo
+                `,
+                'returns <code> foo </code>',
+            ],
+            [
+                `
+                    /pad-both fill=+ 5 foo
+                `,
+                'returns <code>+foo+</code>',
+            ],
+            [
+                `
+                    /pad-both fill=+ 6 foo
+                `,
+                'returns <code>+foo++</code>',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2609,7 +2805,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'diff',
             isRequired: true,
         }),
     ],
-    helpString: 'Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.',
+    helpString: help(
+        `
+            Compares old text vs new text and displays the difference between the two. Use <code>all=true</code> to show new, old, and diff side by side. Use <code>buttons=true</code> to add buttons to pick which text to return. Use <code>stripcode=true</code> to remove all codeblocks before diffing. Use <code>notes="some text"</code> to show additional notes or comments above the comparison.
+        `,
+        [
+            [
+                `
+                    /sub {{lastMessageId}} 1 |
+                    /messages names=off |
+                    /let old {{pipe}} |
+                    /setvar key=old {{var::old}} |
+
+                    /messages names=off {{lastMessageId}} |
+                    /let new {{pipe}} |
+                    /setvar key=new {{var::new}} |
+
+                    /diff old={{var::old}} new={{var::new}}
+                `,
+                'compares the last two messages',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2625,7 +2842,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'json-pretty'
             isRequired: true,
         }),
     ],
-    helpString: 'Pretty print JSON.',
+    helpString: help(
+        `
+            Pretty print JSON.
+        `,
+        [
+            [
+                `
+                    /json-pretty {"a":1, "b":[1,2,3]} |
+                    /send \`\`\`json{{newline}}{{pipe}}{{newline}}\`\`\`
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'substitute',
@@ -2642,7 +2872,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'substitute',
             isRequired: true,
         }),
     ],
-    helpString: 'Substitute macros in text.',
+    helpString: help(
+        `
+            Substitute macros in text.
+        `,
+        [
+            [
+                `
+                    /let x foo |
+                    /substitute x is \\{\\{var::x\\}\\} |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2668,7 +2911,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wordcount',
         }),
     ],
     returns: 'the number of words',
-    helpString: 'Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+    helpString: help(
+        `
+            Count the number of words in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
+        `,
+        [
+            [
+                `
+                    /wordcount The quick brown fox jumps over the lazy dog. |
+                `,
+                'returns 9',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sentencecount',
@@ -2692,7 +2947,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sentencecoun
         }),
     ],
     returns: 'the number of sentences',
-    helpString: 'Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.',
+    helpString: help(
+        `
+            Count the number of sentences in text. Language defaults to "en". Supply a two character language according to IETF BCP 47 language tags for other languages.
+        `,
+        [
+            [
+                `
+                    /sentencecount The quick brown fox jumps over the lazy dog. Does the quick brown fox jump over the lazy dog? |
+                `,
+                'returns 2',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'segment',
@@ -2727,7 +2994,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'segment',
         }),
     ],
     returns: 'list of the segments (graphemes, words, or sentences)',
-    helpString: 'Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.',
+    helpString: help(
+        `
+            Return the graphemes (characters, basically), words or sentences found in the text. Supply a two character language according to IETF BCP 47 language tags for other languages.
+        `,
+        [
+            [
+                `
+                    /segment granularity=sentence The fox. The dog. |
+                `,
+                'returns ["The fox.", "The dog."]',
+            ],
+            [
+                `
+                    /segment granularity=word The fox. The dog. |
+                `,
+                'returns ["The", "fox", "The", "dog"]',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2753,21 +3038,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-escape',
         }),
     ],
     returns: 'regex-escaped string',
-    helpString: `
-        <div>Escapes text to be used literally inside a regex.</div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/re-escape foo/bar foo.bar |\n/echo</code></pre>
-                    Will echo <code>foo\\/bar foo\\.bar</code>.
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/re-escape {{char}} |\n/re-replace find=/\\b{{pipe}}\\b/g replace=FOO {{lastMessage}} |\n/echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+    helpString: help(
+        `
+            Escapes text to be used literally inside a regex.
+        `,
+        [
+            [
+                `
+                    /re-escape foo/bar foo.bar |
+                    /echo
+                `,
+                'Will echo <code>foo\\/bar foo\\.bar</code>.',
+            ],
+            [
+                `
+                    /re-escape {{char}} |
+                    /re-replace find=/\\b{{pipe}}\\b/g replace=FOO {{lastMessage}} |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
@@ -2806,7 +3098,46 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-test',
         }),
     ],
     returns: 'true or false',
-    helpString: 'Tests if the provided variable or value matches a regular expression.',
+    helpString: help(
+        `
+            Tests if the provided variable or value matches a regular expression.
+        `,
+        [
+            [
+                `
+                    /re-test find=/dog/i The quick brown fox jumps over the lazy dog. |
+                `,
+                'returns true',
+            ],
+            [
+                `
+                    // pipes in the regex must to be escaped |
+                    /re-test find=/dog\\|cat/i The quick brown fox jumps over the lazy dog. |
+                `,
+                'returns true',
+            ],
+            [
+                `
+                    // if you want to find a literal pipe, you have to also escape the backslash escaping it |
+                    /re-test find=/dog\\\\\\|cat/i The quick brown fox jumps over the lazy dog. |
+                `,
+                'returns false',
+            ],
+            [
+                `
+                    // or you can put quote around the regex and forget about escaping... |
+                    /re-test find="/dog|cat/i" The quick brown fox jumps over the lazy dog. |
+                `,
+                'returns true ("dog" or "cat")',
+            ],
+            [
+                `
+                    /re-test find="/dog\\|cat/i" The quick brown fox jumps over the lazy dog. |
+                `,
+                'result will be false (only matching literally "dog|cat")',
+            ],
+        ],
+    ),
 }));
 
 
@@ -2903,24 +3234,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-replace',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Searches the provided variable or value with the regular expression and replaces matches with the replace value or the return value of the provided closure or slash command. For text replacements and slash commands, use <code>$1</code>, <code>$2</code>, ... to reference capturing groups. In closures use <code>{{$1}}</code>, <code>{{$2}}</code>, ... to reference capturing groups.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/re-replace find=/\\s+/ replace=" " The quick   brown  fox  jumps over the lazy dog | /echo</code></pre>
-                    replaces multiple whitespace with a single space
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/re-replace find=/([a-z]+) ([a-z]+)/ cmd="/echo $2 $1" the quick brown fox | /echo</code></pre>
-                    swaps words using a slash command on each match
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /re-replace find=/\\s+/ replace=" " The quick   brown  fox  jumps over the lazy dog | /echo
+                `,
+                'replaces multiple whitespace with a single space',
+            ],
+            [
+                `
+                    /re-replace find=/([a-z]+) ([a-z]+)/ cmd="/echo $2 $1" the quick brown fox | /echo
+                `,
+                'swaps words using a slash command on each match',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-exec',
@@ -2978,22 +3310,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 're-exec',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Searches the provided value with the regular expression and returns a list of all matches.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/re-exec find=/\\b(?<word>\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |\n/json-pretty |\n/comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`</code></pre>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/re-exec first= find=/\\b(?<word>\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |\n/json-pretty |\n/comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /re-exec find=/\\b(?\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |
+                    /json-pretty |
+                    /comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`
+                `,
+                '',
+            ],
+            [
+                `
+                    /re-exec first= find=/\\b(?\\w+?(o+)\\w+?)\\b/g The quick brown fox jumps over the lazy fool dog. |
+                    /json-pretty |
+                    /comment \`\`\`{{newline}}{{pipe}}{{newline}}\`\`\`
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -3042,7 +3381,66 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'getat',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: 'Retrieves an item from a list or a property from a dictionary.',
+    helpString: help(
+        `
+            Retrieves an item from a list or a property from a dictionary.
+        `,
+        [
+            [
+                `
+                    /setvar key=x {
+                        "a": [
+                            1,
+                            2,
+                            {
+                                "b": "foo",
+                                "c": "bar"
+                            }
+                        ],
+                        "d": "D"
+                    } |
+                    /getat var=x index=d |
+                `,
+                'returns "D"',
+            ],
+            [
+                `
+                    /return {
+                        "a": [
+                            1,
+                            2,
+                            {
+                                "b": "foo",
+                                "c": "bar"
+                            }
+                        ],
+                        "d": "D"
+                    } |
+                    /getat index=["a", 2, "b"] |
+                `,
+                'returns "foo"',
+            ],
+            [
+                `
+                    /return {
+                        "a": [
+                            1,
+                            2,
+                            {
+                                "b": "foo",
+                                "c": "bar"
+                            }
+                        ],
+                        "d": "D"
+                    } |
+                    /getat index=a |
+                    /getat index=2 |
+                    /getat index=c |
+                `,
+                'returns "bar"',
+            ],
+        ],
+    ),
     returns: 'the retrieved item or property value',
 }));
 
@@ -3118,25 +3516,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'setat',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Sets an item in a list or a property in a dictionary.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/setat value=[1,2,3] index=1 X</code></pre>
-                    returns <code>[1,"X",3]</code>
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/setat value={{var::myVariable}} index=[1,2,"someProperty"] foobar</code></pre>
-                    sets the value of <code>myVariable[1][2].someProperty</code> to "foobar" (the variable will be updated and the resulting value of myVariable will be returned)
-                </li>
-            </ul>
-            Can be used to create structures that do not already exist.
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /setat value=[1,2,3] index=1 X
+                `,
+                'returns <code>[1,"X",3]</code>',
+            ],
+            [
+                `
+                    /setat value={{var::myVariable}} index=[1,2,"someProperty"] foobar
+                `,
+                'sets the value of <code>myVariable[1][2].someProperty</code> to "foobar" (the variable will be updated and the resulting value of myVariable will be returned)',
+            ],
+        ],
+    ),
     returns: 'the updated list or dictionary',
 }));
 
@@ -3194,20 +3592,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Attempts to execute the provided command and catches any exceptions thrown. Use with <code>/catch</code>.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/try {: /divide 10 0 :} |
-/catch {: /echo An error occurred: {{exception}} :}</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /try {: /divide 10 0 :} |
+                    /catch {: /echo An error occurred: {{exception}} :}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'an object with properties `isException` and `result` or `exception`',
 }));
 
@@ -3264,20 +3662,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Used with the \`/try\` command to handle exceptions. Use \`{{exception}}\` or \`{{error}}\` to get the exception's message.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/try {: /divide 10 0 :} |
-/catch {: /echo An error occurred: {{exception}} :}</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /try {: /divide 10 0 :} |
+                    /catch {: /echo An error occurred: {{exception}} :}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'the result of the catch command, or the original result if no exception occurred',
 }));
 
@@ -3314,7 +3712,30 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifempty',
             isRequired: true,
         }),
     ],
-    helpString: 'Returns the fallback value if value is empty (empty string, empty list, empty dictionary).',
+    helpString: help(
+        `
+            Returns the fallback value if value is empty (empty string, empty list, empty dictionary).
+        `,
+        [
+            [
+                `
+                    /ifempty value=[] [1,2,3] |
+                `,
+                'returns [1, 2, 3]',
+            ],
+            [
+                `
+                    /setvar key=x |
+                    /setvar key=y bar |
+                    /ifempty value={{getvar::x}} foo |
+                    /setvar key=xx {{pipe}} |
+                    /ifempty value={{getvar::y}} foo |
+                    /setvar key=yy {{pipe}} |
+                `,
+                'sets <code>xx</code> to "foo" and <code>yy</code> to "bar"',
+            ],
+        ],
+    ),
     returns: 'the value or the fallback value',
 }));
 
@@ -3338,7 +3759,30 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifnullish',
             isRequired: true,
         }),
     ],
-    helpString: 'Returns the fallback value if value is nullish (empty string).',
+    helpString: help(
+        `
+            Returns the fallback value if value is nullish (empty string).
+        `,
+        [
+            [
+                `
+                    /ifempty value=[] [1,2,3] |
+                `,
+                'returns []',
+            ],
+            [
+                `
+                    /setvar key=x |
+                    /setvar key=y bar |
+                    /ifempty value={{getvar::x}} foo |
+                    /setvar key=xx {{pipe}} |
+                    /ifempty value={{getvar::y}} foo |
+                    /setvar key=yy {{pipe}} |
+                `,
+                'sets <code>xx</code> to "foo" and <code>yy</code> to "bar"',
+            ],
+        ],
+    ),
     returns: 'the value or the fallback value',
 }));
 
@@ -3374,7 +3818,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'copy',
             isRequired: true,
         }),
     ],
-    helpString: 'Copies value into clipboard.',
+    helpString: help(
+        `
+            Copies value into clipboard.
+        `,
+        [
+            [
+                `
+                    /copy this text is now in your clipboard |
+                `,
+                '',
+            ],
+            [
+                `
+                    /copy {{lastMessage}}
+                `,
+                'puts the last chat message in your clipboard',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'download',
@@ -3410,7 +3872,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'download',
             isRequired: true,
         }),
     ],
-    helpString: 'Downloads value as a text file.',
+    helpString: help(
+        `
+            Downloads value as a text file.
+        `,
+        [
+            [
+                `
+                    /download Let's download this text.
+                `,
+                'downloads a txt file containing "Let\'s download this text."',
+            ],
+            [
+                `
+                    /download name=TheLastMessage ext=md {{lastMessage}}
+                `,
+                'downloads a file <code>TheLastMessage.md</code> containing the last chat message',
+            ],
+        ],
+    ),
 }));
 
 
@@ -3543,18 +4023,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'dom',
         }),
     ],
     returns: 'the result of the action, if any',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Click on an element, change its value, retrieve a property, or retrieve an attribute. To select the targeted element, use CSS selectors.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li><pre><code class="language-stscript">/dom action=click #expandMessageActions</code></pre></li>
-                <li><pre><code class="language-stscript">/dom action=value value=0 #avatar_style</code></pre></li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /dom action=click #expandMessageActions
+                `,
+                '',
+            ],
+            [
+                `
+                    /dom action=value value=0 #avatar_style
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -3596,18 +4083,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'char-get',
         }),
     ],
     returns: 'char object or property',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Get a character object or one of its properties.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li><pre><code class="language-stscript">/char-get Seraphina |\n/getat index=description |\n/echo</code></pre></li>
-                <li><pre><code class="language-stscript">/char-get index=description Seraphina |\n/echo</code></pre></li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /char-get Seraphina |
+                    /getat index=description |
+                    /echo
+                `,
+                '',
+            ],
+            [
+                `
+                    /char-get index=description Seraphina |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -3650,7 +4147,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'memberpos',
             isRequired: true,
         }),
     ],
-    helpString: 'Move group member to position (index starts with 0).',
+    helpString: help(
+        `
+            Move group member to position (index starts with 0).
+        `,
+        [
+            [
+                `
+                    /memberpos Alice 3 |
+                    /echo Alice has been moved to position 3 |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'group-get',
@@ -3693,19 +4203,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'group-get',
         }),
     ],
     returns: 'char object or property',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Get a group object or one of its properties.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li><pre><code class="language-stscript">/group-get MyGroup |\n/getat index=description |\n/echo</code></pre></li>
-                <li><pre><code class="language-stscript">/group-get index=description MyGroup |\n/echo</code></pre></li>
-                <li><pre><code class="language-stscript">/group-get index=members chars=true MyGroup |\n/echo</code></pre></li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /group-get MyGroup |
+                    /getat index=description |
+                    /echo
+                `,
+                '',
+            ],
+            [
+                `
+                    /group-get index=description MyGroup |
+                    /echo
+                `,
+                '',
+            ],
+            [
+                `
+                    /group-get index=members chars=true MyGroup |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -3736,7 +4262,24 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'switch',
             isRequired: true,
         }),
     ],
-    helpString: 'Use with /case to conditionally execute commands based on a value.',
+    helpString: help(
+        `
+            Use with /case to conditionally execute commands based on a value.
+        `,
+        [
+            [
+                `
+                    /let x foo |
+                    /switch {{var::x}} |
+                        /case 1 {: /echo value is one :} |
+                        /case foo {: /echo value is foo :} |
+                        /case bar {: /echo value is bar :} |
+                        /case {: /echo value is something else :} |
+                `,
+                'returns "value is foo"',
+            ],
+        ],
+    ),
     returns: 'an object containing the switch value',
 }));
 
@@ -3822,7 +4365,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'case',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: 'Execute a command if the provided value matches the switch value from /switch.',
+    helpString: help(
+        `
+            Execute a command if the provided value matches the switch value from /switch.
+        `,
+        [
+            [
+                `
+                    // see /switch |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'the result of the executed command, or the unchanged pipe if no match',
 }));
 
@@ -3926,21 +4481,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
         }),
     ],
     // splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Execute a closure if the expression or first closure returns <code>true</code>.
-        </div>
-        <div>
+
             Use with <code>/elseif</code> and <code>/else</code>.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            ${ifExamples}
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /setvar key=x foo |
+                    /ife (x == 1) {:
+                        /echo value is one
+                    :} |
+                    /elseif (x == 'foo') {:
+                        /echo value is foo
+                    :} |
+                    /elseif (x == 'bar') {:
+                        /echo value is bar
+                    :} |
+                    /else {:
+                        /echo value is something else
+                    :} |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'an object with a boolean "if" property',
 }));
 
@@ -4030,21 +4599,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'elseif',
         }),
     ],
     // splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed and the expression or first closure returns <code>true</code>.
-        </div>
-        <div>
+
             Use with <code>/ife</code> and <code>/else</code>.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            ${ifExamples}
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /setvar key=x foo |
+                    /ife (x == 1) {:
+                        /echo value is one
+                    :} |
+                    /elseif (x == 'foo') {:
+                        /echo value is foo
+                    :} |
+                    /elseif (x == 'bar') {:
+                        /echo value is bar
+                    :} |
+                    /else {:
+                        /echo value is something else
+                    :} |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'an object with a boolean "if" property',
 }));
 
@@ -4101,21 +4684,35 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'else',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Execute a closure if none of the preceeding <code>/ife</code> and <code>/elseif</code> executed.
-        </div>
-        <div>
+
             Use with <code>/ife</code> and <code>/elseif</code>.
-        </div>
-        <div>
+
             See <a href="javascript:;" data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            ${ifExamples}
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /setvar key=x foo |
+                    /ife (x == 1) {:
+                        /echo value is one
+                    :} |
+                    /elseif (x == 'foo') {:
+                        /echo value is foo
+                    :} |
+                    /elseif (x == 'bar') {:
+                        /echo value is bar
+                    :} |
+                    /else {:
+                        /echo value is something else
+                    :} |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'the result of the executed command',
 }));
 
@@ -4173,7 +4770,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: '<div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>',
+    helpString: help(
+        `
+            <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
+        `,
+        [
+            [
+                `
+                    // deprecated |
+                `,
+                'use unnamed args in <code>/ife</code> or <code>/elseif</code>',
+            ],
+        ],
+    ),
     returns: 'the result of the executed command',
 }));
 
@@ -4222,7 +4831,7 @@ const getBookNames = ()=>{
 // GROUP: World Info
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-books',
     callback: async (namedArgs) => {
-        if (isTrueBoolean(namedArgs.source)) {
+        if (isTrueFlag(namedArgs.source)) {
             return JSON.stringify(getBookNamesWithSource());
         }
         return JSON.stringify(getBookNames());
@@ -4236,7 +4845,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-book
             enumList: ['true', 'false'],
         }),
     ],
-    helpString: 'Get a list of currently active World Info books. Use <code>source=true</code> to get a dictionary of lists where the keys are the activation sources.',
+    helpString: help(
+        `
+            Get a list of currently active World Info books. Use <code>source=</code> to get a dictionary of lists where the keys are the activation sources.
+        `,
+        [
+            [
+                `
+                    /wi-list-books |
+                `,
+                'returns a list of active books',
+            ],
+            [
+                `
+                    /wi-list-books source= |
+                    /json-pretty |
+                    /comment Currently active WI books:{{newline}}\`\`\`json{{newline}}{{pipe}}{{newline}}\`\`\` |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'a list of book names, or a dictionary of lists with activation sources as keys',
 }));
 
@@ -4272,7 +4901,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
         for (const book of names) {
             books[book] = await loadBook(book);
         }
-        if (isTrueBoolean(args.flat) || isNameGiven) {
+        if (isTrueFlag(args.flat) || isNameGiven) {
             return JSON.stringify(Object.keys(books).map(it => books[it].entries).flat());
         }
         return JSON.stringify(books);
@@ -4292,7 +4921,26 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-list-entr
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: 'Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=true</code> to list all entries in a flat list instead of a dictionary with entries per book.',
+    helpString: help(
+        `
+            Get a list of World Info entries from currently active books or from the book with the provided name. Use <code>flat=</code> to list all entries in a flat list instead of a dictionary with entries per book.
+        `,
+        [
+            [
+                `
+                    /wi-list-entries |
+                    /map {{pipe}} {:
+                        /getat index=entries {{item}} |
+                        /map {{pipe}} {:
+                            /getat index=comment {{item}}
+                        :}
+                    :} |
+                    /echo Overview of WI entries in currently active books: {{pipe}}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'a dictionary of book entries, or a flat list of entries',
 }));
 
@@ -4301,7 +4949,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'wi-activate'
         getWorldInfoPrompt(chat.filter(it=>!it.is_system).map(it=>it.mes).toReversed(), Number.MAX_SAFE_INTEGER, false);
         return '';
     },
-    helpString: 'Activate World Info entries based on the current chat and trigger their Automation IDs.',
+    helpString: help(
+        `
+            Activate World Info entries based on the current chat and trigger their Automation IDs.
+        `,
+        [
+            [
+                `
+                    /wi-activate |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -4335,7 +4995,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'costumes',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: 'Get a list of costume / sprite folders, recursive by default.',
+    helpString: help(
+        `
+            Get a list of costume / sprite folders, recursive by default.
+        `,
+        [
+            [
+                `
+                    /costumes Alice |
+                    /echo Alice's costumes: {{pipe}} |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'a list of costume/sprite folders',
 }));
 
@@ -4387,7 +5060,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-edit',
             }) ?? [],
         }),
     ],
-    helpString: 'Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.',
+    helpString: help(
+        `
+            Show the Quick Reply editor. If no QR set is provided, tries to find a QR in one of the active sets.
+        `,
+        [
+            [
+                `
+                    /qr-edit My QR From An Active Set |
+                `,
+                '',
+            ],
+            [
+                `
+                    /qr-edit set=MyQrSet label=MyQr |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-add',
@@ -4422,7 +5113,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'qr-add',
             typeList: [ARGUMENT_TYPE.STRING],
         }),
     ],
-    helpString: 'Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.',
+    helpString: help(
+        `
+            Create a new Quick Reply and open its editor. If no QR set is provided, tries to find a QR in one of the active sets.
+        `,
+        [
+            [
+                `
+                    /qr-add New QR In Active Set |
+                `,
+                '',
+            ],
+            [
+                `
+                    /qr-add set=MyQrSet label=MyNewQr |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -4448,7 +5157,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-get',
             isRequired: true,
         }),
     ],
-    helpString: 'Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.',
+    helpString: help(
+        `
+            Get the n-th swipe (zero-based index) from the last message or the message with the given message ID.
+        `,
+        [
+            [
+                `
+                    /swipes-get 5 |
+                    /echo Swipe number five: {{pipe}} |
+                `,
+                '',
+            ],
+            [
+                `
+                    /sub {{lastMessageId}} 2 |
+                    /swipes-get message={{pipe}} 5 |
+                    /echo swipe number five: {{pipe}}
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'swipe text',
 }));
 
@@ -4464,7 +5194,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-list'
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: 'Get a list of all swipes from the last message or the message with the given message ID.',
+    helpString: help(
+        `
+            Get a list of all swipes from the last message or the message with the given message ID.
+        `,
+        [
+            [
+                `
+                    /swipes-list |
+                    /echo |
+                `,
+                '',
+            ],
+            [
+                `
+                    /sub {{lastMessageId}} 2 |
+                    /swipes-list message={{pipe}} |
+                    /echo |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'a list of swipes',
 }));
 
@@ -4480,7 +5231,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-count
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: 'Get the number of all swipes from the last message or the message with the given message ID.',
+    helpString: help(
+        `
+            Get the number of all swipes from the last message or the message with the given message ID.
+        `,
+        [
+            [
+                `
+                    /swipes-count |
+                    /echo |
+                `,
+                '',
+            ],
+            [
+                `
+                    /sub {{lastMessageId}} 2 |
+                    /swipes-count message={{pipe}} |
+                    /echo |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'the number of swipes',
 }));
 
@@ -4496,7 +5268,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-index
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: 'Get the current swipe index from the last message or the message with the given message ID.',
+    helpString: help(
+        `
+            Get the current swipe index from the last message or the message with the given message ID.
+        `,
+        [
+            [
+                `
+                    /swipes-index |
+                    /echo |
+                `,
+                '',
+            ],
+            [
+                `
+                    /sub {{lastMessageId}} 2 |
+                    /swipes-index message={{pipe}} |
+                    /echo |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'the current swipe index',
 }));
 
@@ -4562,7 +5355,21 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-add',
             isRequired: true,
         }),
     ],
-    helpString: 'Add a new swipe to the last message or the message with the provided messageId.',
+    helpString: help(
+        `
+            Add a new swipe to the last message or the message with the provided messageId.
+        `,
+        [
+            [
+                `
+                    /sendas name=Alice foo |
+                    /delay 1000 |
+                    /swipes-add bar |
+                `,
+                'creates a new message "foo", then addes a swipe "bar"',
+            ],
+        ],
+    ),
 }));
 
 
@@ -4674,50 +5481,62 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Delete the current swipe or the swipe at the specified index (0-based).
-        </div>
-        <div>
+
             Use <code>filter={: swipe= /return true :}</code> to remove multiple swipes.
-        </div>
-        <div>
+
             See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a> for more details on expressions.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del |</code></pre>
-                    delete current swipe of last message
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del 5 |</code></pre>
-                    delete swipe number 5 (0-based index) of last message
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del message=20 |</code></pre>
-                    delete current swipe of message #20
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del filter="swipe.index % 2" |</code></pre>
-                    delete all odd swipes (0-based index) of last message
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del filter="swipe.index != 5" |</code></pre>
-                    delete all but swipe at idnex 5 (0-based index) of last message
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del filter="'bad word' in swipe.mes" |</code></pre>
-                    delete all swipes with "bad word" in their message text of last message
-                </li>
-                <li>
-                    <pre><code class="language-stscript">/swipes-del filter={: swipe=\n\t/var key=swipe index=mes |\n\t/test left={{pipe}} rule=in right="bad word" |\n:} |</code></pre>
-                    delete all swipes with "bad word" in their message text of last message
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /swipes-del |
+                `,
+                'delete current swipe of last message',
+            ],
+            [
+                `
+                    /swipes-del 5 |
+                `,
+                'delete swipe number 5 (0-based index) of last message',
+            ],
+            [
+                `
+                    /swipes-del message=20 |
+                `,
+                'delete current swipe of message #20',
+            ],
+            [
+                `
+                    /swipes-del filter="swipe.index % 2" |
+                `,
+                'delete all odd swipes (0-based index) of last message',
+            ],
+            [
+                `
+                    /swipes-del filter="swipe.index != 5" |
+                `,
+                'delete all but swipe at idnex 5 (0-based index) of last message',
+            ],
+            [
+                `
+                    /swipes-del filter="\'bad word\' in swipe.mes" |
+                `,
+                'delete all swipes with "bad word" in their message text of last message',
+            ],
+            [
+                `
+                    /swipes-del filter={: swipe=
+                    \t/var key=swipe index=mes |
+                    \t/test left={{pipe}} rule=in right="bad word" |
+                    :} |
+                `,
+                'delete all swipes with "bad word" in their message text of last message',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
@@ -4763,7 +5582,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-go',
             isRequired: true,
         }),
     ],
-    helpString: 'Go to the swipe. 0-based index.',
+    helpString: help(
+        `
+            Go to the swipe. 0-based index.
+        `,
+        [
+            [
+                `
+                    /sendas name=Alice foo |
+                    /delay 1000 |
+                    /swipes-add bar |
+                    /delay 1000 |
+                    /swipes-add foobar |
+                    /delay 1000 |
+                    /swipes-go 0 |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe',
@@ -4785,7 +5622,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-swipe
         await delay(200);
         return chat[id].mes;
     },
-    helpString: 'Trigger a new swipe on the last message.',
+    helpString: help(
+        `
+            Trigger a new swipe on the last message.
+        `,
+        [
+            [
+                `
+                    /swipes-swipe |
+                    /echo swiping has finished
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit',
@@ -4802,7 +5652,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
         let mesId = parseInt(args.message ?? '-1');
         if (mesId < 0) mesId += chat.length;
         const mes = chat.at(mesId);
-        if (isTrueFlag(args.append)) {
+        if (isTrueBoolean(args.append)) {
             value = `${mes.mes}${value}`;
         }
         mes.mes = value;
@@ -4841,7 +5691,29 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-edit
             isRequired: true,
         }),
     ],
-    helpString: 'Edit the current message or the message at the provided message ID. Use <code>append=</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.',
+    helpString: help(
+        `
+            Edit the current message or the message at the provided message ID. Use <code>append=</code> to add the provided text at the end of the message. Use <code>{{space}}</code> to add space at the beginning of the text.
+        `,
+        [
+            [
+                `
+                    /sendas name=Alice foo |
+                    /delay 1000 |
+                    /message-edit bar |
+                `,
+                'adds a new message "foo" then changes it to "bar"',
+            ],
+            [
+                `
+                    /sendas name=Alice foo |
+                    /delay 1000 |
+                    /message-edit append= bar |
+                `,
+                'adds a new message "foo" then changes it to "foobar"',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-move',
@@ -4903,21 +5775,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-move
             typeList: [ARGUMENT_TYPE.NUMBER],
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Move a message up or down in the chat.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/message-move from={{lastMessageId}} to=10 |</code></pre>
-                    <pre><code class="language-stscript">/message-move from={{lastMessageId}} up=2 |</code></pre>
-                    <pre><code class="language-stscript">/message-move from=3 down=10 |</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /message-move from={{lastMessageId}} to=10 |/message-move from={{lastMessageId}} up=2 |/message-move from=3 down=10 |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -4950,20 +5820,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'chat-list',
         }),
     ],
     returns: 'list of all chats of current or selected character',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Get a list of all chats of the current or provided character.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/chat-list |</code></pre>
-                    <pre><code class="language-stscript">/chat-list char=default_Seraphina.png |</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /chat-list |/chat-list char=default_Seraphina.png |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'chat-parent',
@@ -4971,7 +5840,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'chat-parent'
         return chat_metadata['main_chat'] ?? '';
     },
     returns: 'name of parent chat',
-    helpString: 'returns the name of the parent chat',
+    helpString: help(
+        `
+            returns the name of the parent chat
+        `,
+        [
+            [
+                `
+                    /chat-parent |
+                `,
+                'returns name of the parent chat (if this is a branch)',
+            ],
+        ],
+    ),
 }));
 
 /** @type {{listen:()=>void, unlisten:()=>void, event:string, query:string, id:string}[]} */
@@ -5047,22 +5928,28 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-on',
         }),
     ],
     returns: 'listener ID',
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Add event listeners to the last chat message.
-        </div>
-        <div>
+
             Stops listening when changing to another chat.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/message-on event=click quiet=false callback={:\n    /$ take=textContent {{target}} |\n    /let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |\n    /inputhistory-add {{var::prompt}} |\n    /send {{var::prompt}} |\n    /trigger\n:} .custom-suggestion |\n/setvar key=listenerId |</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /message-on event=click quiet=false callback={:
+                        /$ take=textContent {{target}} |
+                        /let prompt Continue by weaving the following suggestion into your next response: {{pipe}} |
+                        /inputhistory-add {{var::prompt}} |
+                        /send {{var::prompt}} |
+                        /trigger
+                    :} .custom-suggestion |
+                    /setvar key=listenerId |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-off',
@@ -5113,27 +6000,38 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-off'
             defaultValue: 'true',
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Remove an event listener added with /message-on.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    All messages:
-                    <pre><code class="language-stscript">/message-off id={{getvar::listenerId}}</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /message-off id={{getvar::listenerId}}
+                `,
+                'All messages:',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'message-listeners',
     callback: (args, value)=>{
         return JSON.stringify(messageOnListeners.map(it=>({ id:it.id, query:it.query, event:it.event })));
     },
-    helpString: 'Lists all currently active listeners.',
+    helpString: help(
+        `
+            Lists all currently active listeners.
+        `,
+        [
+            [
+                `
+                    /message-listeners |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
@@ -5150,44 +6048,55 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'role-swap',
             typeList: [ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.RANGE],
         }),
     ],
-    helpString: `
-        <div>
-        Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
-        </div>
-        <div>
-            <strong>Examples:</strong>
-            <ul>
-                <li>
-                    All messages:
-                    <pre><code class="language-stscript">/role-swap</code></pre>
-                </li>
-                <li>
-                    Last message:
-                    <pre><code class="language-stscript">/role-swap {{lastMessageId}}</code></pre>
-                </li>
-                <li>
-                    Last message:
-                    <pre><code class="language-stscript">/role-swap -1</code></pre>
-                </li>
-                <li>
-                    Second to last message:
-                    <pre><code class="language-stscript">/role-swap -2</code></pre>
-                </li>
-                <li>
-                    First 10 messages:
-                    <pre><code class="language-stscript">/role-swap 0-10</code></pre>
-                </li>
-                <li>
-                    Last 10 messages:
-                    <pre><code class="language-stscript">/role-swap -10-</code></pre>
-                </li>
-                <li>
-                    All messages except last 10:
-                    <pre><code class="language-stscript">/role-swap 0--10</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+    helpString: help(
+        `
+            Swap roles (user/AI) for all messages in the chat, or for a selected message or range of messages.
+        `,
+        [
+            [
+                `
+                    /role-swap
+                `,
+                'All messages:',
+            ],
+            [
+                `
+                    /role-swap {{lastMessageId}}
+                `,
+                'Last message:',
+            ],
+            [
+                `
+                    /role-swap -1
+                `,
+                'Last message:',
+            ],
+            [
+                `
+                    /role-swap -2
+                `,
+                'Second to last message:',
+            ],
+            [
+                `
+                    /role-swap 0-10
+                `,
+                'First 10 messages:',
+            ],
+            [
+                `
+                    /role-swap -10-
+                `,
+                'Last 10 messages:',
+            ],
+            [
+                `
+                    /role-swap 0--10
+                `,
+                'All messages except last 10:',
+            ],
+        ],
+    ),
 }));
 
 
@@ -5197,7 +6106,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'timestamp',
     callback: (args, value) => {
         return JSON.stringify(new Date().getTime());
     },
-    helpString: 'Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.',
+    helpString: help(
+        `
+            Returns the number of milliseconds midnight at the beginning of January 1, 1970, UTC.
+        `,
+        [
+            [
+                `
+                    /timestamp |
+                `,
+                '',
+            ],
+        ],
+    ),
     returns: 'timestamp',
 }));
 
@@ -5246,7 +6167,25 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fireandforge
         }),
     ],
     splitUnnamedArgument: true,
-    helpString: 'Execute a closure or command without waiting for it to finish.',
+    helpString: help(
+        `
+            Execute a closure or command without waiting for it to finish.
+        `,
+        [
+            [
+                `
+                    /fireandforget {:
+                        /delay 1000 |
+                        /echo firing |
+                        /delay 1000 |
+                        /echo fired script is done
+                    :} |
+                    /echo main script is done |
+                `,
+                'will show "main script is done", then "firing", then "fired script is done"',
+            ],
+        ],
+    ),
 }));
 
 
@@ -5268,7 +6207,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-log'
             isRequired: true,
         }),
     ],
-    helpString: 'logs a value to the browser console',
+    helpString: help(
+        `
+            logs a value to the browser console
+        `,
+        [
+            [
+                `
+                    /console-log Hello, World! |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-warn',
     callback: (args, value)=>toConsole('warn', value),
@@ -5277,7 +6228,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-warn
             isRequired: true,
         }),
     ],
-    helpString: 'logs a value to the browser console as a warning',
+    helpString: help(
+        `
+            logs a value to the browser console as a warning
+        `,
+        [
+            [
+                `
+                    /console-warn This is a warning! |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-error',
     callback: (args, value)=>toConsole('error', value),
@@ -5286,7 +6249,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'console-erro
             isRequired: true,
         }),
     ],
-    helpString: 'logs a value to the browser console as an error',
+    helpString: help(
+        `
+            logs a value to the browser console as an error
+        `,
+        [
+            [
+                `
+                    /console-error OOPS! |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -5335,19 +6310,19 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sfx',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Plays an audio file.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/sfx volume=1.5 await=true /user/audio/mySound.wav | /echo finished playing sound</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /sfx volume=1.5 await=true /user/audio/mySound.wav | /echo finished playing sound
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -5368,7 +6343,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fonts',
         );
     },
     returns: 'list of available fonts',
-    helpString: 'returns a list of all system fonts available to you',
+    helpString: help(
+        `
+            returns a list of all system fonts available to you
+        `,
+        [
+            [
+                `
+                    /fonts |
+                    /comment |
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 
@@ -5503,19 +6491,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'fetch',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Fetch the contents of the provided URL.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/fetch http://example.com |\n/echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /fetch http://example.com |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
@@ -5566,20 +6555,22 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Retrieve the first matching element from the provided HTML or call a method on the first
             matching element and return the resulting HTML.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/fetch http://example.com |\n/$ query=h1 take=textContent |\n/echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /fetch http://example.com |
+                    /$ query=h1 take=textContent |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
 
 SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
@@ -5627,18 +6618,20 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '$$',
             isRequired: true,
         }),
     ],
-    helpString: `
-        <div>
+    helpString: help(
+        `
             Retrieve all matching elements from the provided HTML or call a method on all
             matching elements and return the resulting HTML.
-        </div>
-        <div>
-            <strong>Example:</strong>
-            <ul>
-                <li>
-                    <pre><code class="language-stscript">/fetch http://example.com |\n/$$ query=h1 take=textContent |\n/echo</code></pre>
-                </li>
-            </ul>
-        </div>
-    `,
+        `,
+        [
+            [
+                `
+                    /fetch http://example.com |
+                    /$$ query=h1 take=textContent |
+                    /echo
+                `,
+                '',
+            ],
+        ],
+    ),
 }));
