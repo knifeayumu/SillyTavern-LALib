@@ -894,6 +894,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             list = getListVar(null, null, value[0]);
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
+                if (/\{\{(item|index)\}\}/.test(closure.rawText)) {
+                    toastr.warning('Using macros ({{item}} and {{index}}) to access the loop variables is deprecated. Please use variables / closure arguments instead.', '/foreach (LALib)', { preventDuplicates:true });
+                }
             } else {
                 command = value[1];
             }
@@ -1051,6 +1054,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             list = getListVar(null, null, value[0]);
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
+                if (/\{\{(item|index)\}\}/.test(closure.rawText)) {
+                    toastr.warning('Using macros ({{item}} and {{index}}) to access the loop variables is deprecated. Please use variables / closure arguments instead.', '/map (LALib)', { preventDuplicates:true });
+                }
             } else {
                 command = value[1];
             }
@@ -1094,8 +1100,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
                     item = JSON.stringify(item);
                 }
                 if (closure) {
-                    closure.scope.setMacro('item', item);
-                    closure.scope.setMacro('index', index);
+                    closure.scope.setMacro('item', item, true);
+                    closure.scope.setMacro('index', index, true);
                     if (closure.argumentList.length > 0) {
                         closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
                     }
@@ -1706,6 +1712,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             list = getListVar(null, null, value[0]);
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
+                if (/\{\{(item|index)\}\}/.test(closure.rawText)) {
+                    toastr.warning('Using macros ({{item}} and {{index}}) to access the loop variables is deprecated. Please use variables / closure arguments instead.', '/filter (LALib)', { preventDuplicates:true });
+                }
             } else {
                 expression = value.slice(1).join(' ');
             }
@@ -1750,8 +1759,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
                 }
                 let outcome;
                 if (closure) {
-                    closure.scope.setMacro('item', item);
-                    closure.scope.setMacro('index', index);
+                    closure.scope.setMacro('item', item, true);
+                    closure.scope.setMacro('index', index, true);
                     if (closure.argumentList.length > 0) {
                         closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
                     }
@@ -1879,6 +1888,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             list = getListVar(null, null, value[0]);
             if (value[1] instanceof SlashCommandClosure) {
                 closure = /**@type {SlashCommandClosure}*/(value[1]);
+                if (/\{\{(item|index)\}\}/.test(closure.rawText)) {
+                    toastr.warning('Using macros ({{item}} and {{index}}) to access the loop variables is deprecated. Please use variables / closure arguments instead.', '/find (LALib)', { preventDuplicates:true });
+                }
             } else {
                 expression = value.slice(1).join(' ');
             }
@@ -1923,8 +1935,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 }
                 let outcome;
                 if (closure) {
-                    closure.scope.setMacro('item', item);
-                    closure.scope.setMacro('index', index);
+                    closure.scope.setMacro('item', item, true);
+                    closure.scope.setMacro('index', index, true);
                     if (closure.argumentList.length == 0) {
                         const arg = new SlashCommandNamedArgumentAssignment();
                         arg.name = 'item';
