@@ -111,6 +111,35 @@ function makeBoolArgument() {
         acceptsMultiple: true,
     });
 }
+function makeBoolOrClosureEnumProvider(offset = 0) {
+    return (executor, scope)=>{
+        // no args
+        //  -> start expression, start bool closure
+        if (executor.unnamedArgumentList.length == 0 + offset || executor.unnamedArgumentList.at(0 + offset).value == '') {
+            return [
+                ...makeBoolEnumProvider()(),
+                new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1 arg, starts with {:
+        //  -> continue bool closure
+        if (executor.unnamedArgumentList.length == 1 + offset && executor.unnamedArgumentList.at(0 + offset).value.toString().startsWith('{:')) {
+            return [
+                new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
+            ];
+        }
+        // 1+ arg
+        //  -> continue expression
+        if (executor.unnamedArgumentList.length >= 1 + offset) {
+            return [
+                ...makeBoolEnumProvider()(),
+            ];
+        }
+        return [
+            new SlashCommandEnumValue('What?', 'What?', enumTypes.enum, enumIcons.undefined, (input)=>true, (input)=>input),
+        ];
+    };
+}
 function makeIfWhileEnumProvider(type) {
     return (executor, scope)=>{
         // no args
@@ -1574,6 +1603,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'sorte',
             description: 'the expression or closure used to compare two items <code>a</code> and <code>b</code>',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
             defaultValue: '(a <=> b)',
+            acceptsMultiple: true,
+            enumProvider: makeBoolOrClosureEnumProvider(1),
         }),
     ],
     splitUnnamedArgument: true,
@@ -1825,6 +1856,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
             description: 'the closure or expression to execute for each item, with {{var::item}} and {{var::index}} placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.STRING],
             isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: makeBoolEnumProvider(),
         }),
     ],
     splitUnnamedArgument: true,
@@ -2014,6 +2047,8 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
             description: 'the command to execute for each item, using {{var::item}} and {{var::index}} as placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
+            acceptsMultiple: true,
+            enumProvider: makeBoolEnumProvider(),
         }),
     ],
     splitUnnamedArgument: true,
@@ -5638,6 +5673,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'swipes-del',
             name: 'filter',
             description: 'expression or closure accepting a swipe dictionary as argument returning true or false',
             typeList: [ARGUMENT_TYPE.STRING, ARGUMENT_TYPE.CLOSURE],
+            enumProvider: makeBoolEnumProvider(),
         }),
     ],
     unnamedArgumentList: [
