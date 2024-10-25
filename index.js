@@ -152,7 +152,7 @@ function makeIfWhileEnumProvider(type) {
         }
         // 1 arg, starts curly
         //  -> continue bool closure
-        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value.toString().at(0) == '{') {
+        if (executor.unnamedArgumentList.length == 1 && executor.unnamedArgumentList.at(0).value.toString().startsWith('{:')) {
             return [
                 new SlashCommandEnumValue('Closure', 'Closure returning true or false', enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
             ];
@@ -201,7 +201,7 @@ function makeIfWhileEnumProvider(type) {
         }
         // >1 args, [-1] starts curly
         //  -> continue then closure
-        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).value.toString().at(0) == '{') {
+        if (executor.unnamedArgumentList.length > 1 && executor.unnamedArgumentList.at(-1).value.toString().startsWith('{:')) {
             return [
                 new SlashCommandEnumValue('Closure', `Closure to execute ${type} true`, enumTypes.command, enumIcons.closure, (input)=>true, (input)=>input),
             ];
