@@ -299,4 +299,10 @@ Increment and decrement operators (`++` and `--`) are supported, both in prefix 
 /= --x | // sets x to 1, evaluates to 1 |
 /= x++ | // sets x to 2, evaluates to 1 |
 /= x-- | // sets x to 1, evaluates to 2 |
+
+/let y 0 |
+/whilee y++ < 3 {: /echo y: {{var::y}} :} | // shows 1, 2, 3 |
+
+/let z 0 |
+/whilee ++z < 3 {: /echo z: {{var::z}} :} | // shows 1, 2 |
 ```
