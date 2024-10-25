@@ -438,7 +438,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'test',
         [
             [
                 `
-                    /setvar key=i 0 | /test left=i rule=let right=10 | /echo
+                    /setvar key=i 0 | /test left=i rule=lte right=10 | /echo
                 `,
                 'returns <code>true</code>',
             ],
@@ -649,13 +649,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'pop',
             typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
             isRequired: true,
         }),
-        SlashCommandArgument.fromProps({ description: 'items to add',
-            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
-            isRequired: true,
-            acceptsMultiple: true,
-        }),
     ],
-    splitUnnamedArgument: true,
     returns: 'The removed element',
     helpString: help(
         `
@@ -792,13 +786,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'shift',
             typeList: [ARGUMENT_TYPE.VARIABLE_NAME, ARGUMENT_TYPE.LIST],
             isRequired: true,
         }),
-        SlashCommandArgument.fromProps({ description: 'items to add',
-            typeList: [ARGUMENT_TYPE.BOOLEAN, ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.DICTIONARY, ARGUMENT_TYPE.LIST, ARGUMENT_TYPE.NUMBER, ARGUMENT_TYPE.STRING],
-            isRequired: true,
-            acceptsMultiple: true,
-        }),
     ],
-    splitUnnamedArgument: true,
     returns: 'The removed element',
     helpString: help(
         `
@@ -3799,7 +3787,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'try',
         [
             [
                 `
-                    /try {: /divide 10 0 :} |
+                    /try {: /var x :} |
                     /catch {: /echo An error occurred: {{exception}} :}
                 `,
                 '',
@@ -3869,7 +3857,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'catch',
         [
             [
                 `
-                    /try {: /divide 10 0 :} |
+                    /try {: /var x :} |
                     /catch {: /echo An error occurred: {{exception}} :}
                 `,
                 '',
@@ -3966,7 +3954,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifnullish',
         [
             [
                 `
-                    /ifempty value=[] [1,2,3] |
+                    /ifnullish value=[] [1,2,3] |
                 `,
                 'returns []',
             ],
@@ -3974,9 +3962,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ifnullish',
                 `
                     /setvar key=x |
                     /setvar key=y bar |
-                    /ifempty value={{getvar::x}} foo |
+                    /ifnullish value={{getvar::x}} foo |
                     /setvar key=xx {{pipe}} |
-                    /ifempty value={{getvar::y}} foo |
+                    /ifnullish value={{getvar::y}} foo |
                     /setvar key=yy {{pipe}} |
                 `,
                 'sets <code>xx</code> to "foo" and <code>yy</code> to "bar"',
@@ -4972,15 +4960,9 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
     splitUnnamedArgument: true,
     helpString: help(
         `
-            <div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
+            <div><strong>DEPRECATED</strong></div>
         `,
         [
-            [
-                `
-                    // deprecated |
-                `,
-                'use unnamed args in <code>/ife</code> or <code>/elseif</code>',
-            ],
         ],
     ),
     returns: 'the result of the executed command',
