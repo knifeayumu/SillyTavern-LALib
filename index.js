@@ -913,25 +913,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
-            if (closure.argumentList.length == 0) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'item';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length == 1) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'index';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length > 0) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[0].name;
-                closure.providedArgumentList[0] = ass;
-            }
-            if (closure.argumentList.length > 1) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[1].name;
-                closure.providedArgumentList[1] = ass;
+            if (closure) {
+                if (closure.argumentList.length == 0) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'item';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length == 1) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'index';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length > 0) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[0].name;
+                    closure.providedArgumentList[0] = ass;
+                }
+                if (closure.argumentList.length > 1) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[1].name;
+                    closure.providedArgumentList[1] = ass;
+                }
             }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
@@ -1075,25 +1077,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
-            if (closure.argumentList.length == 0) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'item';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length == 1) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'index';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length > 0) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[0].name;
-                closure.providedArgumentList[0] = ass;
-            }
-            if (closure.argumentList.length > 1) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[1].name;
-                closure.providedArgumentList[1] = ass;
+            if (closure) {
+                if (closure.argumentList.length == 0) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'item';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length == 1) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'index';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length > 0) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[0].name;
+                    closure.providedArgumentList[0] = ass;
+                }
+                if (closure.argumentList.length > 1) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[1].name;
+                    closure.providedArgumentList[1] = ass;
+                }
             }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
@@ -1733,25 +1737,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'filter',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
-            if (closure.argumentList.length == 0) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'item';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length == 1) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'index';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length > 0) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[0].name;
-                closure.providedArgumentList[0] = ass;
-            }
-            if (closure.argumentList.length > 1) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[1].name;
-                closure.providedArgumentList[1] = ass;
+            if (closure) {
+                if (closure.argumentList.length == 0) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'item';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length == 1) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'index';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length > 0) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[0].name;
+                    closure.providedArgumentList[0] = ass;
+                }
+                if (closure.argumentList.length > 1) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[1].name;
+                    closure.providedArgumentList[1] = ass;
+                }
             }
             for (let [index, item] of list) {
                 if (typeof item == 'object') {
@@ -1906,25 +1912,27 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
         } else {
             /**@type {SlashCommandClosureResult}*/
             let commandResult;
-            if (closure.argumentList.length == 0) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'item';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length == 1) {
-                const arg = new SlashCommandNamedArgumentAssignment();
-                arg.name = 'index';
-                closure.argumentList.push(arg);
-            }
-            if (closure.argumentList.length > 0) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[0].name;
-                closure.providedArgumentList[0] = ass;
-            }
-            if (closure.argumentList.length > 1) {
-                const ass = new SlashCommandNamedArgumentAssignment();
-                ass.name = closure.argumentList[1].name;
-                closure.providedArgumentList[1] = ass;
+            if (closure) {
+                if (closure.argumentList.length == 0) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'item';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length == 1) {
+                    const arg = new SlashCommandNamedArgumentAssignment();
+                    arg.name = 'index';
+                    closure.argumentList.push(arg);
+                }
+                if (closure.argumentList.length > 0) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[0].name;
+                    closure.providedArgumentList[0] = ass;
+                }
+                if (closure.argumentList.length > 1) {
+                    const ass = new SlashCommandNamedArgumentAssignment();
+                    ass.name = closure.argumentList[1].name;
+                    closure.providedArgumentList[1] = ass;
+                }
             }
             if (isTrueFlag(args.last)) {
                 list.reverse();
@@ -1937,25 +1945,11 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'find',
                 if (closure) {
                     closure.scope.setMacro('item', item, true);
                     closure.scope.setMacro('index', index, true);
-                    if (closure.argumentList.length == 0) {
-                        const arg = new SlashCommandNamedArgumentAssignment();
-                        arg.name = 'item';
-                        closure.argumentList.push(arg);
-                    }
-                    if (closure.argumentList.length == 1) {
-                        const arg = new SlashCommandNamedArgumentAssignment();
-                        arg.name = 'index';
-                        closure.argumentList.push(arg);
-                    }
                     if (closure.argumentList.length > 0) {
-                        const ass = new SlashCommandNamedArgumentAssignment();
-                        ass.name = closure.argumentList[0].name;
-                        closure.providedArgumentList[0] = ass;
+                        closure.providedArgumentList[0].value = typeof item == 'string' ? item : JSON.stringify(item);
                     }
                     if (closure.argumentList.length > 1) {
-                        const ass = new SlashCommandNamedArgumentAssignment();
-                        ass.name = closure.argumentList[1].name;
-                        closure.providedArgumentList[1] = ass;
+                        closure.providedArgumentList[1].value = index.toString();
                     }
                     commandResult = (await closure.execute());
                     if (commandResult.isAborted) break;
