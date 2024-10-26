@@ -242,7 +242,7 @@ let help = (text, ex)=>{
         parseImgDimensions: true,
         tables: true,
         underline: true,
-        simpleLineBreaks: true,
+        simpleLineBreaks: false,
         strikethrough: true,
         disableForced4SpacesIndentedSublists: true,
     });
