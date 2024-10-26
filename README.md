@@ -128,7 +128,7 @@ Numeric values and string literals for left and right operands supported.
 ##### **Examples**
 ```stscript
 
-/setvar key=i 0 | /test left=i rule=let right=10 | /echo |
+/setvar key=i 0 | /test left=i rule=lte right=10 | /echo |
 // returns true |
 ```
 
@@ -205,8 +205,6 @@ Returns true if value is false, otherwise true.
 #### <a id="lalib-help-cmd-pop"></a>`/pop`
 - `(varname|list)`  
  target list
-- `...(bool|closure|dictionary|list|number|string)`  
- items to add
 
 
 Removes the last element from a list and returns it.
@@ -251,8 +249,6 @@ Appends new elements to the end of a list, and returns the list.
 #### <a id="lalib-help-cmd-shift"></a>`/shift`
 - `(varname|list)`  
  target list
-- `...(bool|closure|dictionary|list|number|string)`  
- items to add
 
 
 Removes the first element from a list and returns it.
@@ -459,7 +455,7 @@ The reducer closure accepts up to three arguments:
  *(optional)* closure that returns the value to be used for sorting
 - `(list|varname)`  
  the list to sort
-- `(string|closure)? = (a <=> b)`  
+- `...(string|closure)? = (a <=> b)`  
  *(optional)* the expression or closure used to compare two items <code>a</code> and <code>b</code>
 
 
@@ -535,7 +531,7 @@ Creates a new list with all sub-list elements concatenated into it recursively u
 #### <a id="lalib-help-cmd-filter"></a>`/filter`
 - `(list|dictionary)`  
  the list or dictionary to iterate over
-- `(closure|string)`  
+- `...(closure|string)`  
  the closure or expression to execute for each item, with {{var::item}} and {{var::index}} placeholders
 
 
@@ -572,7 +568,7 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
  *(optional)* return the last instead of the first matching item
 - `(list|dictionary)`  
  the list or dictionary to iterate over
-- `(closure|subcommand)`  
+- `...(closure|subcommand)`  
  the command to execute for each item, using {{var::item}} and {{var::index}} as placeholders
 
 
@@ -1259,7 +1255,7 @@ Attempts to execute the provided command and catches any exceptions thrown. Use 
 ##### **Examples**
 ```stscript
 
-/try {: /divide 10 0 :} |
+/try {: /var x :} |
 /catch {: /echo An error occurred: {{exception}} :} |
 ```
 
@@ -1274,7 +1270,7 @@ Used with the `/try` command to handle exceptions. Use `{{exception}}` or `{{err
 ##### **Examples**
 ```stscript
 
-/try {: /divide 10 0 :} |
+/try {: /var x :} |
 /catch {: /echo An error occurred: {{exception}} :} |
 ```
 
@@ -1322,16 +1318,16 @@ Returns the fallback value if value is nullish (empty string).
 ##### **Examples**
 ```stscript
 
-/ifempty value=[] [1,2,3] |
+/ifnullish value=[] [1,2,3] |
 // returns [] |
 ```
 ```stscript
 
 /setvar key=x |
 /setvar key=y bar |
-/ifempty value={{getvar::x}} foo |
+/ifnullish value={{getvar::x}} foo |
 /setvar key=xx {{pipe}} |
-/ifempty value={{getvar::y}} foo |
+/ifnullish value={{getvar::y}} foo |
 /setvar key=yy {{pipe}} |
 // sets xx to "foo" and yy to "bar" |
 ```
@@ -1361,7 +1357,7 @@ Copies value into clipboard.
 
 
 #### <a id="lalib-help-cmd-download"></a>`/download`
-- `[name:string]? = SillyTavern-2024-10-23T18:52:37.510Z`  
+- `[name:string]? = SillyTavern-2024-10-26T02:38:20.569Z`  
  *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *(optional)* the file extension for the downloaded file
@@ -1641,13 +1637,11 @@ See <a href="javascript:;" data-lalib-exec="/lalib? expressions"><code>/lalib? e
  the command to execute
 
 
-<div>Use with /ife, /elseif, and /else. The provided command will be executed if the previous /if or /elseif was true.</div>
+<div><strong>DEPRECATED</strong></div>
 
 ##### **Examples**
 ```stscript
-
-// deprecated |
-// use unnamed args in /ife or /elseif |
+// DEPRECATED |
 ```
 
 

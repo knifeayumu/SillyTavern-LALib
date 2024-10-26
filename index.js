@@ -4963,6 +4963,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'then',
             <div><strong>DEPRECATED</strong></div>
         `,
         [
+            ['// DEPRECATED |', ''],
         ],
     ),
     returns: 'the result of the executed command',
