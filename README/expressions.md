@@ -114,9 +114,9 @@ A negation simply flips a boolean value; "not `true`" becomes `false`, "not `fal
 
 
 
-## Locigal Operators
+## Logical Operators
 
-Locigal operators combine two boolean values. Three logical operators are available (in order of precedence):
+Logical operators combine two boolean values. Three logical operators are available (in order of precedence):
 - `and`: true when both sides are true
 - `or`: true when at least one side is true
 - `xor`: true when only one side is true ("either or")
