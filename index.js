@@ -377,6 +377,13 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: '=',
             ['/= 1 < 2 and (\'a\' in x or \'b\' not in y) and !z', ''],
             ['/= 1 + 2 * 3 ** 4', ''],
             ['/= (1 + 2) * 3 ** 4', ''],
+            [
+                `
+                    /genraw say either foo or bar |
+                    /= result={{pipe}} ('foo' in result) |
+                `,
+                'use named arguments to provide variables to the expression',
+            ],
         ],
     ),
 }));
@@ -997,7 +1004,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, with {{var::item}} and {{var::index}} placeholders',
+            description: 'the closure to execute for each item, with {{var::item}} and {{var::index}} (or the first two closure arguments) placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
@@ -1005,7 +1012,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
     splitUnnamedArgument: true,
     helpString: help(
         `
-            Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} with the current item and index.
+            Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} (or the first two closure arguments) with the current item and index.
 
             Use <code>/break</code> to break out of the loop early.
         `,
@@ -1037,6 +1044,15 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'foreach',
                     :}
                 `,
                 'uses custom closure arguments <code>it</code> and <code>i</code> instead of the default <code>item</code> and <code>index</code>.',
+            ],
+            [
+                `
+                    /foreach ["A", "B", "C"] {: foo= bar=
+                        /echo Item {{var::foo}} is {{var::bar}} |
+                        /delay 400 |
+                    :}
+                `,
+                'uses custom closure arguments <code>foo</code> and <code>bar</code> instead of the default <code>item</code> and <code>index</code>.',
             ],
         ],
     ),
@@ -1176,7 +1192,7 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
             isRequired: true,
         }),
         SlashCommandArgument.fromProps({
-            description: 'the command to execute for each item, with {{var::item}} and {{var::index}} placeholders',
+            description: 'the closure to execute for each item, with {{var::item}} and {{var::index}} (or the first two closure arguments) placeholders',
             typeList: [ARGUMENT_TYPE.CLOSURE, ARGUMENT_TYPE.SUBCOMMAND],
             isRequired: true,
         }),
@@ -1202,6 +1218,14 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'map',
                 `
                     /map [1,2,3] {: it= i=
                         /mul {{var::it}} {{var::it}}
+                    :}
+                `,
+                'Calculates the square of each number.',
+            ],
+            [
+                `
+                    /map [1,2,3] {: foo= bar=
+                        /mul {{var::foo}} {{var::foo}}
                     :}
                 `,
                 'Calculates the square of each number.',
@@ -4695,6 +4719,18 @@ SlashCommandParser.addCommandObject(SlashCommand.fromProps({ name: 'ife',
                     :} |
                 `,
                 '',
+            ],
+            [
+                `
+                    /genraw say either foo or bar |
+                    /ife result={{pipe}} ('foo' in result) {:
+                        /echo said "foo" |
+                    :} |
+                    /else {:
+                        /echo did not say "foo" |
+                    :} |
+                `,
+                'use named arguments to provide variables to the expression',
             ],
         ],
     ),

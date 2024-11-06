@@ -96,6 +96,12 @@ on expressions.
 ```stscript
 /= (1 + 2) * 3 ** 4 |
 ```
+```stscript
+
+/genraw say either foo or bar |
+/= result={{pipe}} ('foo' in result) |
+// use named arguments to provide variables to the expression |
+```
 
 
 #### <a id="lalib-help-cmd-test"></a>`/test`
@@ -294,10 +300,10 @@ Inserts new elements at the start of a list, and returns the list.
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|subcommand)`  
- the command to execute for each item, with {{var::item}} and {{var::index}} placeholders
+ the closure to execute for each item, with {{var::item}} and {{var::index}} (or the first two closure arguments) placeholders
 
 
-Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} with the current item and index.
+Executes the provided command for each item of a list or dictionary, replacing {{var::item}} and {{var::index}} (or the first two closure arguments) with the current item and index.
 
 Use <code>/break</code> to break out of the loop early.
 
@@ -325,6 +331,14 @@ Use <code>/break</code> to break out of the loop early.
 :} |
 // uses custom closure arguments it and i instead of the default item and index. |
 ```
+```stscript
+
+/foreach ["A", "B", "C"] {: foo= bar=
+    /echo Item {{var::foo}} is {{var::bar}} |
+    /delay 400 |
+:} |
+// uses custom closure arguments foo and bar instead of the default item and index. |
+```
 
 
 #### <a id="lalib-help-cmd-map"></a>`/map`
@@ -333,7 +347,7 @@ Use <code>/break</code> to break out of the loop early.
 - `(list|dictionary)`  
  the list or dictionary to iterate over
 - `(closure|subcommand)`  
- the command to execute for each item, with {{var::item}} and {{var::index}} placeholders
+ the closure to execute for each item, with {{var::item}} and {{var::index}} (or the first two closure arguments) placeholders
 
 
 Executes a command for each item of a list or dictionary and returns the list or dictionary of the command results.
@@ -352,6 +366,13 @@ Use <code>/break</code> to break out of the loop early.
 
 /map [1,2,3] {: it= i=
     /mul {{var::it}} {{var::it}}
+:} |
+// Calculates the square of each number. |
+```
+```stscript
+
+/map [1,2,3] {: foo= bar=
+    /mul {{var::foo}} {{var::foo}}
 :} |
 // Calculates the square of each number. |
 ```
@@ -1357,7 +1378,7 @@ Copies value into clipboard.
 
 
 #### <a id="lalib-help-cmd-download"></a>`/download`
-- `[name:string]? = SillyTavern-2024-10-26T02:38:20.569Z`  
+- `[name:string]? = SillyTavern-2024-11-06T15:46:46.129Z`  
  *(optional)* the filename for the downloaded file
 - `[ext:string]? = txt`  
  *(optional)* the file extension for the downloaded file
@@ -1567,6 +1588,17 @@ See <a data-lalib-exec="/lalib? expressions"><code>/lalib? expressions</code></a
 /else {:
     /echo value is something else
 :} |
+```
+```stscript
+
+/genraw say either foo or bar |
+/ife result={{pipe}} ('foo' in result) {:
+    /echo said "foo" |
+:} |
+/else {:
+    /echo did not say "foo" |
+:} |
+// use named arguments to provide variables to the expression |
 ```
 
 
