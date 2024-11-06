@@ -567,6 +567,14 @@ export class BoolParser {
             try {
                 return JSON.parse(val);
             } catch { /* empty */ }
+            const parser = new BoolParser(this.scope, {});
+            parser.index = 0;
+            parser.text = val;
+            if (parser.testRegex()) {
+                try {
+                    return parser.parseRegex()();
+                } catch { /* empty */ }
+            }
             return val;
         };
         func.varName = name;
@@ -667,18 +675,17 @@ export class BoolParser {
         text += this.take(); // take closing "}"
         text += '}';
         return ()=>{
-            const value = new SlashCommandClosure().substituteParams(text, this.scope);
+            const value = new SlashCommandClosure().substituteParams(text, this.scope).toString();
+            try {
+                return JSON.parse(value);
+            } catch { /* empty */ }
             const parser = new BoolParser(this.scope, {});
             parser.index = 0;
             parser.text = value;
-            if (parser.testBool()) {
-                return parser.parseBool()();
-            } else if (parser.testNumber()) {
-                return parser.parseNumber()();
-            } else if (parser.testList()) {
-                return parser.parseList()();
-            } else if (parser.testRegex()) {
-                return parser.parseRegex()();
+            if (parser.testRegex()) {
+                try {
+                    return parser.parseRegex()();
+                } catch { /* empty */ }
             }
             return value;
         };
